@@ -5,6 +5,9 @@
       <router-link to="/about">About</router-link>
     </div>
     <router-view />
+	<div style="font-size: 12px;">
+		  冀ICP备2021011143号
+	</div>
   </div>
 </template>
 

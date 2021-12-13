@@ -72,8 +72,9 @@
 			<el-col :span="3" style="text-align: left;">
 				<el-select v-model="pc.for_free">
 					<el-option label="w/RE Accessories" :value="0"></el-option>
-					<el-option label="Ontrend 32G USB" :value="1"></el-option>
-					<el-option label="不送" :value="2"></el-option>
+					<el-option label="RATZK 32G USB" :value="1"></el-option>
+					<el-option label="w/RE 32GB USB" :value="2"></el-option>
+					<el-option label="不送" :value="3"></el-option>
 				</el-select>
 			</el-col>
 			<el-col :span="2" style="text-align: left;">
@@ -201,7 +202,9 @@
 				<el-select style="width: 220px;" v-model="base.system">
 					<el-option label="Windows10 Home" :value="0"></el-option>
 					<el-option label="Windows10 Professional" :value="1"></el-option>
-					<el-option label="Windows10 in S model" :value="2"></el-option>
+					<el-option label="Windows11 Home" :value="2"></el-option>
+					<el-option label="Windows11 Professional" :value="3"></el-option>
+					<el-option label="Windows10 in S model" :value="4"></el-option>
 				</el-select>
 			</el-col>
 		</el-row>
@@ -250,7 +253,9 @@
 					<el-select style="width: 220px;" v-model="item.system">
 						<el-option label="Windows10 Home" :value="0"></el-option>
 						<el-option label="Windows10 Professional" :value="1"></el-option>
-						<el-option label="Windows10 in S model" :value="2"></el-option>
+						<el-option label="Windows11 Home" :value="2"></el-option>
+						<el-option label="Windows11 Professional" :value="3"></el-option>
+						<el-option label="Windows10 in S model" :value="4"></el-option>
 					</el-select>
 				</el-col>
 				
@@ -443,7 +448,8 @@
 				//复制文本
 				sku_copy_str:"",
 				title_copy_str:"",
-				bullet_2_copy_str:""
+				bullet_2_copy_str:"",
+				bullet_5_copy_str:""
 			}
 		},
 		methods: {
@@ -506,6 +512,7 @@
 				this.sku_copy_str = "";
 				this.title_copy_str = "";
 				this.bullet_2_copy_str = "";
+				this.bullet_5_copy_str = "";
 			},
 			get_cur_year(){
 				var now = new Date();
@@ -517,7 +524,13 @@
 					case 1:
 						system_str = "Windows 10 Pro";
 						break;
-					case 2: 
+					case 2:
+						system_str = "Windows 11 Home";
+						break;
+					case 3: 
+						system_str = "Windows 11 Pro";
+						break;
+					case 4:
 						system_str = "Windows 10 in S mode";
 						break;
 					default:
@@ -544,14 +557,17 @@
 				let description_free = "";
 				switch (pc.for_free){
 					case 1:
-						free_bullet_str = "free Ontrend 32GB USB Drive (authorized seller only)";
+						free_bullet_str = "free RATZK 32GB USB Drive";
 						description_head = "<p><strong>Disclaimer: We sell computers with customized configurations. If the computer has modifications different than the base model, the&nbsp;factory box is opened to install the upgrades to achieve the specifications as advertised. The modified product is professionally tested and resealed.</strong></p>";
-						description_free = "<p><strong>Free&nbsp;Ontrend 32GB USB Drive included, authorized seller only</strong></p>";
+						description_free = "<p><strong>Free&nbsp;RATZK 32GB USB Drive included</strong></p>";
 						break;
 					case 2:
+						free_bullet_str = "free Rock eDigital 32GB USB 3.0 Flash Drive";
+						description_head = "<p><strong>Rock eDigital&nbsp;sells computers with upgraded configurations. If the computer has modifications (listed above), then the manufacturer box is opened for it to be tested and inspected and to install the upgrades to achieve the specifications as advertised.</strong></p>";
+						description_free = "<p><strong>Free Rock eDigital 32GB USB 3.0 Flash Drive</strong></p>"
 						break;
 					default:
-						free_bullet_str = "free Rock eDigital Acessories: 1xHDMI cable, 1xUSB Extension cord, 1xMousepad, authorized sellers ONLY";
+						free_bullet_str = "free Rock eDigital Acessories: 1xHDMI cable, 1xUSB Extension cord, 1xMousepad";
 						description_head = "<p><strong>Rock eDigital&nbsp;sells computers with upgraded configurations. If the computer has modifications (listed above), then the manufacturer box is opened for it to be tested and inspected and to install the upgrades to achieve the specifications as advertised.</strong></p>";
 						description_free = "<p><strong>Free Rock eDigital accessories:</strong><br />1xHDMI cable, 1xUSB Extension cord, 1xMousepad</p>"
 						break;
@@ -585,8 +601,8 @@
 						disk_title_str += ` ${disk.size}${disk.unit} ${disk.type}`;
 					}
 					//SKU 和 Title
-					let var_sku = `${pc.manufacture}-${pc.screen_size}-${pc.model}-${vari.ram_size}GB${disk_sku_str}${vari.system==0?"":"-W10P"}-${pc.for_free==0?"RE3":"USB"}`;
-					let var_title = `${this.get_cur_year()} ${pc.manufacture} ${pc.series} ${pc.screen} ${pc.pctype} ${pc.cpu} ${pc.cpu_cores} Cores ${pc.graphics} ${vari.ram_size}GB RAM DDR4${disk_title_str}${base_title_addition_str} ${system_str} ${pc.for_free == 0?"w/ RE Accessories":"w/ Ontrend 32GB USB Drive"}`
+					let var_sku = `${pc.manufacture}-${pc.screen_size}-${pc.model}-${vari.ram_size}GB${disk_sku_str}${vari.system>1?(vari.system==2?"-W11H":"-W11P"):(vari.system==0?"":"-W10P")}-${pc.for_free==0?"RE3":"USB"}`;
+					let var_title = `${this.get_cur_year()} ${pc.manufacture} ${pc.series} ${pc.screen} ${pc.pctype} ${pc.cpu} ${pc.cpu_cores} Cores ${pc.graphics} ${vari.ram_size}GB RAM DDR4${disk_title_str}${base_title_addition_str} ${system_str} ${pc.for_free == 0?"w/ RE Accessories":(pc.for_free == 1?"RATZK 32GB USB Drive":"w/RE 32GB USB Drive")}`
 					this.skus.push(var_sku);
 					this.titles.push(var_title);
 					
@@ -598,11 +614,11 @@
 					let vari_disk_size = parseInt(vari_disk.size);
 					let isUpgrade = vari_ram > bass_ram || vari_disk_size > base_disk_size || (vari_disk_size == 1 && vari_disk.type.indexOf("SSD") != -1);
 					
-					let bullet_2 = `【Customization】${isUpgrade?'Upgrade to ':""}${vari_ram}GB DDR4 SDRAM, ${disk_title_str}, ${pc.dvd}`;
+					let bullet_2 = `【Customization】${isUpgrade?'Upgraded to ':""}${vari_ram}GB DDR4 SDRAM, ${disk_title_str}, ${pc.dvd}`;
 					this.bullet_2.push(bullet_2);
 					
 					let bullet_5_head = pc.for_free==0?(vari.system != 1?"【Rock eDigital Bundle】":"【Rock eDigital Enhancement】"):(vari.system != 1?"【For Home】":"【For Business】");
-					let bullet_5 = `${bullet_5_head}${vari.system != 1?"":"Upgrade to "}${system_str}, ${descriptions.battery_description}, ${descriptions.size_description}, ${pc.color}, ${free_bullet_str}`;
+					let bullet_5 = `${bullet_5_head}${vari.system <= base.system?"":"Upgraded to "}${system_str}, ${descriptions.battery_description}, ${descriptions.size_description}, ${pc.color}, ${free_bullet_str}`;
 					this.bullet_5.push(bullet_5);
 					
 					//Description
@@ -611,13 +627,13 @@
 					<p><strong>PC Series:</strong><br />${pc.manufacture} ${pc.series} ${pc.pctype}</p> 
 					<p><strong>Display:</strong><br />${descriptions.screen_description}</p> 
 					<p><strong>Processor:</strong><br />${descriptions.cpu_description}</p>
-					<p><strong>Memory:</strong><br />${vari_ram > bass_ram?'<strong>Upgrade to&nbsp;</strong>':''}${vari_ram}GB DDR4</p>
-					<p><strong>Storage:</strong><br />${(vari_disk_size > base_disk_size) || (vari.disks.length > base.disks.length) || (vari_disk_size == 1 && vari_disk.type.indexOf("SSD") != -1)?'<strong>Upgrade to</strong>':''}${disk_title_str}</p>
+					<p><strong>Memory:</strong><br />${vari_ram > bass_ram?'<strong>Upgraded to&nbsp;</strong>':''}${vari_ram}GB DDR4</p>
+					<p><strong>Storage:</strong><br />${(vari_disk_size > base_disk_size) || (vari.disks.length > base.disks.length) || (vari_disk_size == 1 && vari_disk.type.indexOf("SSD") != -1)?'<strong>Upgraded to</strong>':''}${disk_title_str}</p>
 					<p><strong>Graphics:</strong><br />${descriptions.graphics_description}</p>
 					<p><strong>Communications:</strong><br />${descriptions.connectivity_description}</p>
 					<p><strong>Keyboard:</strong><br />${descriptions.keyboard_description}</p>
 					<p><strong>Camera:</strong><br />${descriptions.camera_description}</p>
-					<p><strong>Operating system:</strong><br />${vari.system != 1?'':'<strong>Upgrade to&nbsp;</strong>'}${system_str}</p>
+					<p><strong>Operating system:</strong><br />${vari.system == 0?'':'<strong>Upgraded to&nbsp;</strong>'}${system_str}</p>
 					<p><strong>Ports &amp; Slots:</strong><br />${descriptions.solt_description}</p>
 					<p><strong>Additional Information:</strong><br />Dimensions:${descriptions.size_description}</p>
 					${description_free}`;
