@@ -1,13 +1,14 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/">Listing</router-link> |
+      <router-link to="/about">Tools</router-link> |
+	  <router-link to="/CAConvert">CAConvert</router-link>
     </div>
     <router-view />
-	<div style="font-size: 12px;">
+	<el-row style="font-size: 12px; padding:20px">
 		  冀ICP备2021011143号
-	</div>
+	</el-row>
   </div>
 </template>
 

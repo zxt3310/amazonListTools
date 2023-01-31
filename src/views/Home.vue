@@ -27,7 +27,7 @@
 			</el-col>
 
 			<el-col :span="4">
-				<el-input v-model="pc.cpu" placeholder="i5 1065G7">
+				<el-input v-model="pc.cpu" placeholder="Intel 4-Core i5-10300H">
 					<template slot="prepend">CPU</template>
 				</el-input>
 			</el-col>
@@ -36,12 +36,7 @@
 					<template slot="prepend">核心数</template>
 				</el-input>
 			</el-col>
-			<el-col :span="4">
-				<el-input v-model="pc.screen_size" placeholder="15">
-					<template slot="prepend">显示器尺寸(整数)</template>
-				</el-input>
-			</el-col>
-			
+
 		</el-row>
 		<!--------------------- 分割线 -------------------------->
 		<el-row :gutter="20">
@@ -71,9 +66,9 @@
 		<el-row :gutter="20">
 			<el-col :span="3" style="text-align: left;">
 				<el-select v-model="pc.for_free">
-					<el-option label="w/RE Accessories" :value="0"></el-option>
-					<el-option label="RATZK 32G USB" :value="1"></el-option>
-					<el-option label="w/RE 32GB USB" :value="2"></el-option>
+					<el-option label="w/Accessories" :value="0"></el-option>
+					<el-option label="RATZK USB" :value="1"></el-option>
+					<el-option label="w/USB" :value="2"></el-option>
 					<el-option label="不送" :value="3"></el-option>
 				</el-select>
 			</el-col>
@@ -115,7 +110,7 @@
 
 		<el-row>
 			<el-col>
-				<el-input v-model="descriptions.cpu_description">
+				<el-input v-model="descriptions.cpu_description" placeholder="10th Generation Intel Core i3-1005G1 processor 1.2GHz with turo boost Technology up to 3.4GHz">
 					<template slot="prepend">CPU描述语</template>
 				</el-input>
 			</el-col>
@@ -516,7 +511,9 @@
 			},
 			get_cur_year(){
 				var now = new Date();
-				return now.getFullYear();
+				var year= now.getFullYear();
+				year = year <= 2022?2022:year;
+				return year;
 			},
 			get_system_str(obj){
 				let system_str = ";"
@@ -557,25 +554,25 @@
 				let description_free = "";
 				switch (pc.for_free){
 					case 1:
-						free_bullet_str = "free RATZK 32GB USB Drive";
+						free_bullet_str = "free 32GB USB Drive";
 						description_head = "<p><strong>Disclaimer: We sell computers with customized configurations. If the computer has modifications different than the base model, the&nbsp;factory box is opened to install the upgrades to achieve the specifications as advertised. The modified product is professionally tested and resealed.</strong></p>";
-						description_free = "<p><strong>Free&nbsp;RATZK 32GB USB Drive included</strong></p>";
+						description_free = "<p><strong>Free&nbsp;32GB USB Drive included</strong></p>";
 						break;
 					case 2:
-						free_bullet_str = "free Rock eDigital 32GB USB 3.0 Flash Drive";
+						free_bullet_str = "free 32GB USB 3.0 Flash Drive";
 						description_head = "<p><strong>Rock eDigital&nbsp;sells computers with upgraded configurations. If the computer has modifications (listed above), then the manufacturer box is opened for it to be tested and inspected and to install the upgrades to achieve the specifications as advertised.</strong></p>";
-						description_free = "<p><strong>Free Rock eDigital 32GB USB 3.0 Flash Drive</strong></p>"
+						description_free = "<p><strong>Free 32GB USB 3.0 Flash Drive</strong></p>"
 						break;
 					default:
-						free_bullet_str = "free Rock eDigital Acessories: 1xHDMI cable, 1xUSB Extension cord, 1xMousepad";
+						free_bullet_str = "free Acessories: 1xHDMI cable, 1xUSB Extension cord, 1xMousepad";
 						description_head = "<p><strong>Rock eDigital&nbsp;sells computers with upgraded configurations. If the computer has modifications (listed above), then the manufacturer box is opened for it to be tested and inspected and to install the upgrades to achieve the specifications as advertised.</strong></p>";
-						description_free = "<p><strong>Free Rock eDigital accessories:</strong><br />1xHDMI cable, 1xUSB Extension cord, 1xMousepad</p>"
+						description_free = "<p><strong>Free accessories:</strong><br />1xHDMI cable, 1xUSB Extension cord, 1xMousepad</p>"
 						break;
 				}
 				
 				//处理base
 				//base_sku
-				let base_sku = `${pc.manufacture.toLocaleUpperCase()}-${pc.screen_size}-${pc.model}-PARENT`;
+				let base_sku = `${pc.manufacture.toLocaleUpperCase()}-${pc.model}-PARENT`;
 				this.skus.push(base_sku);
 				
 				//base_title
@@ -588,7 +585,7 @@
 				for(let additon of pc.title_addition){
 					base_title_addition_str += ` ${additon}`;
 				}
-				let base_title = `${this.get_cur_year()} ${pc.manufacture} ${pc.series} ${pc.screen} ${pc.pctype} ${pc.cpu} ${pc.cpu_cores} Cores ${pc.graphics} ${base.ram_size}GB RAM DDR4${base_disk_title_str}${base_title_addition_str} ${system_str}`
+				let base_title = `${this.get_cur_year()} Newest ${pc.manufacture} ${pc.series} ${pc.screen} ${pc.pctype} ${pc.cpu} ${pc.graphics} ${base.ram_size}GB RAM DDR4${base_disk_title_str}${base_title_addition_str} ${system_str}`
 				this.titles.push(base_title);
 				
 				for(let vari of this.variations){
@@ -601,8 +598,8 @@
 						disk_title_str += ` ${disk.size}${disk.unit} ${disk.type}`;
 					}
 					//SKU 和 Title
-					let var_sku = `${pc.manufacture}-${pc.screen_size}-${pc.model}-${vari.ram_size}GB${disk_sku_str}${vari.system>1?(vari.system==2?"-W11H":"-W11P"):(vari.system==0?"":"-W10P")}-${pc.for_free==0?"RE3":"USB"}`;
-					let var_title = `${this.get_cur_year()} ${pc.manufacture} ${pc.series} ${pc.screen} ${pc.pctype} ${pc.cpu} ${pc.cpu_cores} Cores ${pc.graphics} ${vari.ram_size}GB RAM DDR4${disk_title_str}${base_title_addition_str} ${system_str} ${pc.for_free == 0?"w/ RE Accessories":(pc.for_free == 1?"RATZK 32GB USB Drive":"w/RE 32GB USB Drive")}`
+					let var_sku = `${pc.manufacture}-${pc.screen_size}-${pc.model}-${vari.ram_size}GB${disk_sku_str}${vari.system>1?(vari.system==2?"-W11H":"-W11P"):(vari.system==0?"":"-W10P")}`;
+					let var_title = `${this.get_cur_year()} Newest ${pc.manufacture} ${pc.series} ${pc.screen} Laptop ${pc.cpu} ${pc.graphics} ${vari.ram_size}GB RAM DDR4${disk_title_str}${base_title_addition_str} ${system_str} ${pc.for_free == 0?"w/Accessories":(pc.for_free == 1?"32GB USB Drive":"w/32GB USB Drive")}`
 					this.skus.push(var_sku);
 					this.titles.push(var_title);
 					
@@ -617,7 +614,7 @@
 					let bullet_2 = `【Customization】${isUpgrade?'Upgraded to ':""}${vari_ram}GB DDR4 SDRAM, ${disk_title_str}, ${pc.dvd}`;
 					this.bullet_2.push(bullet_2);
 					
-					let bullet_5_head = pc.for_free==0?(vari.system != 1?"【Rock eDigital Bundle】":"【Rock eDigital Enhancement】"):(vari.system != 1?"【For Home】":"【For Business】");
+					let bullet_5_head = (pc.for_free==0 ||pc.for_free==2)?((vari.system == 0|| vari.system != 2)?"【Rock eDigital Bundle】":"【Rock eDigital Enhancement】"):((vari.system == 0|| vari.system != 2)?"【For Home】":"【For Business】");
 					let bullet_5 = `${bullet_5_head}${vari.system <= base.system?"":"Upgraded to "}${system_str}, ${descriptions.battery_description}, ${descriptions.size_description}, ${pc.color}, ${free_bullet_str}`;
 					this.bullet_5.push(bullet_5);
 					
@@ -643,10 +640,30 @@
 				
 				//bullet 1-5
 				
-				this.bullet_1 = `【Powerful Performance with ${pc.cpu} ${parseInt(pc.cpu_cores)>=4?'Quand':"Dual"} Core】${descriptions.cpu_description}`;
+				this.bullet_1 = `【Powerful Performance with ${pc.cpu} ${this.getCores_str(pc.cpu_cores)} Core】${descriptions.cpu_description}`;
 				this.bullet_3 = `【Display and Graphics】${descriptions.screen_description},${descriptions.graphics_description}`;
 				this.bullet_4 = `【Connectivity】${descriptions.connectivity_description},${descriptions.solt_description}`;
 				
+			},
+			//多核描述
+			getCores_str(cores){
+				switch (parseInt(cores)){
+					case 2:
+						return "Dual"
+						// break;
+					case 4:
+						return "Quad"
+						// break;
+					case 6:
+						return "Hexa"
+						// break;
+					case 8:
+						return "Octa"
+						// break;
+					default:
+						return "Muti"
+						// break;
+				}
 			},
 			//复制skus
 			copy_sku(){
