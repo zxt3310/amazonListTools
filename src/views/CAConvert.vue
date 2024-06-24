@@ -70,6 +70,7 @@
 			}
 		},
 		created() {
+			let loadingInstance = Loading.service({text:"加载中"});
 			this.readWorkbookFromRemoteFile('/CA/TraditionalLaptops.xlsm', (e) => {
 				var worksheet = e.Sheets['Template'];
 				this.targetList = XLSX.utils.sheet_to_json(worksheet, {
@@ -77,6 +78,7 @@
 					defval: ""
 				});
 				console.log(this.targetList)
+				loadingInstance.close();
 			});
 		},
 		methods: {
@@ -116,6 +118,7 @@
 				return `/${directory}/${filename}`;
 			},
 			reloadTemple() {
+				let loadingInstance = Loading.service({text:"加载中"});
 				let path = this.getTempleFilePath();
 				this.readWorkbookFromRemoteFile(path, (e) => {
 					var worksheet = e.Sheets['Template'];
@@ -124,6 +127,7 @@
 						defval: ""
 					});
 					console.log(this.targetList)
+					loadingInstance.close();
 				});
 				if(this.area == "澳大利亚"){
 					this.addition_price = 0;
@@ -180,10 +184,51 @@
 				for (let row of this.originList) {
 					let new_row = {};
 					for (let key in this.targetList[0]) {
-						if(key == "standard_price"){
-							new_row[key] = (parseFloat(row[key]) + parseFloat(this.addition_price)) * parseFloat(this.rate);
-						}else{
-							new_row[key] = row[key];
+						switch (key){
+							//价格计算
+							case "standard_price":
+								new_row[key] = ((parseFloat(row[key]) + parseFloat(this.addition_price)) * parseFloat(this.rate)).toFixed(2);
+								break;
+							//size & style
+							case "variation_theme":
+								new_row[key] = this.area == "澳大利亚"?"SizeName-StyleName":row[key];
+								break;
+							//硬盘单位映射
+							case "hard_drive_size_unit_of_measure":
+								new_row[key] = row["hard_disk_size_unit_of_measure"];
+								break;
+							//size单位换算
+							case "thickness_head_to_toe_unit_of_measure":
+							case "thickness_width_side_to_side_unit_of_measure":
+							case "thickness_floor_to_top_unit_of_measure":
+								new_row[key] = "Centimeters";
+								break;
+							//size映射
+							case "thickness_head_to_toe":
+							case "thickness_width_side_to_side":
+							case "thickness_floor_to_top":
+								if(isNaN(row[key]) || row[key].length==0){
+									switch (key){
+										case "thickness_head_to_toe":
+											new_row[key] =  (parseFloat(row["item_length"]) * 2.54).toFixed(2);
+											break;
+										case "thickness_width_side_to_side":
+											new_row[key] =  (parseFloat(row["item_width"]) * 2.54).toFixed(2);
+											break;
+										case "thickness_floor_to_top":
+											new_row[key] =  (parseFloat(row["item_height"]) * 2.54).toFixed(2);
+											break;
+										default:
+											new_row[key] = row[key];
+											break;
+									}
+								}else{
+									new_row[key] = (parseFloat(row[key]) * 2.54).toFixed(2);
+								}
+								break;
+							default:
+								new_row[key] = row[key];
+								break;
 						}
 					}
 					obj.push(new_row);
