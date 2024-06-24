@@ -3,7 +3,8 @@ import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import About from "../views/About.vue";
 import CAConvert from "../views/CAConvert.vue";
-import UPC from "../views/UPC.vue"
+import UPC from "../views/UPC.vue";
+import CaculateUPC from "../views/CaculateUPC.vue"
 
 Vue.use(VueRouter);
 
@@ -32,6 +33,11 @@ const routes = [
 	  path:"/UPC",
 	  name:"UPC",
 	  component: UPC
+  },
+  {
+	  path:"/CaculateUPC",
+	  name:"UPC计算器",
+	  component: CaculateUPC
   }
 ];
 
