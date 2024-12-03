@@ -1,6 +1,6 @@
 <template>
-	<div class="about">
-		<div clase="contain">
+	<div class="about_">
+		<div clase="contain_">
 			<el-row :gutter="20">
 				<!-- <el-col :span="12"> -->
 					<el-container style="height: 800px;">
@@ -9,21 +9,15 @@
 							<el-dropdown split-button type="primary" @command="BrandSelect">
 							  {{Brand}}
 							  <el-dropdown-menu slot="dropdown">
-							    <!-- <el-dropdown-item command="HP">HP</el-dropdown-item>
-							    <el-dropdown-item command="LENOVO">LENOVO</el-dropdown-item>
-							    <el-dropdown-item command="DELL">DELL</el-dropdown-item>
-							    <el-dropdown-item command="ACER">ACER</el-dropdown-item>
-							    <el-dropdown-item command="MSI">MSI</el-dropdown-item>
-								<el-dropdown-item command="ASUS">ASUS</el-dropdown-item>
-								<el-dropdown-item command="LG">LG</el-dropdown-item>
-								<el-dropdown-item command="INTEL">INTEL</el-dropdown-item>
-								<el-dropdown-item command="SAMSUNG">SAMSUNG</el-dropdown-item> -->
 								<el-dropdown-item v-for="(item, index) in Brand_option" :key="index" :command="item">{{item}}</el-dropdown-item>
 							  </el-dropdown-menu>
 							</el-dropdown>
-							<label></label>
+							<!-- <label></label-->
+							<!-- <div style="width: 180px;">
+								<el-input placeholder="口令(正式环境取消)" v-model="pwd"></el-input>
+							</div> -->
+							
 						</el-header>
-
 						<el-main>
 							<el-input readonly v-model="upcs_load" type="textarea" :rows="30">
 							</el-input>
@@ -77,7 +71,8 @@
 				},
 				Brand:"选择品牌",
 				Brand_option:[
-					"HP","LENOVO","DELL","MSI","ASUS","ACER","LG","INTEL","SAMSUNG"
+					"HP","LENOVO"
+					// ,"DELL","MSI","ASUS","ACER","LG","INTEL","SAMSUNG"
 				]
 			}
 		},
@@ -94,6 +89,10 @@
 					alert("填写数量")
 					return;
 				}
+				// if(this.pwd != "123Ranknow!"){
+				// 	alert("口令错误")
+				// 	return;
+				// }
 				this.upcs_load = "";
 				let status = this.load_btn_status;
 				let status_ori = {...status};
@@ -161,13 +160,13 @@
 </script>
 
 <style>
-	.about{
+	.about_{
 		width: 100%;
 		height: 100%;
 		display: flex;
 		justify-content: center;
 	}
-	.contain {
+	.contain_ {
 		/* display: inline-block; */
 		width: 50%;
 	}

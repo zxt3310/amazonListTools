@@ -1,6 +1,6 @@
 <template>
 	<div class="about">
-		<h2>订单&运单</h2>
+		<h2>Tracking  &  SN</h2>
 		<div class="" style="">
 			<el-container style="height: 45rem;">
 				<el-header>
@@ -38,6 +38,8 @@
 						</el-button>
 						<el-button size="medium" @click="getHistory(4)">{{getDateName(4)}} 扫描:{{history.exfifth}}
 						</el-button>
+						<el-button size="medium" @click="checkCATracking()">加拿大Tracking预警
+						</el-button>
 					</el-aside>
 					<el-main>
 						<el-table max-height="700" v-loading="loading" :data="tableData" stripe>
@@ -45,9 +47,11 @@
 							</el-table-column>
 							<el-table-column prop="updated_at" label="扫描时间" width="220">
 							</el-table-column>
-							<el-table-column prop="order_id" label="订单号" width="220">
+							<el-table-column prop="order_id" label="订单号" width="120">
 							</el-table-column>
 							<el-table-column prop="express_num" label="运单号" width="220">
+							</el-table-column>
+							<el-table-column prop="SN" label="Serial Number" width="220">
 							</el-table-column>
 							<el-table-column label="操作">
 								<template slot-scope="scope">
@@ -71,13 +75,24 @@
 					</el-row>
 					<el-row>
 						<el-input v-model="scandata.scan_tracker" placeholder="运单号" ref="tracker_input"
-							@keyup.enter.native="scanOrder"></el-input>
+							@keyup.enter.native="onSubmit"></el-input>
+					</el-row>
+					<el-row>
+						<el-input v-model="scandata.scan_SN" placeholder="SN" ref="SN_input" type="textarea" autosize
+						@keyup.enter.native="SNEditing"></el-input>
+					</el-row>
+					<el-row>
+						SN结束码：
+						<el-image :src="require(`../static/SN_END_FLAG.png`)"/>
 					</el-row>
 					<el-alert v-if="scanError.show" type="error" :title="scanError.msg" effect="dark" show-icon=""
 						:closable="false">
 					</el-alert>
 					<el-row style="text-align: center; margin-top: 30px;">
 						<el-button type="primary" @click="drawer=false">关闭窗口</el-button>
+					</el-row>
+					<el-row style="margin-top: 30px;">
+						注：Tracking扫描完毕会自动激活SN输入框，SN支持多行扫描(可扫描多个SN，中间自动用换行符间隔)，SN扫描完毕后，请扫描结束码触发提交。
 					</el-row>
 				</div>
 
@@ -90,6 +105,7 @@
 	import moment from 'moment-timezone';
 	// import axios from 'axios'
 	import axios from '../js/request.js';
+	import axiosEx from 'axios';
 	import {
 		Loading
 	} from 'element-ui';
@@ -146,7 +162,8 @@
 				},
 				scandata: {
 					scan_order: "",
-					scan_tracker: ""
+					scan_tracker: "",
+					scan_SN:"",
 				}
 			}
 		},
@@ -198,10 +215,20 @@
 				})
 			},
 			onSubmit(e) {
-				console.log(e);
-				this.$refs.tracker_input.focus();
+				// console.log(e);
+				this.$refs.SN_input.focus();
 			},
-			scanOrder() {
+			SNEditing(){
+				// console.log(this.scandata.scan_SN)
+				let SNs = this.scandata.scan_SN.split("\n")
+				let flag = "SN_Scan_END_FLAG"
+				if(SNs.includes(flag)){
+					SNs.splice(-2,2)
+					console.log(SNs)
+					this.scanOrder(SNs.join(", "))
+				}
+			},
+			scanOrder(SN_post) {
 				if (this.scandata.scan_tracker.length == 0) {
 					return;
 				}
@@ -212,7 +239,8 @@
 				let temp = this.tableData;
 				axios.post("scanorder", {
 					"order_id": this.scandata.scan_order,
-					"express_num": this.scandata.scan_tracker
+					"express_num": this.scandata.scan_tracker,
+					"SN":SN_post
 				}).then((res) => {
 					if (res.ret == 0) {
 						// console.log(res)
@@ -221,6 +249,7 @@
 						this.tableData = temp;
 						this.$refs.order_input.clear();
 						this.$refs.tracker_input.clear();
+						this.$refs.SN_input.clear();
 						this.$refs.tracker_input.focus();
 						this.scanError = {
 							show: false,
@@ -272,6 +301,41 @@
 						message: '已取消删除'
 					});
 				});
+			},
+			//加拿大 Tracking  状态预警
+			checkCATracking(){	
+				// let result = []
+				// axios.get("getcaorder").then((res)=>{
+				// 	// if(res.ret == 0){
+				// 	// 	let ca_orders = res.data
+				// 	// 	ca_orders.forEach(order=>{
+				// 	// 		let tracking = order.express_num
+							
+				// 	// 	})
+				// 	// }
+				// 	console.log(res)
+				// })
+				
+				axiosEx({
+					url:"https://webapis.ups.com/track/api/Track/GetStatus",
+					// url:"https://baidu.com",
+					method:"POST",
+					headers:{
+						"Sec-Fetch-Site": "none",
+						"Content-Type":"application/json",
+						"X-XSRf-TOKEN":"CfDJ8Jcj9GhlwkdBikuRYzfhrpIl8TgRzkclH3QdR5wMJ3zdRI7M3zd3yObIvbTv6LAP1WyiPJdfv7noGfjzketLCPtTgdepI6yjQw6EoxFHVhOw0NLTzF4EEHvCz1zW3AwgX2IVzJTZSXADMEEM04nVn6w"
+					},
+					data:{
+						"Locale": "en_US",
+						    "Requester": "quic/trackdetails",
+						    "TrackingNumber": [
+						        "1ZH4F7118847543583"
+						    ],
+						    "returnToValue": ""
+					}
+				}).then((res=>{
+					console.log(res.trackedDateTime)
+				}))
 			}
 		}
 	}
