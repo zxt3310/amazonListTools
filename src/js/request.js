@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Vue from 'vue';
 
-axios.defaults.baseURL = 'http://wtodland.store:8081/api';
+axios.defaults.baseURL = 'https://wtodland.store/api';
 axios.defaults.timeout = 100000;
 // axios.defaults.headers.post['Content-Type'] = 'application/json';
 // axios.defaults.headers.post['X-Requested-With'] = 'XMLHttpRequest';
