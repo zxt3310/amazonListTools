@@ -1,12 +1,13 @@
 <template>
   <div id="app">
-    <!-- <div id="nav">
-      <router-link to="/">Listing</router-link> |
-      <router-link to="/about">Tools</router-link> |
-	  <router-link to="/CAConvert">CAConvert</router-link>  |
-	  <router-link to="/UPC">UPC获取</router-link>  |
-	  <router-link to="/CaculateUPC">UPC计算器</router-link>
-    </div> -->
+    <div id="nav">
+      <!-- <router-link to="/">Listing</router-link> | -->
+      <router-link to="/">Tracking & SN</router-link> |
+	  <router-link to="/trackingcheck">CA Tracking Check</router-link>
+	  <!-- <router-link to="/CAConvert">CAConvert</router-link>  | -->
+	  <!-- <router-link to="/UPC">UPC获取</router-link>  | -->
+	  <!-- <router-link to="/CaculateUPC">UPC计算器</router-link> -->
+    </div>
     <router-view />
 	<!-- <el-row style="font-size: 12px; padding:20px">
 		  冀ICP备2021011143号
