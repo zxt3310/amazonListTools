@@ -79,7 +79,19 @@
 			},
 			//跳转授权
 			redirectToAuthUPS(){
-				window.open(`https://wwwcie.ups.com/security/v1/oauth/authorize?client_id=${this.appId}&redirect_uri=https://wtodland.store&response_type=code`)
+				// axios.post("gettoken",{
+				// 	"clientid":this.$UPS_APPID,
+				// 	"secret": this.$UPS_APPSECRET
+				// }).then((res)=>{
+				// 	console.log(res)
+				// })
+				
+					
+				axios.post("trackingcheck",{
+					'tracking_id':'1ZAC95659113215464'
+				}).then((res)=>{
+					console.log(res)
+				})
 			},
 			
 			handleDelete(index, row) {

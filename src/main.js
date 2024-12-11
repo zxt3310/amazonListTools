@@ -8,6 +8,9 @@ Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.prototype.loading = false;
 
+Vue.prototype.$UPS_APPID="vMMcWqjwiIWDuS8n3Mg6Mt2Wzj9t0U7celxYCTMmvVHfHXBr";
+Vue.prototype.$UPS_APPSECRET = "msWuqdWTkAEI8RVxmBfxzjVAlGNAySbsIVMokpochWm95JU9uVG43q1jCskuAfm5";
+
 new Vue({
   router,
   store,

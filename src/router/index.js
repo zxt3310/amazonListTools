@@ -6,6 +6,7 @@ import About from "../views/About.vue";
 // import UPC from "../views/UPC.vue";
 // import CaculateUPC from "../views/CaculateUPC.vue";
 import TrackingCheck from "../views/TrackingCheck.vue";
+import TokenFetch from "../views/TokenFetch.vue"
 
 Vue.use(VueRouter);
 
@@ -44,6 +45,11 @@ const routes = [
 	  path:"/trackingcheck",
 	  name:"CA Tracking Check",
 	  component: TrackingCheck
+  },
+  {
+	  path:"/tokenfetch",
+	  name:"获取UPS访问令牌",
+	  component: TokenFetch
   }
 ];
 
