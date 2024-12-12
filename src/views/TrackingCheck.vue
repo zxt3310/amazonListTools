@@ -1,6 +1,6 @@
 <template>
 	<div class="about">
-		<h2>CA Tracking Check</h2>
+		<!-- <h2>CA Tracking Check</h2> -->
 		<div class="" style="">
 			<el-container style="height: 45rem;">
 				<el-header>
@@ -13,20 +13,27 @@
 					</el-aside>
 					<el-main>
 						<el-table max-height="700" v-loading="loading" :data="tableData" stripe>
-							<el-table-column prop="id" label="ID" width="100">
+							<el-table-column prop="id" label="ID" width="80">
 							</el-table-column>
-							<el-table-column prop="updated_at" label="扫描时间" width="220">
+							<el-table-column prop="updated_at" label="扫描时间" width="160">
 							</el-table-column>
-							<el-table-column prop="order_id" label="订单号" width="120">
-							</el-table-column>
-							<el-table-column prop="express_num" label="运单号" width="220">
+							<el-table-column prop="express_num" label="运单号" width="180">
 							</el-table-column>
 							<el-table-column prop="SN" label="Serial Number" width="220">
 							</el-table-column>
-							<el-table-column label="操作">
+							<el-table-column label="状态" width="120">
 								<template slot-scope="scope">
-									<el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
-										删除</el-button>
+									<el-tag
+										:type="tag_enmu[scope.row.ca_tag].style"
+									>
+										{{tag_enmu[scope.row.ca_tag].status}}
+									</el-tag>
+								</template>
+							</el-table-column>
+							<el-table-column label="">
+								<template slot-scope="scope">
+									<el-button size="mini" type="primary" @click="handleDelete(scope.$index, scope.row)">
+										查看 </el-button>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -51,7 +58,13 @@
 				tableData: [],
 				UpsToken:"",
 				appId:"vMMcWqjwiIWDuS8n3Mg6Mt2Wzj9t0U7celxYCTMmvVHfHXBr",
-				appSecret:"msWuqdWTkAEI8RVxmBfxzjVAlGNAySbsIVMokpochWm95JU9uVG43q1jCskuAfm5"
+				appSecret:"msWuqdWTkAEI8RVxmBfxzjVAlGNAySbsIVMokpochWm95JU9uVG43q1jCskuAfm5",
+				tag_enmu:[
+					{"status":"Unknow","style":"info"},
+					{"status":"Shipping","style":"warning"},
+					{"status":"delivered","style":"success"},
+					{"status":"Warning","style":"danger"},
+				]
 			}
 		},
 		created() {
@@ -69,29 +82,51 @@
 					this.tableData = e.data;
 				})
 			},
-			//执行检查步骤
-			checkCATracking(){
-				
-			},
-			//检查ups token
-			preAuthToUPS(){
-				
-			},
-			//跳转授权
+
+			//开启批量请求
 			redirectToAuthUPS(){
-				// axios.post("gettoken",{
-				// 	"clientid":this.$UPS_APPID,
-				// 	"secret": this.$UPS_APPSECRET
-				// }).then((res)=>{
-				// 	console.log(res)
-				// })
+				let index = 0;
+				let end = this.tableData.length;
+				let that = this;
+				let intervalId = setInterval(function(){
+					let order = that.tableData[index];
+					axios.post("trackingcheck",{
+						'tracking_id': order.express_num
+					}).then((res)=>{
+						
+						let tracking = res.data;
+						//获取包裹
+						let pack = tracking.trackResponse.shipment[0].package[0];
+						//获取扫描点
+						let activity = pack.activity;
+						//获取包裹最新状态
+						let curStatus = pack.currentStatus;
+						if(curStatus.code != "011"){
+							let last1 = activity[0].statusCode;
+							let last2 = activity[1].statusCode
+							if(last1 == last2 == "016"){
+								order.ca_tag = 3;
+								that.tableData[index] = order;
+							}else{
+								order.ca_tag = 1;
+								that.tableData[index] = order;
+							}
+						}else{
+							order.ca_tag = 2;
+							that.tableData[index] = order;
+							axios.post("updateCaTag",{
+								"id":order.id
+							})
+						}
+						//判断结束状态
+						index=index+1;
+						if(index == end){
+							clearInterval(intervalId);
+						}
+					})
+				},3000);
 				
-					
-				axios.post("trackingcheck",{
-					'tracking_id':'1ZAC95659113215464'
-				}).then((res)=>{
-					console.log(res)
-				})
+				
 			},
 			
 			handleDelete(index, row) {
