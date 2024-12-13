@@ -1,18 +1,46 @@
 <template>
 	<div class="about">
-		<!-- <h2>CA Tracking Check</h2> -->
-		<div class="" style="">
+		<h2>CA Tracking Check</h2>
+		<div class="">
 			<el-container>
 				<el-header>
-					30日内的加拿大Tracking Number
-				</el-header>
-				<el-container>
-					<el-aside width="200px">
-						<el-button size="medium" @click="redirectToAuthUPS()">加拿大Tracking预警
+					<el-dropdown @command="
+					    e => {
+					      searchKey = e;
+					      searchParam = '';
+					    }
+					  ">
+						<el-button type="primary">
+							{{ searchBtnText(searchKey)
+					    }}<i class="el-icon-arrow-down el-icon--right"></i>
 						</el-button>
+						<el-dropdown-menu slot="dropdown">
+							<el-dropdown-item command="tracker">运单号</el-dropdown-item>
+							<el-dropdown-item command="date">日期</el-dropdown-item>
+						</el-dropdown-menu>
+					</el-dropdown>
+					<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px;"
+						@keyup.enter.native="searchRecord"></el-input>
+
+					<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam" type="daterange"
+						align="right" unlink-panels range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+						:picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:ss">
+					</el-date-picker>
+
+					<el-button type="primary" :disabled="searching" @click="searchRecord">
+						搜索 <i class="el-icon-search"></i>
+					</el-button>
+
+					<div style="margin-left: 50px;">
+						<el-button size="medium" :loading="searching" @click="redirectToAuthUPS()">开始查询</el-button>
+					</div>
+				</el-header>
+				<el-container style="height: 68rem;">
+					<el-aside width="200px">
+
 					</el-aside>
 					<el-main>
-						<el-table max-height="700" v-loading="loading" :data="tableData" stripe>
+						<el-table v-loading="loading" :data="tableData" stripe>
 							<el-table-column prop="id" label="ID" width="80">
 							</el-table-column>
 							<el-table-column prop="updated_at" label="扫描时间" width="160">
@@ -39,6 +67,21 @@
 					</el-main>
 				</el-container>
 			</el-container>
+			<el-drawer @opened="onOpen" :modal="false" :title="showingTracking.inquiryNumber" :visible.sync="drawer"
+				:append-to-body="true" size="30%">
+				<el-timeline>
+					<el-scrollbar class="hide-horizontal-scrollbar" style="margin: 20px; height: 70rem;">
+						<el-timeline-item v-for="(activity,index) in showingTracking.package[0].activity" :key="index"
+							placement="top" :timestamp="timeformat(activity.date,activity.time)">
+							<el-card>
+								<h4>Location:  {{locationformat(activity.location.address)}}</h4>
+								<p>{{activity.status.description}}</p>
+							</el-card>
+						</el-timeline-item>
+					</el-scrollbar>
+
+				</el-timeline>
+			</el-drawer>
 		</div>
 	</div>
 </template>
@@ -71,7 +114,55 @@
 						"status": "Warning",
 						"style": "danger"
 					},
-				]
+				],
+				//查询类型
+				searchKey: "date",
+				//时间快捷选项
+				pickerOptions: {
+					shortcuts: [{
+							text: "最近一周",
+							onClick(picker) {
+								const end = new Date();
+								const start = new Date();
+								start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+								picker.$emit("pick", [start, end]);
+							}
+						},
+						{
+							text: "最近一个月",
+							onClick(picker) {
+								const end = new Date();
+								const start = new Date();
+								start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+								picker.$emit("pick", [start, end]);
+							}
+						}
+					]
+				},
+				//搜索条件
+				searchParam: "",
+				//查询状态
+				searching: false,
+				//抽屉
+				drawer: false,
+				//当前抽屉展示中的tracking全信息
+				showingTracking: {
+					package: [{
+						activity: [
+							{
+								location:{
+									address:{}
+								},
+								status:{
+									description:""
+								},
+								date:"",
+								time:""
+							}
+							
+						]
+					}]
+				}
 			}
 		},
 		created() {
@@ -89,6 +180,31 @@
 					this.tableData = e.data;
 				})
 			},
+			searchBtnText(e) {
+				var text = "";
+				switch (e) {
+					case "tracker":
+						text = "运单号";
+						break;
+					case "date":
+						text = "日期";
+						break;
+				}
+				return text;
+			},
+			searchRecord(e) {
+				if (this.searchParam.length == 0) {
+					return;
+				}
+				axios
+					.post("searchtrackings", {
+						type: this.searchKey,
+						param: this.searchParam
+					})
+					.then(res => {
+						this.tableData = res.data;
+					});
+			},
 
 			delay(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
@@ -96,17 +212,18 @@
 
 			//开启批量请求
 			async redirectToAuthUPS() {
+				this.searching = true;
 				let index = 0;
 				let end = this.tableData.length;
 				let that = this;
 				for (let index = 0; index < end; index++) {
 					let order = that.tableData[index];
 					let res;
-					try{
+					try {
 						res = await axios.post("trackingcheck", {
 							'tracking_id': order.express_num
 						});
-					}catch(e){
+					} catch (e) {
 						console.log(e);
 					}
 					let tracking = res.data;
@@ -121,7 +238,7 @@
 						if (activity.length > 1) {
 							let last1 = activity[0].status.statusCode;
 							let last2 = activity[1].status.statusCode;
-							if (last1 == last2 == "016") {
+							if (last1 == last2 && last1=="016") {
 								order.ca_tag = 3;
 							}
 						}
@@ -135,75 +252,32 @@
 					that.tableData[index] = order;
 					await this.delay(2000);
 				}
-
-				// let intervalId = setInterval(function() {
-				// 		let order = that.tableData[index];
-				// 		try {
-				// 			axios.post("trackingcheck", {
-				// 				'tracking_id': order.express_num
-				// 			}).then((res) => {
-				// 				let tracking = res.data;
-				// 				//获取包裹
-				// 				let pack = tracking.trackResponse.shipment[0].package[0];
-				// 				//获取扫描点
-				// 				let activity = pack.activity;
-				// 				//获取包裹最新状态
-				// 				let curStatus = pack.currentStatus;
-				// 				if (curStatus.code != "011") {
-				// 					let last1 = activity[0].statusCode;
-				// 					let last2 = activity[1].statusCode
-				// 					if (last1 == last2 == "016") {
-				// 						order.ca_tag = 3;
-				// 						that.tableData[index] = order;
-				// 					} else {
-				// 						order.ca_tag = 1;
-				// 						that.tableData[index] = order;
-				// 					}
-				// 				} else {
-				// 					order.ca_tag = 2;
-				// 					that.tableData[index] = order;
-				// 					axios.post("updateCaTag", {
-				// 						"id": order.id
-				// 					})
-				// 				}
-				// 			})
-				// 		} catch (e) {
-				// 			//TODO handle the exception
-				// 			console.log(e)
-				// 		} finally {
-				// 			//判断结束状态
-				// 			index = index + 1;
-				// 			if (index == end) {
-				// 				clearInterval(intervalId);
-				// 			}
-				// 		}
-
-				// 	},
-				// 	2000);
+				this.searching = false;
 			},
-
+			onOpen() {},
 			handleDelete(index, row) {
-				this.$confirm('此操作将删除该运单, 是否继续?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'warning'
-				}).then(() => {
-					axios.post("removeorder", {
-						"id": row.id,
-						"express_num": row.express_num
-					}).then((res) => {
-						if (res.ret == 0) {
-							this.getInitData();
-						} else {
-							alert(res.msg);
-						}
-					})
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '已取消删除'
-					});
+				axios.post("trackingcheck", {
+					'tracking_id': row.express_num
+				}).then((res) => {
+					this.drawer = true;
+					this.showingTracking = res.data.trackResponse.shipment[0];
 				});
+			},
+			timeformat(dateString, timeString) {
+				var year = dateString.substring(0, 4);
+				var month = dateString.substring(4, 6);
+				var day = dateString.substring(6, 8);
+				var hour = timeString.substring(0,2)
+				var min = timeString.substring(2,4)
+				var second = timeString.substring(4,6)
+				return `${year}-${month}-${day} ${hour}:${min}:${second}`;
+			},
+			locationformat(location){
+				var city = location.city || "";
+				var stateProvince = location.stateProvince || "";
+				var country = location.country || "";
+				
+				return `${city} ${stateProvince} ${country}`
 			}
 		}
 	}
@@ -249,5 +323,17 @@
 
 	.el-container:nth-child(7) .el-aside {
 		line-height: 320px;
+	}
+
+	.hide-horizontal-scrollbar {
+		-ms-overflow-style: none;
+		/* IE 10+ */
+		scrollbar-width: none;
+		/* Firefox */
+	}
+
+	.hide-horizontal-scrollbar::-webkit-scrollbar {
+		display: none;
+		/* Chrome, Safari, Opera*/
 	}
 </style>
