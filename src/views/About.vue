@@ -2,7 +2,7 @@
 	<div class="about">
 		<h2>Tracking  &  SN</h2>
 		<div class="" style="">
-			<el-container style="height: 45rem;">
+			<el-container>
 				<el-header>
 					<el-dropdown @command="(e)=>{searchKey = e; searchParam = '';}">
 						<el-button type="primary">
@@ -37,8 +37,6 @@
 						<el-button size="medium" @click="getHistory(3)">{{getDateName(3)}} 扫描:{{history.exfourth}}
 						</el-button>
 						<el-button size="medium" @click="getHistory(4)">{{getDateName(4)}} 扫描:{{history.exfifth}}
-						</el-button>
-						<el-button size="medium" @click="checkCATracking()">加拿大Tracking预警
 						</el-button>
 					</el-aside>
 					<el-main>
@@ -301,41 +299,6 @@
 						message: '已取消删除'
 					});
 				});
-			},
-			//加拿大 Tracking  状态预警
-			checkCATracking(){	
-				// let result = []
-				// axios.get("getcaorder").then((res)=>{
-				// 	// if(res.ret == 0){
-				// 	// 	let ca_orders = res.data
-				// 	// 	ca_orders.forEach(order=>{
-				// 	// 		let tracking = order.express_num
-							
-				// 	// 	})
-				// 	// }
-				// 	console.log(res)
-				// })
-				
-				axiosEx({
-					url:"https://webapis.ups.com/track/api/Track/GetStatus",
-					// url:"https://baidu.com",
-					method:"POST",
-					headers:{
-						"Sec-Fetch-Site": "none",
-						"Content-Type":"application/json",
-						"X-XSRf-TOKEN":"CfDJ8Jcj9GhlwkdBikuRYzfhrpIl8TgRzkclH3QdR5wMJ3zdRI7M3zd3yObIvbTv6LAP1WyiPJdfv7noGfjzketLCPtTgdepI6yjQw6EoxFHVhOw0NLTzF4EEHvCz1zW3AwgX2IVzJTZSXADMEEM04nVn6w"
-					},
-					data:{
-						"Locale": "en_US",
-						    "Requester": "quic/trackdetails",
-						    "TrackingNumber": [
-						        "1ZH4F7118847543583"
-						    ],
-						    "returnToValue": ""
-					}
-				}).then((res=>{
-					console.log(res.trackedDateTime)
-				}))
 			}
 		}
 	}
