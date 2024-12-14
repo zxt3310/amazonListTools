@@ -93,15 +93,63 @@
       <el-drawer
         @opened="onOpen"
         :modal="false"
-        :title="showingTracking.inquiryNumber"
         :visible.sync="drawer"
         :append-to-body="true"
         size="30%"
       >
+        <template #title>
+          <h2>{{ showingTracking.inquiryNumber }}</h2>
+        </template>
+        <el-row>
+          <el-col :span="9" :offset="2">
+            <h4>FROM:</h4>
+            <h4>
+              {{
+                showingTracking.package[0].packageAddress[0].address
+                  .addressLine1
+              }}
+            </h4>
+            <h4>
+              {{ showingTracking.package[0].packageAddress[0].address.city }}
+              {{
+                showingTracking.package[0].packageAddress[0].address
+                  .stateProvince
+              }}
+              {{
+                showingTracking.package[0].packageAddress[0].address.postalCode
+              }}
+              {{
+                showingTracking.package[0].packageAddress[0].address.countryCode
+              }}
+            </h4>
+          </el-col>
+          <el-col :span="9">
+            <h4>TO:</h4>
+            <h4>
+              {{
+                showingTracking.package[0].packageAddress[1].address
+                  .addressLine1
+              }}
+            </h4>
+            <h4>
+              {{ showingTracking.package[0].packageAddress[1].address.city }}
+              {{
+                showingTracking.package[0].packageAddress[1].address
+                  .stateProvince
+              }}
+              {{
+                showingTracking.package[0].packageAddress[1].address.postalCode
+              }}
+              {{
+                showingTracking.package[0].packageAddress[1].address.countryCode
+              }}
+            </h4>
+          </el-col>
+        </el-row>
         <el-timeline>
           <el-scrollbar
             class="hide-horizontal-scrollbar"
-            style="margin: 20px; height: 70rem;"
+            style="margin: 20px; height: 63rem;"
           >
             <el-timeline-item
               v-for="(activity, index) in showingTracking.package[0].activity"
@@ -111,7 +159,7 @@
             >
               <el-card>
                 <h4>
-                  Location: {{ locationformat(activity.location.address) }}
+                  {{ locationformat(activity.location.address) }}
                 </h4>
                 <p>{{ activity.status.description }}</p>
               </el-card>
@@ -200,6 +248,26 @@ export default {
                 },
                 date: "",
                 time: ""
+              }
+            ],
+            packageAddress: [
+              {
+                address: {
+                  addressLine1: "",
+                  city: "",
+                  stateProvince: "",
+                  postalCode: "",
+                  countryCode: ""
+                }
+              },
+              {
+                address: {
+                  addressLine1: "",
+                  city: "",
+                  stateProvince: "",
+                  postalCode: "",
+                  countryCode: ""
+                }
               }
             ]
           }

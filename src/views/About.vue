@@ -48,7 +48,7 @@
             搜索 <i class="el-icon-search"></i>
           </el-button>
         </el-header>
-        <el-container style="height: 68rem;">
+        <el-container v-loading="loading" style="height: 68rem;">
           <el-aside width="200px">
             <el-button size="medium" @click="getHistory(0)"
               >今日扫描:{{ history.today }}</el-button
@@ -67,7 +67,7 @@
             </el-button>
           </el-aside>
           <el-main>
-            <el-table v-loading="loading" :data="tableData" stripe>
+            <el-table :data="tableData" stripe>
               <el-table-column prop="id" label="ID" width="100">
               </el-table-column>
               <el-table-column prop="updated_at" label="扫描时间" width="220">
@@ -167,7 +167,7 @@ import moment from "moment-timezone";
 // import axios from 'axios'
 import axios from "../js/request.js";
 import axiosEx from "axios";
-import { Loading } from "element-ui";
+// import { Loading } from "element-ui";
 export default {
   data() {
     return {
@@ -227,7 +227,8 @@ export default {
         scan_order: "",
         scan_tracker: "",
         scan_SN: ""
-      }
+      },
+      loading: false
     };
   },
   created() {
@@ -236,18 +237,22 @@ export default {
   },
   methods: {
     getInitData() {
+      this.loading = true;
       axios.get("getpage").then(e => {
         this.tableData = e.data.orders;
         this.history = e.data.history;
+        this.loading = false;
       });
     },
     getHistory(cnt) {
+      this.loading = true;
       axios
         .post("gethistory", {
           days: cnt
         })
         .then(e => {
           this.tableData = e.data;
+          this.loading = false;
         });
     },
     getDateName(cnt) {
@@ -274,6 +279,7 @@ export default {
       if (this.searchParam.length == 0) {
         return;
       }
+      this.loading = true;
       axios
         .post("search", {
           type: this.searchKey,
@@ -281,6 +287,7 @@ export default {
         })
         .then(res => {
           this.tableData = res.data;
+          this.loading = false;
         });
     },
     onSubmit(e) {
@@ -301,10 +308,11 @@ export default {
       if (this.scandata.scan_tracker.length == 0) {
         return;
       }
+      this.loading = true;
       this.$refs.tracker_input.blur();
-      let loadingInstance = Loading.service({
-        fullscreen: true
-      });
+      // let loadingInstance = Loading.service({
+      //   fullscreen: true
+      // });
       let temp = this.tableData;
       axios
         .post("scanorder", {
@@ -337,12 +345,14 @@ export default {
             this.$refs.tracker_input.focus();
             this.$refs.tracker_input.select();
           }
-          this.$nextTick(() => {
-            // 以服务的方式调用的 Loading 需要异步关闭
-            loadingInstance.close();
-          });
+          // this.$nextTick(() => {
+          //   // 以服务的方式调用的 Loading 需要异步关闭
+          //   loadingInstance.close();
+          // });
+          this.loading = false;
         })
         .catch(e => {
+          this.loading = false;
           console.log(e);
           if (e.statusCode != 200) {
             alert("出错了！");
@@ -359,6 +369,7 @@ export default {
         type: "warning"
       })
         .then(() => {
+          this.loading = true;
           axios
             .post("removeorder", {
               id: row.id,
@@ -370,6 +381,7 @@ export default {
               } else {
                 alert(res.msg);
               }
+              this.loading = false;
             });
         })
         .catch(() => {
@@ -377,6 +389,7 @@ export default {
             type: "info",
             message: "已取消删除"
           });
+          this.loading = false;
         });
     }
   }
