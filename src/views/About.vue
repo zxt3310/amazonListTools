@@ -150,7 +150,7 @@
 				//搜索条件
 				searchParam: '',
 				//页面数据
-				table_max_height: window.innerHeight-260,
+				table_max_height: window.innerHeight-220,
 				history: {
 					today: 0,
 					yestoday: 0,

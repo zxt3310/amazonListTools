@@ -39,7 +39,7 @@
 				<el-container v-loading="loading">
 					<el-aside width="200px"> </el-aside>
 					<el-main>
-						<el-table :data="tableData" stripe :max-height="table_max_height">
+						<el-table :data="tableData" stripe :max-height="table_max_height-220">
 							<el-table-column prop="id" label="ID" width="80">
 							</el-table-column>
 							<el-table-column prop="updated_at" label="扫描时间" width="160">
@@ -67,58 +67,60 @@
 					</el-main>
 				</el-container>
 			</el-container>
-			<el-drawer @opened="onOpen" :modal="false" :visible.sync="drawer" :append-to-body="true" size="30%">
+			<el-drawer @opened="onOpen" :modal="false" :visible.sync="drawer" :append-to-body="true" size="35%">
 				<template #title>
 					<h2>{{ showingTracking.inquiryNumber }}</h2>
 				</template>
-				<el-row>
-					<el-col :span="9" :offset="2">
-						<h4>FROM:</h4>
-						<h4>
-							{{
-                showingTracking.package[0].packageAddress[0].address
-                  .addressLine1
-              }}
-						</h4>
-						<h4>
-							{{ showingTracking.package[0].packageAddress[0].address.city }}
-							{{
-                showingTracking.package[0].packageAddress[0].address
-                  .stateProvince
-              }}
-							{{
-                showingTracking.package[0].packageAddress[0].address.postalCode
-              }}
-							{{
-                showingTracking.package[0].packageAddress[0].address.countryCode
-              }}
-						</h4>
-					</el-col>
-					<el-col :span="9">
-						<h4>TO:</h4>
-						<h4>
-							{{
-                showingTracking.package[0].packageAddress[1].address
-                  .addressLine1
-              }}
-						</h4>
-						<h4>
-							{{ showingTracking.package[0].packageAddress[1].address.city }}
-							{{
-                showingTracking.package[0].packageAddress[1].address
-                  .stateProvince
-              }}
-							{{
-                showingTracking.package[0].packageAddress[1].address.postalCode
-              }}
-							{{
-                showingTracking.package[0].packageAddress[1].address.countryCode
-              }}
-						</h4>
-					</el-col>
-				</el-row>
+				<div style="line-height: 5px;">
+					<el-row>
+						<el-col :span="12" :offset="2">
+							<h4>FROM:</h4>
+							<h4>
+								{{
+					  showingTracking.package[0].packageAddress[0].address
+					    .addressLine1
+					}}
+							</h4>
+							<h4>
+								{{ showingTracking.package[0].packageAddress[0].address.city }}
+								{{
+					  showingTracking.package[0].packageAddress[0].address
+					    .stateProvince
+					}}
+								{{
+					  showingTracking.package[0].packageAddress[0].address.postalCode
+					}}
+								{{
+					  showingTracking.package[0].packageAddress[0].address.countryCode
+					}}
+							</h4>
+						</el-col>
+						<el-col :span="10">
+							<h4>TO:</h4>
+							<h4>
+								{{
+					  showingTracking.package[0].packageAddress[1].address
+					    .addressLine1
+					}}
+							</h4>
+							<h4>
+								{{ showingTracking.package[0].packageAddress[1].address.city }}
+								{{
+					  showingTracking.package[0].packageAddress[1].address
+					    .stateProvince
+					}}
+								{{
+					  showingTracking.package[0].packageAddress[1].address.postalCode
+					}}
+								{{
+					  showingTracking.package[0].packageAddress[1].address.countryCode
+					}}
+							</h4>
+						</el-col>
+					</el-row>
+				</div>
 				<el-timeline>
-					<el-scrollbar class="hide-horizontal-scrollbar" style="margin: 20px; height: 63rem;">
+					<el-scrollbar class="hide-horizontal-scrollbar" :style="draw_style">
 						<el-timeline-item v-for="(activity, index) in showingTracking.package[0].activity" :key="index"
 							placement="top" :timestamp="timeformat(activity.date, activity.time)">
 							<el-card>
@@ -144,6 +146,14 @@
 		Loading
 	} from "element-ui";
 	export default {
+		computed: {
+			draw_style() {
+				return {
+					margin: "20px",
+					height: `${window.innerHeight - 220}px`
+				}
+			}
+		},
 		data() {
 			return {
 				tableData: [],
@@ -199,7 +209,7 @@
 				//抽屉
 				drawer: false,
 				//table高度
-				table_max_height: window.innerHeight - 260,
+				table_max_height: window.innerHeight,
 				//当前抽屉展示中的tracking全信息
 				showingTracking: {
 					package: [{
@@ -269,16 +279,22 @@
 				if (this.searchParam.length == 0) {
 					return;
 				}
-				this.loading = true;
-				axios
-					.post("searchtrackings", {
-						type: this.searchKey,
-						param: this.searchParam
-					})
-					.then(res => {
-						this.tableData = res.data;
-						this.loading = false;
-					});
+				let key = this.searchKey;
+				if(key == "date"){
+					this.loading = true;
+					axios
+						.post("searchtrackings", {
+							type: key,
+							param: this.searchParam
+						})
+						.then(res => {
+							this.tableData = res.data;
+							this.loading = false;
+						});
+				}
+				if(key == "tracker"){
+					this.searchSingleTrack(this.searchParam);
+				}				
 			},
 
 			delay(ms) {
@@ -293,6 +309,10 @@
 				let that = this;
 				for (let index = 0; index < end; index++) {
 					let order = that.tableData[index];
+					//忽略已经delivered
+					if(order.ca_tag == 2){
+						continue;
+					}
 					let res;
 					try {
 						res = await axios.post("trackingcheck", {
@@ -325,7 +345,7 @@
 					}
 					order.last_description = activity[0].status.description;
 					that.tableData[index] = order;
-					this.btnTilte = `进度：${index + 1} / ${end + 1}`;
+					this.btnTilte = `进度：${index + 1} / ${end}`;
 					await this.delay(2000);
 				}
 				this.searching = false;
@@ -334,10 +354,13 @@
 			onOpen() {},
 			//单个tracking查询
 			handleDelete(index, row) {
+				this.searchSingleTrack(row.express_num);
+			},
+			searchSingleTrack(tracking) {
 				this.loading = true;
 				axios
 					.post("trackingcheck", {
-						tracking_id: row.express_num
+						tracking_id: tracking
 					})
 					.then(res => {
 						this.drawer = true;

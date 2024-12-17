@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div id="nav">
+    <div id="nav" style="padding-top: 10px; padding-bottom: 10px;">
       <!-- <router-link to="/">Listing</router-link> | -->
       <router-link to="/">Tracking & SN</router-link> |
 	  <router-link to="/trackingcheck">CA Tracking Check</router-link>
