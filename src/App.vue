@@ -3,7 +3,8 @@
     <div id="nav" style="padding-top: 10px; padding-bottom: 10px;">
       <!-- <router-link to="/">Listing</router-link> | -->
       <router-link to="/">Tracking & SN</router-link> |
-	  <router-link to="/trackingcheck">CA Tracking Check</router-link>
+	  <router-link to="/trackingcheck">CA Tracking Check</router-link> |
+	  <router-link to="/UpgradeMission">Upgrade Workbench</router-link>
 	  <!-- <router-link to="/CAConvert">CAConvert</router-link>  | -->
 	  <!-- <router-link to="/UPC">UPC获取</router-link>  | -->
 	  <!-- <router-link to="/CaculateUPC">UPC计算器</router-link> -->
