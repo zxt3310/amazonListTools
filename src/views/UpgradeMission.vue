@@ -1,90 +1,114 @@
 <template>
 	<div class="about">
-		<h2>Tracking  &  SN</h2>
+		<div style="padding: 10px;">
+			<router-link to="/">改机任务列表 |</router-link>
+			<router-link to="/"> 统计</router-link>
+		</div>
+
 		<div class="" style="">
-			<el-container>
-				<el-header>
-					<el-dropdown @command="(e)=>{searchKey = e; searchParam = '';}">
-						<el-button type="primary">
-							{{
+			<el-row>
+				<el-col :span="13">
+					<el-container>
+						<el-header>
+							<el-dropdown @command="(e)=>{searchKey = e; searchParam = '';}">
+								<el-button type="primary">
+									{{
 								searchBtnText(searchKey)
 							}}<i class="el-icon-arrow-down el-icon--right"></i>
-						</el-button>
-						<el-dropdown-menu slot="dropdown">
-							<el-dropdown-item command="order">订单号</el-dropdown-item>
-							<el-dropdown-item command="tracker">运单号</el-dropdown-item>
-							<el-dropdown-item command="date">日期</el-dropdown-item>
-						</el-dropdown-menu>
-					</el-dropdown>
-					<el-input v-model="searchParam" v-if="searchKey!='date'" style="margin:0 10px;"
-						@keyup.enter.native="searchRecord"></el-input>
+								</el-button>
+								<el-dropdown-menu slot="dropdown">
+									<el-dropdown-item command="date">日期</el-dropdown-item>
+								</el-dropdown-menu>
+							</el-dropdown>
+							<el-input v-model="searchParam" v-if="searchKey!='date'" style="margin:0 10px;"
+								@keyup.enter.native="searchRecord"></el-input>
 
-					<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam" type="daterange"
-						align="right" unlink-panels range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
-						:picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:ss">
-					</el-date-picker>
+							<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam"
+								type="daterange" align="right" unlink-panels range-separator="至"
+								start-placeholder="开始日期" end-placeholder="结束日期"
+								value-format="yyyy-MM-dd HH:mm:ss">
+							</el-date-picker>
 
-					<el-button type="primary" @click="searchRecord">
-						搜索 <i class="el-icon-search"></i>
-					</el-button>
-				</el-header>
-				<el-container>
-					<el-main>
-						<el-table :max-height="table_max_height" v-loading="loading" :data="tableData" stripe>
-							<el-table-column prop="id" label="ID" width="100">
-							</el-table-column>
-							<el-table-column prop="operator" label="操作员" width="220">
-							</el-table-column>
-							<el-table-column prop="brand" label="品牌" width="220">
-							</el-table-column>
-							<el-table-column prop="upc" label="UPC" width="220">
-							</el-table-column>
-							<el-table-column :formatter="ssdFmt" label="SSD" width="220">
-							</el-table-column>
-							<el-table-column prop="system" label="系统" width="220">
-							</el-table-column>
-							<el-table-column prop="updated_at" label="创建时间" width="220">
-							</el-table-column>
-							<el-table-column label="操作">
-								<template slot-scope="scope">
-									<el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
-										删除</el-button>
-								</template>
-							</el-table-column>
-						</el-table>
-					</el-main>
-					<el-aside width="200px">
-						<el-button type="primary" style="width: 100px;height: 100px;" @click="drawer=!drawer; ">开始扫描
-						</el-button>
-					</el-aside>
-				</el-container>
-			</el-container>
-			<el-drawer @opened="onOpen" :modal="false" title="扫描录入" :visible.sync="drawer" :append-to-body="true">
+							<el-button type="primary" @click="searchRecord">
+								搜索 <i class="el-icon-search"></i>
+							</el-button>
+						</el-header>
+						<el-container>
+							<el-main>
+								<el-table :max-height="table_max_height" v-loading="loading" :data="tableData" stripe>
+									<el-table-column prop="id" label="ID" width="100">
+									</el-table-column>
+									<el-table-column prop="operator" label="操作员" width="80">
+									</el-table-column>
+									<el-table-column prop="brand" label="品牌" width="100">
+									</el-table-column>
+									<el-table-column prop="upc" label="UPC" width="120">
+									</el-table-column>
+									<el-table-column :formatter="ssdFmt" label="SSD" width="100">
+									</el-table-column>
+									<el-table-column prop="system" label="系统" width="120">
+									</el-table-column>
+									<el-table-column prop="updated_at" label="创建时间" width="150">
+									</el-table-column>
+									<el-table-column label="操作">
+										<template slot-scope="scope">
+											<el-button size="mini" type="danger"
+												@click="handleDelete(scope.$index, scope.row)">
+												删除</el-button>
+										</template>
+									</el-table-column>
+								</el-table>
+							</el-main>
+							<el-aside width="120px">
+								<el-button type="primary" style="width: 100px;height: 100px;"
+									@click="drawer=!drawer; ">新增任务
+								</el-button>
+							</el-aside>
+						</el-container>
+					</el-container>
+				</el-col>
+				<el-col :span="11">
+					<el-row>
+						<el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
+							<el-tab-pane label="操作员" name="first">用户管理</el-tab-pane>
+							<el-tab-pane label="品牌" name="second">配置管理</el-tab-pane>
+							<el-tab-pane label="SSD" name="third">角色管理</el-tab-pane>
+							<el-tab-pane label="UPC" name="fourth">定时任务补偿</el-tab-pane>
+						</el-tabs>
+					</el-row>
+					<el-row>
+						123123
+					</el-row>
+				</el-col>
+			</el-row>
+			<el-drawer @opened="onOpen" :modal="false" title="新增改机任务" :visible.sync="drawer" :append-to-body="true">
 				<div style="padding: 20px;">
 					<el-row>
-						<el-input v-model="scandata.scan_order" placeholder="订单号" ref="order_input"
+						<el-input v-model="scandata.brand" placeholder="Brand" ref="brand_input"
 							@keyup.enter.native="onSubmit"></el-input>
 					</el-row>
 					<el-row>
-						<el-input v-model="scandata.scan_tracker" placeholder="运单号" ref="tracker_input"
+						<el-input v-model="scandata.upc" placeholder="UPC" ref="upc_input"
 							@keyup.enter.native="onSubmit"></el-input>
 					</el-row>
 					<el-row>
-						<el-input v-model="scandata.scan_SN" placeholder="SN" ref="SN_input" type="textarea" autosize
-						@keyup.enter.native="SNEditing"></el-input>
+						<el-input v-model="scandata.capacity1" placeholder="SSD1" ref="capacity1_input"
+							@keyup.enter.native="onSubmit"></el-input>
 					</el-row>
 					<el-row>
-						SN结束码：
-						<el-image :src="require(`../static/SN_END_FLAG.png`)"/>
+						<el-input v-model="scandata.capacity2" placeholder="SSD2" ref="capacity2_input"
+							@keyup.enter.native="onSubmit"></el-input>
 					</el-row>
+					<el-row>
+						<el-input v-model="scandata.system" placeholder="System" ref="system_input"
+							@keyup.enter.native="onSubmit"></el-input>
+					</el-row>
+
 					<el-alert v-if="scanError.show" type="error" :title="scanError.msg" effect="dark" show-icon=""
 						:closable="false">
 					</el-alert>
 					<el-row style="text-align: center; margin-top: 30px;">
 						<el-button type="primary" @click="drawer=false">关闭窗口</el-button>
-					</el-row>
-					<el-row style="margin-top: 30px;">
-						注：Tracking扫描完毕会自动激活SN输入框，SN支持多行扫描(可扫描多个SN，中间自动用换行符间隔)，SN扫描完毕后，请扫描结束码触发提交。
 					</el-row>
 				</div>
 
@@ -108,55 +132,23 @@
 				//展示表数据
 				tableData: [],
 				//查询类型
-				searchKey: "order",
+				searchKey: "date",
 				//时间快捷选项
 				scanError: {
 					show: false,
 					msg: ""
 				},
-				pickerOptions: {
-					shortcuts: [{
-						text: '最近一周',
-						onClick(picker) {
-							const end = new Date();
-							const start = new Date();
-							start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-							picker.$emit('pick', [start, end]);
-						}
-					}, {
-						text: '最近一个月',
-						onClick(picker) {
-							const end = new Date();
-							const start = new Date();
-							start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-							picker.$emit('pick', [start, end]);
-						}
-					}, {
-						text: '最近三个月',
-						onClick(picker) {
-							const end = new Date();
-							const start = new Date();
-							start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-							picker.$emit('pick', [start, end]);
-						}
-					}]
-				},
+				
 				//搜索条件
 				searchParam: '',
 				//页面数据
-				table_max_height: window.innerHeight-220,
-				history: {
-					today: 0,
-					yestoday: 0,
-					exthird: 0,
-					exfourth: 0,
-					exfifth: 0
-				},
+				table_max_height: window.innerHeight - 220,
 				scandata: {
 					scan_order: "",
 					scan_tracker: "",
-					scan_SN:"",
-				}
+					scan_SN: "",
+				},
+				activeName: 'first'
 			}
 		},
 		created() {
@@ -164,7 +156,7 @@
 			// moment.tz.setDefault("America/Los_Angeles");
 		},
 		methods: {
-			ssdFmt(row, column, cellValue, index){
+			ssdFmt(row, column, cellValue, index) {
 				let ssd1 = this.tableData[index].capacity1;
 				let ssd2 = this.tableData[index].capacity2;
 				return `${ssd1} ${ssd2?'+ '+ssd2:''}`
@@ -211,15 +203,14 @@
 				})
 			},
 			onSubmit(e) {
-				// console.log(e);
-				this.$refs.SN_input.focus();
+				console.log(e);
 			},
-			SNEditing(){
+			SNEditing() {
 				// console.log(this.scandata.scan_SN)
 				let SNs = this.scandata.scan_SN.split("\n")
 				let flag = "SN_Scan_END_FLAG"
-				if(SNs.includes(flag)){
-					SNs.splice(-2,2)
+				if (SNs.includes(flag)) {
+					SNs.splice(-2, 2)
 					console.log(SNs)
 					this.scanOrder(SNs.join(", "))
 				}
@@ -236,7 +227,7 @@
 				axios.post("scanorder", {
 					"order_id": this.scandata.scan_order,
 					"express_num": this.scandata.scan_tracker,
-					"SN":SN_post
+					"SN": SN_post
 				}).then((res) => {
 					if (res.ret == 0) {
 						// console.log(res)
@@ -273,15 +264,20 @@
 				});
 			},
 			onOpen() {
-				this.$refs.tracker_input.focus();
+				// this.$refs.tracker_input.focus();
 			},
+			//标签页切换
+			handleClick(tab, event) {
+				console.log(tab, event);
+			},
+
 			handleDelete(index, row) {
-				this.$confirm('此操作将删除该运单, 是否继续?', '提示', {
+				this.$confirm('此操作将删除该任务, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					axios.post("removeorder", {
+					axios.post("rmMission", {
 						"id": row.id,
 						"express_num": row.express_num
 					}).then((res) => {
@@ -343,5 +339,4 @@
 	.el-container:nth-child(7) .el-aside {
 		line-height: 320px;
 	}
-
 </style>
