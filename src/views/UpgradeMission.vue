@@ -70,10 +70,12 @@
 				<el-col :span="11">
 					<el-row>
 						<el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
-							<el-tab-pane label="操作员" name="first">用户管理</el-tab-pane>
-							<el-tab-pane label="品牌" name="second">配置管理</el-tab-pane>
-							<el-tab-pane label="SSD" name="third">角色管理</el-tab-pane>
-							<el-tab-pane label="UPC" name="fourth">定时任务补偿</el-tab-pane>
+							<el-tab-pane label="操作员" name="first">
+								<div ref='chart' style="width: 100%; height: 200px;"></div>
+							</el-tab-pane>
+							<el-tab-pane label="品牌" name="second"></el-tab-pane>
+							<el-tab-pane label="SSD" name="third"></el-tab-pane>
+							<el-tab-pane label="UPC" name="fourth"></el-tab-pane>
 						</el-tabs>
 					</el-row>
 					<el-row>
@@ -118,6 +120,7 @@
 </template>
 
 <script>
+	import * as echarts from 'echarts'
 	import moment from 'moment-timezone';
 	// import axios from 'axios'
 	import axios from '../js/request.js';
@@ -138,7 +141,6 @@
 					show: false,
 					msg: ""
 				},
-				
 				//搜索条件
 				searchParam: '',
 				//页面数据
@@ -148,13 +150,20 @@
 					scan_tracker: "",
 					scan_SN: "",
 				},
-				activeName: 'first'
+				activeName: 'first',
+				myChart:{}
 			}
 		},
 		created() {
 			this.getInitData()
 			// moment.tz.setDefault("America/Los_Angeles");
 		},
+		
+		mounted() {
+		    // 基于准备好的dom，初始化echarts实例
+		    this.myChart = echarts.init(this.$refs.chart);
+		  },
+		
 		methods: {
 			ssdFmt(row, column, cellValue, index) {
 				let ssd1 = this.tableData[index].capacity1;
@@ -165,16 +174,6 @@
 				axios.get('getMissionsToday').then((e) => {
 					this.tableData = e.data;
 				})
-			},
-			getHistory(cnt) {
-				axios.post('gethistory', {
-					"days": cnt
-				}).then((e) => {
-					this.tableData = e.data;
-				})
-			},
-			getDateName(cnt) {
-				return moment(new Date().getTime() - cnt * 1000 * 24 * 3600).format('MM-DD')
 			},
 			searchBtnText(e) {
 				var text = "";
@@ -204,16 +203,6 @@
 			},
 			onSubmit(e) {
 				console.log(e);
-			},
-			SNEditing() {
-				// console.log(this.scandata.scan_SN)
-				let SNs = this.scandata.scan_SN.split("\n")
-				let flag = "SN_Scan_END_FLAG"
-				if (SNs.includes(flag)) {
-					SNs.splice(-2, 2)
-					console.log(SNs)
-					this.scanOrder(SNs.join(", "))
-				}
 			},
 			scanOrder(SN_post) {
 				if (this.scandata.scan_tracker.length == 0) {
@@ -268,7 +257,28 @@
 			},
 			//标签页切换
 			handleClick(tab, event) {
-				console.log(tab, event);
+				// 指定图表的配置项和数据
+				var option = {
+				  title: {
+				    text: 'ECharts 入门示例'
+				  },
+				  tooltip: {},
+				  legend: {
+				    data:['销量']
+				  },
+				  xAxis: {
+				    data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+				  },
+				  yAxis: {},
+				  series: [{
+				    name: '销量',
+				    type: 'bar',
+				    data: [5, 20, 36, 10, 10, 20]
+				  }]
+				};
+						
+				// 使用刚指定的配置项和数据显示图表。
+				this.myChart.setOption(option);
 			},
 
 			handleDelete(index, row) {
