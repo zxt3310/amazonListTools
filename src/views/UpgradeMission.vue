@@ -7,7 +7,7 @@
 
 		<div class="" style="">
 			<el-row>
-				<el-col :span="13">
+				<el-col :span="15">
 					<el-container>
 						<el-header>
 							<el-dropdown @command="(e)=>{searchKey = e; searchParam = '';}">
@@ -25,17 +25,16 @@
 
 							<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam"
 								type="daterange" align="right" unlink-panels range-separator="至"
-								start-placeholder="开始日期" end-placeholder="结束日期"
-								value-format="yyyy-MM-dd HH:mm:ss">
+								start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd HH:mm:ss">
 							</el-date-picker>
 
 							<el-button type="primary" @click="searchRecord">
 								搜索 <i class="el-icon-search"></i>
 							</el-button>
 						</el-header>
-						<el-container>
+						<el-container v-loading="loading">
 							<el-main>
-								<el-table :max-height="table_max_height" v-loading="loading" :data="tableData" stripe>
+								<el-table :height="table_max_height" v-loading="loading" :data="tableData" stripe>
 									<el-table-column prop="id" label="ID" width="100">
 									</el-table-column>
 									<el-table-column prop="operator" label="操作员" width="80">
@@ -67,7 +66,7 @@
 						</el-container>
 					</el-container>
 				</el-col>
-				<el-col :span="11">
+				<el-col :span="9">
 					<el-row>
 						<el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
 							<el-tab-pane label="操作员" name="first">
@@ -78,39 +77,49 @@
 							<el-tab-pane label="UPC" name="fourth"></el-tab-pane>
 						</el-tabs>
 					</el-row>
-					<el-row>
-						123123
-					</el-row>
 				</el-col>
 			</el-row>
 			<el-drawer @opened="onOpen" :modal="false" title="新增改机任务" :visible.sync="drawer" :append-to-body="true">
 				<div style="padding: 20px;">
-					<el-row>
-						<el-input v-model="scandata.brand" placeholder="Brand" ref="brand_input"
-							@keyup.enter.native="onSubmit"></el-input>
+					<el-row class="row-bg">
+						<el-select style="width: 100%;" v-model="missionData.brand" placeholder="请选择品牌">
+							<el-option v-for="(item,index) in config.brand" :key="index" :label="item"
+								:value="item"></el-option>
+						</el-select>
 					</el-row>
-					<el-row>
-						<el-input v-model="scandata.upc" placeholder="UPC" ref="upc_input"
-							@keyup.enter.native="onSubmit"></el-input>
+					<el-row class="row-bg">
+						<el-input v-model="missionData.upc" placeholder="请输入UPC"></el-input>
 					</el-row>
-					<el-row>
-						<el-input v-model="scandata.capacity1" placeholder="SSD1" ref="capacity1_input"
-							@keyup.enter.native="onSubmit"></el-input>
+					<el-row class="row-bg">
+						<el-select style="width: 100%;" v-model="missionData.capacity1" placeholder="请选择SSD1">
+							<el-option v-for="(item,index) in config.ssd" :key="index" :label="item"
+								:value="item"></el-option>
+						</el-select>
 					</el-row>
-					<el-row>
-						<el-input v-model="scandata.capacity2" placeholder="SSD2" ref="capacity2_input"
-							@keyup.enter.native="onSubmit"></el-input>
+					<el-row class="row-bg">
+						<el-select style="width: 100%;" v-model="missionData.capacity2" placeholder="请选择SSD2">
+							<el-option v-for="(item,index) in config.ssd" :key="index" :label="item"
+								:value="item"></el-option>
+						</el-select>
 					</el-row>
-					<el-row>
-						<el-input v-model="scandata.system" placeholder="System" ref="system_input"
-							@keyup.enter.native="onSubmit"></el-input>
+					<el-row class="row-bg">
+						<el-select style="width: 100%;" v-model="missionData.system" placeholder="请选择系统">
+							<el-option v-for="(item,index) in config.system" :key="index" :label="item"
+								:value="item"></el-option>
+						</el-select>
+					</el-row>
+					<el-row class="row-bg">
+						<el-select style="width: 100%;" v-model="missionData.operator" placeholder="请选择操作员">
+							<el-option v-for="(item,index) in config.operator" :key="index" :label="item"
+								:value="item"></el-option>
+						</el-select>
 					</el-row>
 
 					<el-alert v-if="scanError.show" type="error" :title="scanError.msg" effect="dark" show-icon=""
 						:closable="false">
 					</el-alert>
-					<el-row style="text-align: center; margin-top: 30px;">
-						<el-button type="primary" @click="drawer=false">关闭窗口</el-button>
+					<el-row style="text-align: center;margin-top: 30px;">
+						<el-button style="width: 50%;" type="primary" @click="SubmitMission">提交</el-button>
 					</el-row>
 				</div>
 
@@ -125,9 +134,6 @@
 	// import axios from 'axios'
 	import axios from '../js/request.js';
 	import axiosEx from 'axios';
-	import {
-		Loading
-	} from 'element-ui';
 	export default {
 		data() {
 			return {
@@ -141,29 +147,32 @@
 					show: false,
 					msg: ""
 				},
+				loading: false,
 				//搜索条件
 				searchParam: '',
 				//页面数据
 				table_max_height: window.innerHeight - 220,
-				scandata: {
-					scan_order: "",
-					scan_tracker: "",
-					scan_SN: "",
-				},
+				missionData: {},
 				activeName: 'first',
-				myChart:{}
+				myChart: {},
+				config: {
+					brand: [],
+					ssd: [],
+					operator: [],
+					system: []
+				}
 			}
+
 		},
 		created() {
 			this.getInitData()
-			// moment.tz.setDefault("America/Los_Angeles");
 		},
-		
+
 		mounted() {
-		    // 基于准备好的dom，初始化echarts实例
-		    this.myChart = echarts.init(this.$refs.chart);
-		  },
-		
+			// 基于准备好的dom，初始化echarts实例
+			this.myChart = echarts.init(this.$refs.chart);
+		},
+
 		methods: {
 			ssdFmt(row, column, cellValue, index) {
 				let ssd1 = this.tableData[index].capacity1;
@@ -173,6 +182,14 @@
 			getInitData() {
 				axios.get('getMissionsToday').then((e) => {
 					this.tableData = e.data;
+				})
+				axios.get('getConfig').then((e) => {
+					let temp = this.config;
+					let result = e.data;
+					for (let key in temp) {
+						temp[key] = result[key].split(',')
+					}
+					this.confg = temp;
 				})
 			},
 			searchBtnText(e) {
@@ -194,61 +211,36 @@
 				if (this.searchParam.length == 0) {
 					return;
 				}
-				axios.post('search', {
+				this.loading = true;
+				axios.post('searchMissions', {
 					"type": this.searchKey,
 					"param": this.searchParam
 				}).then((res) => {
 					this.tableData = res.data;
-				})
-			},
-			onSubmit(e) {
-				console.log(e);
-			},
-			scanOrder(SN_post) {
-				if (this.scandata.scan_tracker.length == 0) {
-					return;
-				}
-				this.$refs.tracker_input.blur();
-				let loadingInstance = Loading.service({
-					fullscreen: true
-				});
-				let temp = this.tableData;
-				axios.post("scanorder", {
-					"order_id": this.scandata.scan_order,
-					"express_num": this.scandata.scan_tracker,
-					"SN": SN_post
-				}).then((res) => {
-					if (res.ret == 0) {
-						// console.log(res)
-						// this.getInitData();
-						temp.unshift(res.data);
-						this.tableData = temp;
-						this.$refs.order_input.clear();
-						this.$refs.tracker_input.clear();
-						this.$refs.SN_input.clear();
-						this.$refs.tracker_input.focus();
-						this.scanError = {
-							show: false,
-							msg: ""
-						}
-					} else {
-						this.scanError = {
-							show: true,
-							msg: res.msg
-						}
-						this.$alert(res.msg, `运单：${this.scandata.scan_tracker}`, {
-							confirmButtonText: '确定'
-						})
-						this.$refs.tracker_input.focus();
-						this.$refs.tracker_input.select();
-					}
-					this.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
-						loadingInstance.close();
-					});
+					this.loading = false
 				}).catch((e) => {
 					console.log(e);
 					if (e.statusCode != 200) {
 						alert("出错了！");
+						this.loading = false;
+					}
+				});
+			},
+			onSubmit(e) {
+				console.log(e);
+			},
+			SubmitMission() {
+				let data = this.missionData
+				this.loading = true;
+				axios.post("addMission", data).then((res) => {
+					this.getInitData();
+					this.loading = false;
+					this.missionData = {};
+				}).catch((e) => {
+					console.log(e);
+					if (e.statusCode != 200) {
+						alert("出错了！");
+						this.loading = false;
 					}
 				});
 			},
@@ -257,26 +249,66 @@
 			},
 			//标签页切换
 			handleClick(tab, event) {
+				// console.log(tab)
 				// 指定图表的配置项和数据
+				let data = this.tableData;
+				let config = this.config;
+				let x = config.operator;
+				let xdata = {};
+				for (let itemx of x) {
+					for (let valuex of data) {
+						if (valuex.operator == itemx) {
+							if (!xdata[valuex.operator]) {
+								xdata[valuex.operator] = [];
+							}
+							xdata[valuex.operator].push(valuex)
+						}
+					}
+				}
+				let result = [];
+				for (let xkey in xdata) {
+					console.log(xkey)
+					let tmp = {
+						value: xdata[xkey].length,
+						name: xkey
+					}
+					result.push(tmp);
+				}
+
+				// var option = {
+				// 	title: {
+				// 		text: `总任务：${data.length}`
+				// 	},
+				// 	tooltip: {},
+				// 	legend: {
+				// 		data: ['数量']
+				// 	},
+				// 	xAxis: {
+				// 		data: x
+				// 	},
+				// 	yAxis: {
+				// 		minInterval:1
+				// 	},
+				// 	series: [{
+				// 		name: '改机数量',
+				// 		type: 'bar',
+				// 		data: result
+				// 	}]
+				// };
+
 				var option = {
-				  title: {
-				    text: 'ECharts 入门示例'
-				  },
-				  tooltip: {},
-				  legend: {
-				    data:['销量']
-				  },
-				  xAxis: {
-				    data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
-				  },
-				  yAxis: {},
-				  series: [{
-				    name: '销量',
-				    type: 'bar',
-				    data: [5, 20, 36, 10, 10, 20]
-				  }]
-				};
-						
+					title: {
+						text: `总任务：${data.length}`
+					},
+					tooltip: {
+						trigger: 'item' // 触发类型为数据项
+					},
+					series: [{
+						type: 'pie',
+						data: result
+					}]
+				}
+
 				// 使用刚指定的配置项和数据显示图表。
 				this.myChart.setOption(option);
 			},
@@ -292,7 +324,7 @@
 						"express_num": row.express_num
 					}).then((res) => {
 						if (res.ret == 0) {
-							this.getInitData();
+							this.tableData.splice(index, 1);
 						} else {
 							alert(res.msg);
 						}
@@ -348,5 +380,9 @@
 
 	.el-container:nth-child(7) .el-aside {
 		line-height: 320px;
+	}
+
+	.row-bg {
+		padding: 10px 0;
 	}
 </style>
