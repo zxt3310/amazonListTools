@@ -1,12 +1,12 @@
 <template>
   <div class="about">
-    <div style="padding: 10px;">
+    <!-- <div style="padding: 10px;">
       <router-link to="/">改机任务列表 |</router-link>
       <router-link to="/"> 统计</router-link>
-    </div>
-
+    </div> -->
+    <h2>Update Workbench</h2>
     <div class="" style="">
-      <el-row>
+      <el-row :gutter="10">
         <el-col :span="13">
           <el-container>
             <el-header>
@@ -61,7 +61,7 @@
                 >
                   <el-table-column prop="id" label="ID" width="100">
                   </el-table-column>
-                  <el-table-column prop="operator" label="操作员" width="80">
+                  <el-table-column prop="operator" label="操作员" width="120">
                   </el-table-column>
                   <el-table-column prop="brand" label="品牌" width="100">
                   </el-table-column>
@@ -112,9 +112,36 @@
             <div ref="chart" style="width: 100%; height: 500px;"></div>
           </el-row>
           <el-row>
-            <div style="width: 100%; height: 100%; background-color: aqua;">
-              adsfasdf
+            <div style="padding: 10px;">配置: 选项之间用逗号隔开</div>
+            <div style="padding: 10px;">
+              <el-input placeholder="请输入内容" v-model="configOri.operator">
+                <template slot="prepend">操作员</template>
+              </el-input>
             </div>
+            <div style="padding: 10px;">
+              <el-input placeholder="请输入内容" v-model="configOri.brand">
+                <template slot="prepend">品牌</template>
+              </el-input>
+            </div>
+            <div style="padding: 10px;">
+              <el-input placeholder="请输入内容" v-model="configOri.ssd">
+                <template slot="prepend">SSD</template>
+              </el-input>
+            </div>
+            <div style="padding: 10px;">
+              <el-input placeholder="请输入内容" v-model="configOri.system">
+                <template slot="prepend">系统</template>
+              </el-input>
+            </div>
+          </el-row>
+          <el-row style="text-align: center;margin-top: 30px;">
+            <el-button
+              style="width: 30%;"
+              type="primary"
+              @click="SubmitConfig"
+              :loading="saveBtnHidding"
+              >保存配置</el-button
+            >
           </el-row>
         </el-col>
       </el-row>
@@ -250,17 +277,34 @@ export default {
       table_max_height: window.innerHeight - 220,
       missionData: {},
       activeName: "operator",
+
+      //原始数据
+      configOri: {
+        brand: "",
+        ssd: "",
+        operator: "",
+        system: ""
+      },
       config: {
         brand: [],
         ssd: [],
         operator: [],
         system: []
       },
-      myChart: null
+      myChart: null,
+      saveBtnHidding: false
     };
   },
   created() {
     this.getInitData();
+    this.getConfigData();
+  },
+
+  beforeDestroy() {
+    // 销毁 ECharts 实例
+    if (this.myChart) {
+      this.myChart.dispose();
+    }
   },
 
   mounted() {
@@ -285,13 +329,18 @@ export default {
       axios.get("getMissionsToday").then(e => {
         this.tableData = e.data;
       });
+    },
+    getConfigData() {
       axios.get("getConfig").then(e => {
         let temp = this.config;
         let result = e.data;
         for (let key in temp) {
           temp[key] = result[key].split(",");
         }
+        //加载配置选项
         this.confg = temp;
+        //保存配置请求参数
+        this.configOri = result;
       });
     },
     searchBtnText(e) {
@@ -355,6 +404,28 @@ export default {
     //抽屉打开时回调
     onOpen() {
       // this.$refs.tracker_input.focus();
+    },
+    SubmitConfig() {
+      this.saveBtnHidding = true;
+      let configData = this.configOri;
+      axios
+        .post("updateConfig", configData)
+        .then(e => {
+          this.getConfigData();
+          this.saveBtnHidding = false;
+          this.$message({
+            message: "更新成功",
+            type: "success"
+          });
+        })
+        .catch(e => {
+          this.saveBtnHidding = false;
+          console.log(e);
+          if (e.statusCode != 200) {
+            alert("出错了！");
+            this.loading = false;
+          }
+        });
     },
     //标签页切换
     handleClick(tab, event) {
@@ -460,30 +531,6 @@ export default {
       this.setOptionWithCharbar(x, result);
     },
     chartWithSSD() {
-      // let data = this.tableData;
-      // let config = this.config;
-      // let x = config.ssd;
-      // let xdata = {};
-      // for (let key of x) {
-      //   xdata[key] = 0;
-      // }
-      // for (let key of x) {
-      //   for (let value of data) {
-      //     if (value.capacity1 == key) {
-      //       xdata[key] += 1;
-      //     }
-      //   }
-      //   for (let value of data) {
-      //     if (value.capacity2 == key) {
-      //       xdata[key] += 1;
-      //     }
-      //   }
-      // }
-      // let result = []
-      // for (let key in xdata) {
-      //   result.push(xdata[key]);
-      // }
-
       let data = this.tableData;
       let xdata = {};
       for (let value of data) {
