@@ -71,6 +71,14 @@
                   </el-table-column>
                   <el-table-column prop="system" label="系统" width="120">
                   </el-table-column>
+                  <el-table-column prop="status" label="完成" width="80">
+                    <template #default="{ row }">
+                      <el-checkbox
+                        :value="row.status == 1 ? true : false"
+                        @change="statusChange(row)"
+                      ></el-checkbox>
+                    </template>
+                  </el-table-column>
                   <el-table-column
                     prop="updated_at"
                     label="创建时间"
@@ -615,6 +623,18 @@ export default {
       if (this.myChart) {
         this.myChart.resize();
       }
+    },
+    statusChange(row) {
+      row.status = row.status == 0 ? 1 : 0;
+      axios
+        .post("updateStatus", {
+          id: row.id,
+          status: row.status
+        })
+        .then(e => {})
+        .catch(e => {
+          alert("出错了");
+        });
     }
   }
 };
