@@ -130,7 +130,7 @@
 					</el-col>
 				</transition>
 			</el-row>
-			<el-drawer @opened="onOpen" :modal="false" title="新增改机任务" :visible.sync="drawer" :append-to-body="true">
+			<el-drawer @opened="onOpen" @closed="onClose" :modal="false" title="新增改机任务" :visible.sync="drawer" :append-to-body="true">
 				<div style="padding: 20px;">
 					<el-row class="row-bg">
 						<el-select style="width: 100%;" v-model="missionData.brand" placeholder="请选择品牌">
@@ -164,6 +164,14 @@
 							<el-option v-for="(item, index) in config.operator" :key="index" :label="item"
 								:value="item"></el-option>
 						</el-select>
+					</el-row>
+					
+					<el-row class="row-bg">
+						<el-input style="width: 50%;" :disabled="!multiple" type="number" :min="1" v-model="missionData.cnt" placeholder="数量">
+							<template slot="prepend">
+								<el-checkbox @change="multipleChange" v-model="multiple">批量创建</el-checkbox>
+							</template>
+						</el-input>
 					</el-row>
 
 					<el-alert v-if="scanError.show" type="error" :title="scanError.msg" effect="dark" show-icon=""
@@ -231,7 +239,9 @@
 				saveBtnHidding: false,
 				submitBtnHidding: false,
 				//当前编辑的行
-				editingRowIndex: null
+				editingRowIndex: null,
+				//是否批量创建
+				multiple:false
 			};
 		},
 		created() {
@@ -336,8 +346,17 @@
 			onSubmit(e) {
 				console.log(e);
 			},
-			SubmitMission() {
+			SubmitMission() {				
 				let data = this.missionData;
+				const regex = /^-?\d+$/;
+				if(!regex.test(data.cnt)){
+					this.$alert("请输入数字");
+					return
+				}
+				if(data.cnt != null && data.cnt <1){
+					this.$alert("数量不能小于1");
+					return
+				}
 				this.submitBtnHidding = true;
 				axios
 					.post("addMission", data)
@@ -353,6 +372,7 @@
 						}
 						this.submitBtnHidding = false;
 						this.missionData = {};
+						this.multiple = false;
 						this.editingRowIndex = null;
 					})
 					.catch(e => {
@@ -366,6 +386,15 @@
 			//抽屉打开时回调
 			onOpen() {
 				// this.$refs.tracker_input.focus();
+			},
+			onClose(){
+				this.missionData = {};
+				this.multiple = false;
+			},
+			multipleChange(value){
+				if(!value){
+					this.missionData.cnt = null;
+				}
 			},
 			SubmitConfig() {
 				this.saveBtnHidding = true;
@@ -422,6 +451,7 @@
 						type: "warning"
 					})
 					.then(() => {
+						this.loading = true;
 						axios
 							.post("rmMission", {
 								id: row.id,
@@ -433,6 +463,10 @@
 								} else {
 									alert(res.msg);
 								}
+								this.loading = false;
+							}).catch((e)=>{
+								this.$alert(e)
+								this.loading = false;
 							});
 					})
 					.catch(() => {
