@@ -7,6 +7,7 @@ import About from "../views/About.vue";
 // import CaculateUPC from "../views/CaculateUPC.vue";
 import TrackingCheck from "../views/TrackingCheck.vue";
 import UpgradeMission from "../views/UpgradeMission.vue";
+import Login from "../views/login.vue"
 
 Vue.use(VueRouter);
 
@@ -50,6 +51,11 @@ const routes = [
 	  path:"/UpgradeMission",
 	  name:"UpgradeMission",
 	  component: UpgradeMission
+  },
+  {
+	  path:"/login",
+	  name:"Login",
+	  component: Login
   }
 ];
 

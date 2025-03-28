@@ -1,5 +1,6 @@
 <template>
 	<div class="about">
+		<my-navi activeIndex="1"></my-navi>
 		<h2>Tracking  &  SN</h2>
 		<div class="" style="">
 			<el-container>
@@ -101,7 +102,6 @@
 
 <script>
 	import moment from 'moment-timezone';
-	// import axios from 'axios'
 	import axios from '../js/request.js';
 	import axiosEx from 'axios';
 	import {
@@ -289,8 +289,6 @@
 					}).then((res) => {
 						if (res.ret == 0) {
 							this.getInitData();
-						} else {
-							alert(res.msg);
 						}
 					})
 				}).catch(() => {

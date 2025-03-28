@@ -1,5 +1,6 @@
 <template>
 	<div class="page">
+		<my-navi activeIndex="2"></my-navi>
 		<h2>CA Tracking Check</h2>
 		<div class="">
 			<el-container>

@@ -1,5 +1,7 @@
 <template>
+
 	<div class="about">
+		<my-navi activeIndex="3"></my-navi>
 		<!-- <div style="padding: 10px;">
       <router-link to="/">改机任务列表 |</router-link>
       <router-link to="/"> 统计</router-link>
@@ -40,7 +42,8 @@
 									</el-button>
 								</div>
 								<div>
-									<el-button type="primary" circle="" @click="collesp"><i class=el-icon-s-data></i></el-button>
+									<el-button type="primary" circle="" @click="collesp"><i
+											class=el-icon-s-data></i></el-button>
 								</div>
 							</el-header>
 							<el-container>
@@ -53,6 +56,12 @@
 										<el-table-column prop="brand" label="品牌" width="100">
 										</el-table-column>
 										<el-table-column prop="upc" label="UPC" width="120">
+										</el-table-column>
+										<el-table-column prop="orderid" label="订单号" width="170">
+										</el-table-column>
+										<el-table-column prop="asin" label="ASIN" width="120">
+										</el-table-column>
+										<el-table-column prop="ram" label="内存" width="120">
 										</el-table-column>
 										<el-table-column :formatter="ssdFmt" label="SSD" width="150">
 										</el-table-column>
@@ -130,7 +139,8 @@
 					</el-col>
 				</transition>
 			</el-row>
-			<el-drawer @opened="onOpen" @closed="onClose" :modal="false" title="新增改机任务" :visible.sync="drawer" :append-to-body="true">
+			<el-drawer @opened="onOpen" @closed="onClose" :modal="false" title="新增改机任务" :visible.sync="drawer"
+				:append-to-body="true">
 				<div style="padding: 20px;">
 					<el-row class="row-bg">
 						<el-select style="width: 100%;" v-model="missionData.brand" placeholder="请选择品牌">
@@ -140,6 +150,15 @@
 					</el-row>
 					<el-row class="row-bg">
 						<el-input v-model="missionData.upc" placeholder="请输入UPC"></el-input>
+					</el-row>
+					<el-row class="row-bg">
+						<el-input v-model="missionData.asin" placeholder="请输入ASIN"></el-input>
+					</el-row>
+					<el-row class="row-bg">
+						<el-input v-model="missionData.orderid" placeholder="请输入OrderNumber"></el-input>
+					</el-row>
+					<el-row class="row-bg">
+						<el-input v-model="missionData.ram" placeholder="请输入内存"></el-input>
 					</el-row>
 					<el-row class="row-bg">
 						<el-select style="width: 100%;" v-model="missionData.capacity1" placeholder="请选择SSD1">
@@ -165,14 +184,24 @@
 								:value="item"></el-option>
 						</el-select>
 					</el-row>
-					
+
 					<el-row class="row-bg">
-						<el-input style="width: 50%;" :disabled="!multiple" type="number" :min="1" v-model="missionData.cnt" placeholder="数量">
+						<el-input style="width: 50%;" :disabled="!multiple" type="number" :min="1"
+							v-model="missionData.cnt" placeholder="数量">
 							<template slot="prepend">
 								<el-checkbox @change="multipleChange" v-model="multiple">批量创建</el-checkbox>
 							</template>
 						</el-input>
 					</el-row>
+
+					<div class="textarea">
+						<el-input type="textarea" :autosize="{ minRows: 4, maxRows: 4}" v-model="autoFillStr"
+							placeholder="请输入内容">
+						</el-input>
+
+						<el-button class="textarea-btn" type="primary" size="mini" @click="autoFill">自动识别</el-button>
+					</div>
+
 
 					<el-alert v-if="scanError.show" type="error" :title="scanError.msg" effect="dark" show-icon=""
 						:closable="false">
@@ -190,13 +219,15 @@
 <script>
 	import * as echarts from "echarts";
 	import moment from "moment-timezone";
-	// import axios from 'axios'
 	import axios from "../js/request.js";
 	import axiosEx from "axios";
 	import {
 		Switch
 	} from "element-ui";
 	export default {
+		// components:{
+		// 	myNavi
+		// },
 		data() {
 			return {
 				//初始
@@ -241,12 +272,14 @@
 				//当前编辑的行
 				editingRowIndex: null,
 				//是否批量创建
-				multiple:false
+				multiple: false,
+				autoFillStr: ""
 			};
 		},
 		created() {
 			this.getInitData();
 			this.getConfigData();
+			// localStorage.clear();
 		},
 
 		beforeDestroy() {
@@ -346,14 +379,14 @@
 			onSubmit(e) {
 				console.log(e);
 			},
-			SubmitMission() {				
+			SubmitMission() {
 				let data = this.missionData;
 				const regex = /^-?\d+$/;
-				if(!regex.test(data.cnt)){
+				if (data.cnt != null && !regex.test(data.cnt)) {
 					this.$alert("请输入数字");
 					return
 				}
-				if(data.cnt != null && data.cnt <1){
+				if (data.cnt != null && data.cnt < 1) {
 					this.$alert("数量不能小于1");
 					return
 				}
@@ -387,12 +420,13 @@
 			onOpen() {
 				// this.$refs.tracker_input.focus();
 			},
-			onClose(){
+			onClose() {
 				this.missionData = {};
 				this.multiple = false;
+				this.autoFillStr = "";
 			},
-			multipleChange(value){
-				if(!value){
+			multipleChange(value) {
+				if (!value) {
 					this.missionData.cnt = null;
 				}
 			},
@@ -464,8 +498,8 @@
 									alert(res.msg);
 								}
 								this.loading = false;
-							}).catch((e)=>{
-								this.$alert(e)
+							}).catch((e) => {
+								// this.$alert(e)
 								this.loading = false;
 							});
 					})
@@ -657,6 +691,39 @@
 						other: '0%'
 					}
 				}
+			},
+			autoFill() {
+				const regex = {
+					brand: /ASIN:[^\n]*\n+([ \t]*\n)*.*?\n\s*([A-Z][a-zA-Z]+)/, // 匹配品牌
+					upc: /UPC:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
+					asin: /ASIN:[\s\u3000]*([A-Z0-9]{10})/, // 用 \u3000 代替全角空格
+					itemCount: /Item Count:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
+					orderNumber: /Amazon Order#\s*([0-9-]+)/
+				}
+				// 提取并返回结果
+				const extractData = (text) => {
+					const upcMatch = text.match(regex.upc);
+					const asinMatch = text.match(regex.asin);
+					const itemCountMatch = text.match(regex.itemCount);
+					const orderNumberMatch = text.match(regex.orderNumber);
+					const brandMatch = text.match(regex.brand);
+
+					return {
+						brand: brandMatch ? brandMatch[2].toUpperCase() : "未匹配",
+						upc: upcMatch ? upcMatch[1] : "未匹配",
+						asin: asinMatch ? asinMatch[1] : "未匹配",
+						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
+						orderid: orderNumberMatch ? orderNumberMatch[1] : "未匹配"
+					}
+				}
+				
+				let data = extractData(this.autoFillStr)
+				if(data.cnt>1){
+					this.multiple = true;
+				}
+				this.missionData = {
+					...data
+				}
 			}
 		}
 	};
@@ -738,5 +805,15 @@
 		overflow: hidden;
 		transition: width 500ms ease;
 		/* 添加 width 过渡 */
+	}
+
+	.textarea {
+		position: relative;
+	}
+
+	.textarea-btn {
+		position: absolute;
+		right: 10px;
+		bottom: 10px;
 	}
 </style>
