@@ -104,6 +104,7 @@
 							<el-tabs v-model="activeName" type="card" @tab-click="handleClick">
 								<el-tab-pane label="操作员" name="operator"></el-tab-pane>
 								<el-tab-pane label="品牌" name="brand"></el-tab-pane>
+								<el-tab-pane label="RAM" name="ram"></el-tab-pane>
 								<el-tab-pane label="SSD" name="ssd"></el-tab-pane>
 								<el-tab-pane label="UPC" name="upc"></el-tab-pane>
 							</el-tabs>
@@ -460,6 +461,9 @@
 					case "brand":
 						this.chartWithBrand();
 						break;
+					case "ram" :
+						this.chartWithRAM();
+						break;
 					case "ssd":
 						this.chartWithSSD();
 						break;
@@ -573,23 +577,46 @@
 				}
 				this.setOptionWithCharbar(x, result);
 			},
+			chartWithRAM(){
+				let data = this.tableData;
+				let xdata = {};
+				for (let value of data) {
+					if(value.ram == null){
+						continue
+					}
+					if (!xdata[value.ram]) {
+						xdata[value.ram] = 0;
+					}
+					xdata[value.ram] += 1;
+				}
+				let x = [];
+				let result = [];
+				for (let key in xdata) {
+					x.push(key);
+					result.push(xdata[key]);
+				}
+				this.setOptionWithCharbar(x, result);
+			},
 			chartWithSSD() {
 				let data = this.tableData;
 				let xdata = {};
 				for (let value of data) {
-					if (value.capacity1 == null) {
-						continue;
-					}
-					if (!xdata[value.capacity1]) {
-						xdata[value.capacity1] = 0;
-					}
-					xdata[value.capacity1] += 1;
-					if (value.capacity2) {
-						if (!xdata[value.capacity2]) {
-							xdata[value.capacity2] = 0;
+					if (value.capacity1 != null) {
+						let cap1 = value.capacity1.replace(/.*?(\d+(GB|TB)).*/, '$1')
+						if (!xdata[cap1]) {
+							xdata[cap1] = 0;
 						}
-						xdata[value.capacity2] += 1;
+						xdata[cap1] += 1;
 					}
+
+					if (value.capacity2) {
+						let cap2 = value.capacity2.replace(/.*?(\d+(GB|TB)).*/, '$1')
+						if (!xdata[cap2]) {
+							xdata[cap2] = 0;
+						}
+						xdata[cap2] += 1;
+					}
+					
 				}
 				let x = [];
 				let result = [];
@@ -698,7 +725,9 @@
 					upc: /UPC:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
 					asin: /ASIN:[\s\u3000]*([A-Z0-9]{10})/, // 用 \u3000 代替全角空格
 					itemCount: /Item Count:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
-					orderNumber: /Amazon Order#\s*([0-9-]+)/
+					orderNumber: /Amazon Order#\s*([0-9-]+)/,
+					custom: /\[Customize\].*/,
+					size: /:\s*([^-\s]+)-((?:[^-\s+]+)(?:\+[^-\s+]+)*)-([^-\s]+)/
 				}
 				// 提取并返回结果
 				const extractData = (text) => {
@@ -707,18 +736,43 @@
 					const itemCountMatch = text.match(regex.itemCount);
 					const orderNumberMatch = text.match(regex.orderNumber);
 					const brandMatch = text.match(regex.brand);
+					const customized = text.match(regex.custom);
+					const customizeLine = customized ? customized[0] : null;
+
+					let ram = ""
+					let ssdStr = ""
+					let ssd1 = ""
+					let ssd2 = ""
+					let system = ""
+					if (customizeLine) {
+						let match = customizeLine.match(regex.size)
+						if (match) {
+							[, ram, ssdStr, system] = match;
+							if (ssdStr.includes('+')) {
+								const tem = ssdStr.split('+')
+								ssd1 = tem[0]
+								ssd2 = tem[1]
+							} else {
+								ssd1 = ssdStr
+							}
+						}
+					}
 
 					return {
 						brand: brandMatch ? brandMatch[2].toUpperCase() : "未匹配",
 						upc: upcMatch ? upcMatch[1] : "未匹配",
 						asin: asinMatch ? asinMatch[1] : "未匹配",
 						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
-						orderid: orderNumberMatch ? orderNumberMatch[1] : "未匹配"
+						orderid: orderNumberMatch ? orderNumberMatch[1] : "未匹配",
+						ram: ram,
+						system: system,
+						capacity1: ssd1,
+						capacity2: ssd2
 					}
 				}
-				
+
 				let data = extractData(this.autoFillStr)
-				if(data.cnt>1){
+				if (data.cnt > 1) {
 					this.multiple = true;
 				}
 				this.missionData = {
