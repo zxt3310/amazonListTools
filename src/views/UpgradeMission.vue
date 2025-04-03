@@ -727,7 +727,8 @@
 					itemCount: /Item Count:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
 					orderNumber: /Amazon Order#\s*([0-9-]+)/,
 					custom: /\[Customize\].*/,
-					size: /:\s*([^-\s]+)-((?:[^-\s+]+)(?:\+[^-\s+]+)*)-([^-\s]+)/
+					// size: /:\s*([^-\s]+)-((?:[^-\s+]+)(?:\+[^-\s+]+)*)-([^-\s]+)/
+					size:/G\d+:\s*([^-]+(?:-[^-]+)*)/
 				}
 				// 提取并返回结果
 				const extractData = (text) => {
@@ -738,7 +739,7 @@
 					const brandMatch = text.match(regex.brand);
 					const customized = text.match(regex.custom);
 					const customizeLine = customized ? customized[0] : null;
-
+					
 					let ram = ""
 					let ssdStr = ""
 					let ssd1 = ""
@@ -746,14 +747,29 @@
 					let system = ""
 					if (customizeLine) {
 						let match = customizeLine.match(regex.size)
+						console.log(match)
 						if (match) {
-							[, ram, ssdStr, system] = match;
-							if (ssdStr.includes('+')) {
-								const tem = ssdStr.split('+')
-								ssd1 = tem[0]
-								ssd2 = tem[1]
-							} else {
-								ssd1 = ssdStr
+							let result = match[1].split('-')
+							for(let i=0; i<result.length; i++){
+								let str = result[i];	
+								//判断含存储单位字符，则进一步提取
+								if(str.includes('GB') || str.includes('TB')){
+									//硬盘位
+									if(str.includes('+')){
+										const tem = str.split('+')
+										ssd1 = tem[0]
+										ssd2 = tem[1]
+									}else{
+										const opacityMatch = str.match(/(\d+)(?=GB)/)
+										if(opacityMatch && opacityMatch[1] < 128){
+											ram = str
+										}else{
+											ssd1 = str
+										}
+									}
+								}else{
+									system = str;
+								}
 							}
 						}
 					}
