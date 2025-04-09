@@ -6,7 +6,7 @@
       <router-link to="/">改机任务列表 |</router-link>
       <router-link to="/"> 统计</router-link>
     </div> -->
-		<h2>Update Workbench</h2>
+		<!-- <h2>Update Workbench</h2> -->
 		<div class="" style="">
 			<el-row :gutter="10">
 				<transition name="resize">
@@ -48,6 +48,10 @@
 							</el-header>
 							<el-container>
 								<el-main>
+									<el-tabs v-model="activeStatus" type="card" @tab-click="handleStatusClick">
+										<el-tab-pane label="全部" name="all"></el-tab-pane>
+										<el-tab-pane label="需刻盘" name="0"></el-tab-pane>
+									</el-tabs>
 									<el-table :height="table_max_height" v-loading="loading" :data="tableData" stripe>
 										<el-table-column prop="id" label="ID" width="100">
 										</el-table-column>
@@ -57,9 +61,11 @@
 										</el-table-column>
 										<el-table-column prop="upc" label="UPC" width="120">
 										</el-table-column>
-										<el-table-column prop="orderid" label="订单号" width="170">
+										<el-table-column v-if="activeStatus == 'all'" prop="orderid" label="订单号"
+											width="170">
 										</el-table-column>
-										<el-table-column prop="asin" label="ASIN" width="120">
+										<el-table-column v-if="activeStatus== 'all'" prop="asin" label="ASIN"
+											width="120">
 										</el-table-column>
 										<el-table-column prop="ram" label="内存" width="120">
 										</el-table-column>
@@ -67,24 +73,39 @@
 										</el-table-column>
 										<el-table-column prop="system" label="系统" width="120">
 										</el-table-column>
-										<el-table-column prop="status" label="完成" width="80">
-											<template #default="{ row }">
-												<el-checkbox :value="row.status == 1 ? true : false"
-													@change="statusChange(row)"></el-checkbox>
+										<el-table-column prop="status" label="已刻盘" width="80">
+											<template slot-scope="scope">
+												<el-checkbox style="transform: scale(1.5);"
+													:disabled="activeStatus==='all'"
+													:value="scope.row.status == 1 ? true : false"
+													@change="statusChange(scope.row)"></el-checkbox>
 											</template>
 										</el-table-column>
-										<el-table-column prop="created_at" label="创建时间" width="150">
-										</el-table-column>
-										<el-table-column prop="updated_at" label="更新时间" width="150">
-										</el-table-column>
-										<el-table-column label="操作">
+										<el-table-column prop="is_dispatch" :label="activeStatus=='all'?'已派单':''" width="80">
 											<template slot-scope="scope">
-												<el-button size="mini" type="primary"
+												<el-checkbox v-if="activeStatus=='all'" style="transform: scale(1.5);"
+													:value="scope.row.is_dispatch == 1 ? true : false"
+													@change="dispatch_status(scope.row)"></el-checkbox>
+											</template>
+										</el-table-column>
+										<el-table-column v-if="showall" prop="created_at" label="创建时间" width="150">
+										</el-table-column>
+										<el-table-column v-if="showall" prop="updated_at" label="更新时间" width="150">
+										</el-table-column>
+										<el-table-column label="操作" width="150">
+											<template slot-scope="scope">
+												<el-button :disabled="activeStatus!='all'" size="mini" type="primary"
 													@click="handleEdit(scope.$index, scope.row)">
 													编辑</el-button>
-												<el-button size="mini" type="danger"
+												<el-button :disabled="activeStatus!='all'" size="mini" type="danger"
 													@click="handleDelete(scope.$index, scope.row)">
 													删除</el-button>
+											</template>
+										</el-table-column>
+										<el-table-column align="right">
+											<template slot="header">
+												<el-button size="mini" type="primary"
+													@click="showall=!showall">{{showall?"部分":"完整"}}</el-button>
 											</template>
 										</el-table-column>
 									</el-table>
@@ -209,11 +230,19 @@
 					</el-alert>
 					<el-row style="text-align: center;margin-top: 30px;">
 						<el-button style="width: 50%;" type="primary" :loading="submitBtnHidding"
-							@click="SubmitMission">提交</el-button>
+							@click="confirm_Submit">提交</el-button>
 					</el-row>
 				</div>
 			</el-drawer>
 		</div>
+		<el-dialog title="提示" :visible.sync="centerDialogVisible" width="30%" center>
+			<span style="font-size: 30px; text-align: center;">是否需要刻盘？</span>
+			<span slot="footer" class="dialog-footer">
+				<el-button type="primary" @click="SubmitMission(0)">需要</el-button>
+				<el-button type="danger" @click="SubmitMission(1)">不需要</el-button>
+				<el-button type="text" @click="centerDialogVisible = false">取消</el-button>
+			</span>
+		</el-dialog>
 	</div>
 </template>
 
@@ -239,6 +268,8 @@
 				drawer: false,
 				//展示表数据
 				tableData: [],
+				//缓存数据
+				tableCache: [],
 				//查询类型
 				searchKey: "date",
 				//时间快捷选项
@@ -274,7 +305,11 @@
 				editingRowIndex: null,
 				//是否批量创建
 				multiple: false,
-				autoFillStr: ""
+				autoFillStr: "",
+				showall: false,
+				activeStatus: "all",
+				//弹窗状态
+				centerDialogVisible: false
 			};
 		},
 		created() {
@@ -322,6 +357,8 @@
 				axios.get("getMissionsToday").then(e => {
 					this.tableData = e.data;
 					this.loading = false;
+					//保存数据
+					this.tableCache = [...this.tableData]
 				}).catch((e) => {
 					console.log(e);
 					this.loading = false;
@@ -368,6 +405,8 @@
 					.then(res => {
 						this.tableData = res.data;
 						this.loading = false;
+						//保存数据
+						this.tableCache = [...this.tableData]
 					})
 					.catch(e => {
 						console.log(e);
@@ -380,7 +419,8 @@
 			onSubmit(e) {
 				console.log(e);
 			},
-			SubmitMission() {
+
+			confirm_Submit() {
 				let data = this.missionData;
 				const regex = /^-?\d+$/;
 				if (data.cnt != null && !regex.test(data.cnt)) {
@@ -391,6 +431,12 @@
 					this.$alert("数量不能小于1");
 					return
 				}
+				this.centerDialogVisible = true;
+			},
+			SubmitMission(status) {
+				this.centerDialogVisible = false
+				let data = this.missionData;
+				data.status = status;
 				this.submitBtnHidding = true;
 				axios
 					.post("addMission", data)
@@ -461,7 +507,7 @@
 					case "brand":
 						this.chartWithBrand();
 						break;
-					case "ram" :
+					case "ram":
 						this.chartWithRAM();
 						break;
 					case "ssd":
@@ -577,11 +623,11 @@
 				}
 				this.setOptionWithCharbar(x, result);
 			},
-			chartWithRAM(){
+			chartWithRAM() {
 				let data = this.tableData;
 				let xdata = {};
 				for (let value of data) {
-					if(value.ram == null){
+					if (value.ram == null) {
 						continue
 					}
 					if (!xdata[value.ram]) {
@@ -616,7 +662,7 @@
 						}
 						xdata[cap2] += 1;
 					}
-					
+
 				}
 				let x = [];
 				let result = [];
@@ -705,6 +751,18 @@
 						alert("出错了");
 					});
 			},
+			dispatch_status(row) {
+				row.is_dispatch = row.is_dispatch == 0 ? 1 : 0;
+				axios
+					.post("dispatched", {
+						id: row.id,
+						is_dispatch: row.is_dispatch
+					})
+					.then(e => {})
+					.catch(e => {
+						alert("出错了");
+					});
+			},
 			collesp() {
 				let before = this.spanWidth;
 				if (before.table === '100%') {
@@ -728,7 +786,7 @@
 					orderNumber: /Amazon Order#\s*([0-9-]+)/,
 					custom: /\[Customize\].*/,
 					// size: /:\s*([^-\s]+)-((?:[^-\s+]+)(?:\+[^-\s+]+)*)-([^-\s]+)/
-					size:/G\d+:\s*([^-]+(?:-[^-]+)*)/
+					size: /G\d+:\s*([^-]+(?:-[^-]+)*)/
 				}
 				// 提取并返回结果
 				const extractData = (text) => {
@@ -739,7 +797,7 @@
 					const brandMatch = text.match(regex.brand);
 					const customized = text.match(regex.custom);
 					const customizeLine = customized ? customized[0] : null;
-					
+
 					let ram = ""
 					let ssdStr = ""
 					let ssd1 = ""
@@ -750,24 +808,24 @@
 						console.log(match)
 						if (match) {
 							let result = match[1].split('-')
-							for(let i=0; i<result.length; i++){
-								let str = result[i];	
+							for (let i = 0; i < result.length; i++) {
+								let str = result[i];
 								//判断含存储单位字符，则进一步提取
-								if(str.includes('GB') || str.includes('TB')){
+								if (str.includes('GB') || str.includes('TB')) {
 									//硬盘位
-									if(str.includes('+')){
+									if (str.includes('+')) {
 										const tem = str.split('+')
 										ssd1 = tem[0]
 										ssd2 = tem[1]
-									}else{
+									} else {
 										const opacityMatch = str.match(/(\d+)(?=GB)/)
-										if(opacityMatch && opacityMatch[1] < 128){
+										if (opacityMatch && opacityMatch[1] < 128) {
 											ram = str
-										}else{
+										} else {
 											ssd1 = str
 										}
 									}
-								}else{
+								} else {
 									system = str;
 								}
 							}
@@ -793,6 +851,22 @@
 				}
 				this.missionData = {
 					...data
+				}
+			},
+			handleStatusClick(tab, event) {
+				let data = this.tableCache
+				switch (this.activeStatus) {
+					case "all":
+						this.getInitData()
+						break;
+					default: {
+						let newData = data.filter((item, index) => {
+							return item.status == this.activeStatus
+						})
+						this.tableData = newData
+						console.log(newData)
+					}
+					break;
 				}
 			}
 		}
