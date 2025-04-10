@@ -25,10 +25,11 @@
                   }}<i class="el-icon-arrow-down el-icon--right"></i>
 										</el-button>
 										<el-dropdown-menu slot="dropdown">
+											<el-dropdown-item command="tracker">运单号</el-dropdown-item>
 											<el-dropdown-item command="date">日期</el-dropdown-item>
 										</el-dropdown-menu>
 									</el-dropdown>
-									<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px;"
+									<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px; width: 50%;"
 										@keyup.enter.native="searchRecord"></el-input>
 
 									<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam"
@@ -52,7 +53,7 @@
 										<el-tab-pane label="全部" name="all"></el-tab-pane>
 										<el-tab-pane label="需刻盘" name="0"></el-tab-pane>
 									</el-tabs>
-									<el-table :height="table_max_height" v-loading="loading" :data="tableData" stripe>
+									<el-table :max-height="table_max_height" v-loading="loading" :data="tableData" stripe>
 										<el-table-column prop="id" label="ID" width="100">
 										</el-table-column>
 										<el-table-column prop="operator" label="操作员" width="120">
@@ -66,6 +67,9 @@
 										</el-table-column>
 										<el-table-column v-if="activeStatus== 'all'" prop="asin" label="ASIN"
 											width="120">
+										</el-table-column>
+										<el-table-column v-if="activeStatus== 'all'" prop="tracking" label="Tracking"
+											width="170">
 										</el-table-column>
 										<el-table-column prop="ram" label="内存" width="120">
 										</el-table-column>
@@ -178,6 +182,9 @@
 					</el-row>
 					<el-row class="row-bg">
 						<el-input v-model="missionData.orderid" placeholder="请输入OrderNumber"></el-input>
+					</el-row>
+					<el-row class="row-bg">
+						<el-input v-model="missionData.tracking" placeholder="请输入Tracking"></el-input>
 					</el-row>
 					<el-row class="row-bg">
 						<el-input v-model="missionData.ram" placeholder="请输入内存"></el-input>
@@ -309,7 +316,9 @@
 				showall: false,
 				activeStatus: "all",
 				//弹窗状态
-				centerDialogVisible: false
+				centerDialogVisible: false,
+				//是否触发搜索
+				isSearched:false
 			};
 		},
 		created() {
@@ -392,7 +401,7 @@
 				}
 				return text;
 			},
-			searchRecord(e) {
+			searchRecord() {
 				if (this.searchParam.length == 0) {
 					return;
 				}
@@ -407,6 +416,8 @@
 						this.loading = false;
 						//保存数据
 						this.tableCache = [...this.tableData]
+						//搜索过
+						this.isSearched = true
 					})
 					.catch(e => {
 						console.log(e);
@@ -759,9 +770,6 @@
 						is_dispatch: row.is_dispatch
 					})
 					.then(e => {})
-					.catch(e => {
-						alert("出错了");
-					});
 			},
 			collesp() {
 				let before = this.spanWidth;
@@ -786,7 +794,10 @@
 					orderNumber: /Amazon Order#\s*([0-9-]+)/,
 					custom: /\[Customize\].*/,
 					// size: /:\s*([^-\s]+)-((?:[^-\s+]+)(?:\+[^-\s+]+)*)-([^-\s]+)/
-					size: /G\d+:\s*([^-]+(?:-[^-]+)*)/
+					size: /G\d+:\s*([^-]+(?:-[^-]+)*)/,
+					trackingContent: /^\d+\s+.*?Amazon Order#\s+[\d-]+.*$/gm,
+					upsTracking: /\b1Z[A-Z0-9]{16,}\b/g,
+					uspsTracking: /\b(\d{30}|\d{34}|\d{12}|94\d{18}|9[35]\d{17}|7\d{19}|[A-Z]{2}\d{9}[A-Z]{2})\b/g
 				}
 				// 提取并返回结果
 				const extractData = (text) => {
@@ -797,6 +808,13 @@
 					const brandMatch = text.match(regex.brand);
 					const customized = text.match(regex.custom);
 					const customizeLine = customized ? customized[0] : null;
+					
+					//先找到包含Tracking的行
+					const trackContentMatch = text.match(regex.trackingContent);
+					const trackContent = trackContentMatch?trackContentMatch[0]:"未匹配";
+					//继续匹配
+					const upsMatch = trackContent.match(regex.upsTracking);
+					const uspsMatch = trackContent.match(regex.uspsTracking);
 
 					let ram = ""
 					let ssdStr = ""
@@ -838,6 +856,7 @@
 						asin: asinMatch ? asinMatch[1] : "未匹配",
 						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
 						orderid: orderNumberMatch ? orderNumberMatch[1] : "未匹配",
+						tracking: upsMatch ? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
 						ram: ram,
 						system: system,
 						capacity1: ssd1,
@@ -856,8 +875,12 @@
 			handleStatusClick(tab, event) {
 				let data = this.tableCache
 				switch (this.activeStatus) {
-					case "all":
-						this.getInitData()
+					case "all":{
+						if(this.isSearched)
+							this.searchRecord()
+						else
+							this.getInitData()
+					}
 						break;
 					default: {
 						let newData = data.filter((item, index) => {
