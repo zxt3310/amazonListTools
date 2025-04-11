@@ -1,6 +1,6 @@
 <template>
 
-	<div class="about">
+	<div ref="mission_page" class="about">
 		<my-navi activeIndex="3"></my-navi>
 		<!-- <div style="padding: 10px;">
       <router-link to="/">改机任务列表 |</router-link>
@@ -26,10 +26,12 @@
 										</el-button>
 										<el-dropdown-menu slot="dropdown">
 											<el-dropdown-item command="tracker">运单号</el-dropdown-item>
+											<el-dropdown-item command="order">订单号</el-dropdown-item>
 											<el-dropdown-item command="date">日期</el-dropdown-item>
 										</el-dropdown-menu>
 									</el-dropdown>
-									<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px; width: 50%;"
+									<el-input v-model="searchParam" v-if="searchKey != 'date'"
+										style="margin:0 10px; width: 50%;"
 										@keyup.enter.native="searchRecord"></el-input>
 
 									<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam"
@@ -53,9 +55,13 @@
 										<el-tab-pane label="全部" name="all"></el-tab-pane>
 										<el-tab-pane label="需刻盘" name="0"></el-tab-pane>
 									</el-tabs>
-									<el-table :max-height="table_max_height" v-loading="loading" :data="tableData" stripe>
+									<el-table :max-height="table_max_height" v-loading="loading" :data="tableData"
+										stripe>
 										<el-table-column prop="id" label="ID" width="100">
 										</el-table-column>
+										<!-- <el-table-column prop="code" label="code" width="100">
+											<VueBarcode></VueBarcode>
+										</el-table-column> -->
 										<el-table-column prop="operator" label="操作员" width="120">
 										</el-table-column>
 										<el-table-column prop="brand" label="品牌" width="100">
@@ -85,7 +91,8 @@
 													@change="statusChange(scope.row)"></el-checkbox>
 											</template>
 										</el-table-column>
-										<el-table-column prop="is_dispatch" :label="activeStatus=='all'?'已派单':''" width="80">
+										<el-table-column prop="is_dispatch" :label="activeStatus=='all'?'已派单':''"
+											width="80">
 											<template slot-scope="scope">
 												<el-checkbox v-if="activeStatus=='all'" style="transform: scale(1.5);"
 													:value="scope.row.is_dispatch == 1 ? true : false"
@@ -168,6 +175,7 @@
 			<el-drawer @opened="onOpen" @closed="onClose" :modal="false" title="新增改机任务" :visible.sync="drawer"
 				:append-to-body="true">
 				<div style="padding: 20px;">
+					<UBarcode val="123123" unit="px" :width="400" :height="50"></UBarcode>
 					<el-row class="row-bg">
 						<el-select style="width: 100%;" v-model="missionData.brand" placeholder="请选择品牌">
 							<el-option v-for="(item, index) in config.brand" :key="index" :label="item"
@@ -258,13 +266,11 @@
 	import moment from "moment-timezone";
 	import axios from "../js/request.js";
 	import axiosEx from "axios";
-	import {
-		Switch
-	} from "element-ui";
+	import VueBarcode from "vue-barcode";
 	export default {
-		// components:{
-		// 	myNavi
-		// },
+		components:{
+			VueBarcode
+		},
 		data() {
 			return {
 				//初始
@@ -318,7 +324,7 @@
 				//弹窗状态
 				centerDialogVisible: false,
 				//是否触发搜索
-				isSearched:false
+				isSearched: false
 			};
 		},
 		created() {
@@ -334,8 +340,9 @@
 			}
 			if (this.resizeObserver) {
 				this.resizeObserver.disconnect(); // 移除监听器
-				console.log("移除监听")
 			}
+
+			document.removeEventListener('keydown', this.handleGlobalEnter);
 		},
 
 		mounted() {
@@ -347,6 +354,8 @@
 				this.resizeChart();
 			});
 			this.resizeObserver.observe(chartContainer);
+
+			document.addEventListener('keydown', this.handleGlobalEnter)
 		},
 
 
@@ -808,10 +817,10 @@
 					const brandMatch = text.match(regex.brand);
 					const customized = text.match(regex.custom);
 					const customizeLine = customized ? customized[0] : null;
-					
+
 					//先找到包含Tracking的行
 					const trackContentMatch = text.match(regex.trackingContent);
-					const trackContent = trackContentMatch?trackContentMatch[0]:"未匹配";
+					const trackContent = trackContentMatch ? trackContentMatch[0] : "未匹配";
 					//继续匹配
 					const upsMatch = trackContent.match(regex.upsTracking);
 					const uspsMatch = trackContent.match(regex.uspsTracking);
@@ -875,13 +884,13 @@
 			handleStatusClick(tab, event) {
 				let data = this.tableCache
 				switch (this.activeStatus) {
-					case "all":{
-						if(this.isSearched)
+					case "all": {
+						if (this.isSearched)
 							this.searchRecord()
 						else
 							this.getInitData()
 					}
-						break;
+					break;
 					default: {
 						let newData = data.filter((item, index) => {
 							return item.status == this.activeStatus
@@ -891,7 +900,30 @@
 					}
 					break;
 				}
-			}
+			},
+			//监控键盘回调
+			handleGlobalEnter(e) {
+				// 1. 判断是否为回车键
+				if (e.key == 'Escape') {
+					this.drawer = false;
+					return
+				}
+				if (e.key == 'Enter') {
+					// 2. 获取当前焦点元素
+					const focusedElement = document.activeElement;
+
+					// 3. 检查焦点元素是否为输入类元素（input/textarea）
+					const isInputFocused = ['INPUT', 'TEXTAREA'].includes(
+						focusedElement?.tagName // 兼容性：空值使用可选链操作符
+					);
+
+					// 4. 如果焦点不在输入类元素上，触发按钮
+					if (!isInputFocused) {
+						e.preventDefault(); // 防止默认行为（如表单提交）
+						this.drawer = true;
+					}
+				}
+			},
 		}
 	};
 </script>

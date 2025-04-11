@@ -14,6 +14,7 @@
 						<el-dropdown-menu slot="dropdown">
 							<el-dropdown-item command="order">订单号</el-dropdown-item>
 							<el-dropdown-item command="tracker">运单号</el-dropdown-item>
+							<el-dropdown-item command="SN">SN</el-dropdown-item>
 							<el-dropdown-item command="date">日期</el-dropdown-item>
 						</el-dropdown-menu>
 					</el-dropdown>
@@ -194,6 +195,9 @@
 						break;
 					case "tracker":
 						text = "运单号";
+						break;
+					case "SN":
+						text = "SN";
 						break;
 					case "date":
 						text = "日期";

@@ -6,6 +6,7 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import MyNavi from "./components/Navi.vue";
 
+Vue.config.silent = true; // 关闭所有Vue日志和警告（生产环境默认启用）
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.prototype.loading = false;
@@ -13,7 +14,6 @@ Vue.component('MyNavi', MyNavi)
 
 Vue.prototype.$UPS_APPID="vMMcWqjwiIWDuS8n3Mg6Mt2Wzj9t0U7celxYCTMmvVHfHXBr";
 Vue.prototype.$UPS_APPSECRET = "msWuqdWTkAEI8RVxmBfxzjVAlGNAySbsIVMokpochWm95JU9uVG43q1jCskuAfm5";
-
 new Vue({
   router,
   store,
