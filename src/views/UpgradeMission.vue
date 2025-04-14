@@ -175,78 +175,80 @@
 			<el-drawer @opened="onOpen" @closed="onClose" :modal="false" title="新增改机任务" :visible.sync="drawer"
 				:append-to-body="true">
 				<div style="padding: 20px;">
-					<UBarcode val="123123" unit="px" :width="400" :height="50"></UBarcode>
-					<el-row class="row-bg">
-						<el-select style="width: 100%;" v-model="missionData.brand" placeholder="请选择品牌">
-							<el-option v-for="(item, index) in config.brand" :key="index" :label="item"
-								:value="item"></el-option>
-						</el-select>
-					</el-row>
-					<el-row class="row-bg">
-						<el-input v-model="missionData.upc" placeholder="请输入UPC"></el-input>
-					</el-row>
-					<el-row class="row-bg">
-						<el-input v-model="missionData.asin" placeholder="请输入ASIN"></el-input>
-					</el-row>
-					<el-row class="row-bg">
-						<el-input v-model="missionData.orderid" placeholder="请输入OrderNumber"></el-input>
-					</el-row>
-					<el-row class="row-bg">
-						<el-input v-model="missionData.tracking" placeholder="请输入Tracking"></el-input>
-					</el-row>
-					<el-row class="row-bg">
-						<el-input v-model="missionData.ram" placeholder="请输入内存"></el-input>
-					</el-row>
-					<el-row class="row-bg">
-						<el-select style="width: 100%;" v-model="missionData.capacity1" placeholder="请选择SSD1">
-							<el-option v-for="(item, index) in config.ssd" :key="index" :label="item"
-								:value="item"></el-option>
-						</el-select>
-					</el-row>
-					<el-row class="row-bg">
-						<el-select style="width: 100%;" v-model="missionData.capacity2" placeholder="请选择SSD2">
-							<el-option v-for="(item, index) in config.ssd" :key="index" :label="item"
-								:value="item"></el-option>
-						</el-select>
-					</el-row>
-					<el-row class="row-bg">
-						<el-select style="width: 100%;" v-model="missionData.system" placeholder="请选择系统">
-							<el-option v-for="(item, index) in config.system" :key="index" :label="item"
-								:value="item"></el-option>
-						</el-select>
-					</el-row>
-					<el-row class="row-bg">
-						<el-select style="width: 100%;" v-model="missionData.operator" placeholder="请选择操作员">
-							<el-option v-for="(item, index) in config.operator" :key="index" :label="item"
-								:value="item"></el-option>
-						</el-select>
-					</el-row>
+					<el-scrollbar class="hide-horizontal-scrollbar" :style="draw_style">
+						<el-row class="row-bg">
+							<el-select style="width: 100%;" v-model="missionData.brand" placeholder="请选择品牌">
+								<el-option v-for="(item, index) in config.brand" :key="index" :label="item"
+									:value="item"></el-option>
+							</el-select>
+						</el-row>
+						<el-row class="row-bg">
+							<el-input v-model="missionData.upc" placeholder="请输入UPC"></el-input>
+						</el-row>
+						<el-row class="row-bg">
+							<el-input v-model="missionData.asin" placeholder="请输入ASIN"></el-input>
+						</el-row>
+						<el-row class="row-bg">
+							<el-input v-model="missionData.orderid" placeholder="请输入OrderNumber"></el-input>
+						</el-row>
+						<el-row class="row-bg">
+							<el-input v-model="missionData.tracking" placeholder="请输入Tracking"></el-input>
+						</el-row>
+						<el-row class="row-bg">
+							<el-input v-model="missionData.ram" placeholder="请输入内存"></el-input>
+						</el-row>
+						<el-row class="row-bg">
+							<el-select style="width: 100%;" v-model="missionData.capacity1" placeholder="请选择SSD1">
+								<el-option v-for="(item, index) in config.ssd" :key="index" :label="item"
+									:value="item"></el-option>
+							</el-select>
+						</el-row>
+						<el-row class="row-bg">
+							<el-select style="width: 100%;" v-model="missionData.capacity2" placeholder="请选择SSD2">
+								<el-option v-for="(item, index) in config.ssd" :key="index" :label="item"
+									:value="item"></el-option>
+							</el-select>
+						</el-row>
+						<el-row class="row-bg">
+							<el-select style="width: 100%;" v-model="missionData.system" placeholder="请选择系统">
+								<el-option v-for="(item, index) in config.system" :key="index" :label="item"
+									:value="item"></el-option>
+							</el-select>
+						</el-row>
+						<el-row class="row-bg">
+							<el-select style="width: 100%;" v-model="missionData.operator" placeholder="请选择操作员">
+								<el-option v-for="(item, index) in config.operator" :key="index" :label="item"
+									:value="item"></el-option>
+							</el-select>
+						</el-row>
 
-					<el-row class="row-bg">
-						<el-input style="width: 50%;" :disabled="!multiple" type="number" :min="1"
-							v-model="missionData.cnt" placeholder="数量">
-							<template slot="prepend">
-								<el-checkbox @change="multipleChange" v-model="multiple">批量创建</el-checkbox>
-							</template>
-						</el-input>
-					</el-row>
+						<el-row class="row-bg">
+							<el-input style="width: 50%;" :disabled="!multiple" type="number" :min="1"
+								v-model="missionData.cnt" placeholder="数量">
+								<template slot="prepend">
+									<el-checkbox @change="multipleChange" v-model="multiple">批量创建</el-checkbox>
+								</template>
+							</el-input>
+						</el-row>
 
-					<div class="textarea">
-						<el-input type="textarea" :autosize="{ minRows: 4, maxRows: 4}" v-model="autoFillStr"
-							placeholder="请输入内容">
-						</el-input>
+						<div class="textarea">
+							<el-input type="textarea" :autosize="{ minRows: 4, maxRows: 4}" v-model="autoFillStr"
+								placeholder="请输入内容">
+							</el-input>
 
-						<el-button class="textarea-btn" type="primary" size="mini" @click="autoFill">自动识别</el-button>
-					</div>
+							<el-button class="textarea-btn" type="primary" size="mini"
+								@click="autoFill">自动识别</el-button>
+						</div>
 
 
-					<el-alert v-if="scanError.show" type="error" :title="scanError.msg" effect="dark" show-icon=""
-						:closable="false">
-					</el-alert>
-					<el-row style="text-align: center;margin-top: 30px;">
-						<el-button style="width: 50%;" type="primary" :loading="submitBtnHidding"
-							@click="confirm_Submit">提交</el-button>
-					</el-row>
+						<el-alert v-if="scanError.show" type="error" :title="scanError.msg" effect="dark" show-icon=""
+							:closable="false">
+						</el-alert>
+						<el-row style="text-align: center;margin-top: 30px;">
+							<el-button style="width: 50%;" type="primary" :loading="submitBtnHidding"
+								@click="confirm_Submit">提交</el-button>
+						</el-row>
+					</el-scrollbar>
 				</div>
 			</el-drawer>
 		</div>
@@ -266,10 +268,19 @@
 	import moment from "moment-timezone";
 	import axios from "../js/request.js";
 	import axiosEx from "axios";
-	import VueBarcode from "vue-barcode";
+	// import VueBarcode from "vue-barcode";
 	export default {
-		components:{
-			VueBarcode
+		// components: {
+		// 	VueBarcode
+		// },
+		computed:{
+			draw_style() {
+				return {
+					margin: "20px",
+					backgroundColor:"white",
+					height: `${window.innerHeight - 110}px`
+				}
+			}
 		},
 		data() {
 			return {
