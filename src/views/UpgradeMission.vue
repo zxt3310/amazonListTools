@@ -189,10 +189,18 @@
 							<el-input v-model="missionData.asin" placeholder="请输入ASIN"></el-input>
 						</el-row>
 						<el-row class="row-bg">
-							<el-input v-model="missionData.orderid" placeholder="请输入OrderNumber"></el-input>
+							<div v-for="(orderid,index) in missionData.orderids" :key="index">
+								<el-input v-model="missionData.orderids[index]" placeholder="请输入OrderNumber">
+									<el-button v-if="index==missionData.orderids.length-1" style="font-size: 30px;" slot="append" type="primary" @click="addId">+</el-button>
+								</el-input>
+							</div>
 						</el-row>
 						<el-row class="row-bg">
-							<el-input v-model="missionData.tracking" placeholder="请输入Tracking"></el-input>
+							<div v-for="(tracking,index) in missionData.trackings" :key="index">
+								<el-input v-model="missionData.trackings[index]" placeholder="请输入Tracking">
+									<el-button v-if="index==missionData.trackings.length-1" style="font-size: 30px;" slot="append" type="primary" @click="addTracking">+</el-button>
+								</el-input>
+							</div>
 						</el-row>
 						<el-row class="row-bg">
 							<el-input v-model="missionData.ram" placeholder="请输入内存"></el-input>
@@ -306,7 +314,14 @@
 				searchParam: "",
 				//页面数据
 				table_max_height: window.innerHeight - 220,
-				missionData: {},
+				missionData: {
+					orderids:[
+						""
+					],
+					trackings:[
+						""
+					]
+				},
 				activeName: "operator",
 
 				//原始数据
@@ -450,7 +465,25 @@
 			onSubmit(e) {
 				console.log(e);
 			},
-
+			
+			addId(){
+				this.missionData.orderids.push("")
+			},
+			addTracking(){
+				this.missionData.trackings.push("")
+			},
+			//重置missionData
+			resetData(){
+				return{
+					orderids:[
+						""
+					],
+					trackings:[
+						""
+					]
+				}
+			},
+			
 			confirm_Submit() {
 				let data = this.missionData;
 				const regex = /^-?\d+$/;
@@ -482,7 +515,7 @@
 							this.tableData = [...table];
 						}
 						this.submitBtnHidding = false;
-						this.missionData = {};
+						this.missionData = this.resetData();
 						this.multiple = false;
 						this.editingRowIndex = null;
 					})
@@ -499,7 +532,7 @@
 				// this.$refs.tracker_input.focus();
 			},
 			onClose() {
-				this.missionData = {};
+				this.missionData = this.resetData();
 				this.multiple = false;
 				this.autoFillStr = "";
 			},
@@ -811,7 +844,7 @@
 					upc: /UPC:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
 					asin: /ASIN:[\s\u3000]*([A-Z0-9]{10})/, // 用 \u3000 代替全角空格
 					itemCount: /Item Count:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
-					orderNumber: /Amazon Order#\s*([0-9-]+)/,
+					orderNumber: /Amazon Order#\s*([0-9-]+)/gm,
 					custom: /\[Customize\].*/,
 					// size: /:\s*([^-\s]+)-((?:[^-\s+]+)(?:\+[^-\s+]+)*)-([^-\s]+)/
 					size: /G\d+:\s*([^-]+(?:-[^-]+)*)/,
@@ -824,13 +857,15 @@
 					const upcMatch = text.match(regex.upc);
 					const asinMatch = text.match(regex.asin);
 					const itemCountMatch = text.match(regex.itemCount);
-					const orderNumberMatch = text.match(regex.orderNumber);
+					const orderNumberMatch = [...text.matchAll(regex.orderNumber)].map(match=>match[1]);
+					console.log(orderNumberMatch)
 					const brandMatch = text.match(regex.brand);
 					const customized = text.match(regex.custom);
 					const customizeLine = customized ? customized[0] : null;
 
 					//先找到包含Tracking的行
 					const trackContentMatch = text.match(regex.trackingContent);
+					console.log(trackContentMatch)
 					const trackContent = trackContentMatch ? trackContentMatch[0] : "未匹配";
 					//继续匹配
 					const upsMatch = trackContent.match(regex.upsTracking);
@@ -843,7 +878,7 @@
 					let system = ""
 					if (customizeLine) {
 						let match = customizeLine.match(regex.size)
-						console.log(match)
+						// console.log(match)
 						if (match) {
 							let result = match[1].split('-')
 							for (let i = 0; i < result.length; i++) {
@@ -875,8 +910,8 @@
 						upc: upcMatch ? upcMatch[1] : "未匹配",
 						asin: asinMatch ? asinMatch[1] : "未匹配",
 						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
-						orderid: orderNumberMatch ? orderNumberMatch[1] : "未匹配",
-						tracking: upsMatch ? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
+						orderids: orderNumberMatch, //? orderNumberMatch[1] : "未匹配",
+						trackings: upsMatch?upsMatch:uspsMatch, //? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
 						ram: ram,
 						system: system,
 						capacity1: ssd1,

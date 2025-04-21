@@ -8,6 +8,7 @@ import About from "../views/About.vue";
 import TrackingCheck from "../views/TrackingCheck.vue";
 import UpgradeMission from "../views/UpgradeMission.vue";
 import Login from "../views/login.vue"
+import ReturnWarranty from "../views/ReturnWarranty.vue";
 
 Vue.use(VueRouter);
 
@@ -56,6 +57,11 @@ const routes = [
 	  path:"/login",
 	  name:"Login",
 	  component: Login
+  },
+  {
+	  path:"/returnwarranty",
+	  name:"Return&Warranty",
+	  component:ReturnWarranty
   }
 ];
 
