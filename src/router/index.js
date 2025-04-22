@@ -9,6 +9,7 @@ import TrackingCheck from "../views/TrackingCheck.vue";
 import UpgradeMission from "../views/UpgradeMission.vue";
 import Login from "../views/login.vue"
 import ReturnWarranty from "../views/ReturnWarranty.vue";
+import AddRtWrVue from "../views/AddRtWr.vue";
 
 Vue.use(VueRouter);
 
@@ -62,6 +63,11 @@ const routes = [
 	  path:"/returnwarranty",
 	  name:"Return&Warranty",
 	  component:ReturnWarranty
+  },
+  {
+	  path:"/addreturn",
+	  name:"新增退货",
+	  component:AddRtWrVue
   }
 ];
 

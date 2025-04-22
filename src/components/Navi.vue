@@ -37,7 +37,7 @@
 				if(curPath === routerPath[key-1]){
 					return
 				}
-				this.$router.push({
+				this.$router.replace({
 					path:routerPath[key-1]
 				});
 			}
