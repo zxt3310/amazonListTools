@@ -42,7 +42,7 @@
 							<el-tab-pane label="全部" name="all"></el-tab-pane>
 							<el-tab-pane label="需要质保" name="0"></el-tab-pane>
 						</el-tabs>
-						<el-table :height="table_max_height" v-loading="loading" :data="tableData" stripe>
+						<el-table :cell-click="check_when_copyed" :height="table_max_height" v-loading="loading" :data="tableData" stripe>
 							<el-table-column prop="rt_id" label="ID" width="80">
 							</el-table-column>
 							<el-table-column prop="condition" label="Condition" width="100">
@@ -104,7 +104,7 @@
 <script>
 	import moment from "moment-timezone";
 	import axios from "../js/request.js";
-	import axiosEx from "axios";
+	import Clipboard from "clipboard";
 	import {
 		Loading
 	} from "element-ui";
@@ -112,48 +112,26 @@
 	export default {
 		data() {
 			return {
-				drawer: false,
 				//展示表数据
 				tableData: [],
 				//查询类型
 				searchKey: "order",
-				//时间快捷选项
-				scanError: {
-					show: false,
-					msg: ""
-				},
 				//搜索条件
 				searchParam: "",
 				//页面数据
 				table_max_height: window.innerHeight - 220,
-				history: {
-					today: 0,
-					yestoday: 0,
-					exthird: 0,
-					exfourth: 0,
-					exfifth: 0
-				},
-				scandata: {
-					scan_order: "",
-					scan_tracker: "",
-					scan_SN: ""
-				}
+				
 			};
 		},
 		created() {
 			// this.getInitData();
 		},
+		mounted(){
+			console.log("刷新页面")
+		},
 		methods: {
 			getInitData() {
-				axios.get("getpage").then(e => {
-					this.tableData = e.data.orders;
-					this.history = e.data.history;
-				});
-			},
-			getDateName(cnt) {
-				return moment(new Date().getTime() - cnt * 1000 * 24 * 3600).format(
-					"MM-DD"
-				);
+				
 			},
 			searchBtnText(e) {
 				var text = "";
@@ -174,24 +152,7 @@
 				return text;
 			},
 			searchRecord(e) {},
-			onSubmit(e) {
-				// console.log(e);
-				this.$refs.SN_input.focus();
-			},
-			SNEditing() {
-				// console.log(this.scandata.scan_SN)
-				let SNs = this.scandata.scan_SN.split("\n");
-				let flag = "SN_Scan_END_FLAG";
-				if (SNs.includes(flag)) {
-					SNs.splice(-2, 2);
-					console.log(SNs);
-					this.scanOrder(SNs.join(", "));
-				}
-			},
-			scanOrder(SN_post) {},
-			onOpen() {
-				this.$refs.tracker_input.focus();
-			},
+
 			handleDelete(index, row) {
 				this.$confirm("此操作将删除该运单, 是否继续?", "提示", {
 						confirmButtonText: "确定",
@@ -199,16 +160,7 @@
 						type: "warning"
 					})
 					.then(() => {
-						axios
-							.post("removeorder", {
-								id: row.id,
-								express_num: row.express_num
-							})
-							.then(res => {
-								if (res.ret == 0) {
-									this.getInitData();
-								}
-							});
+						
 					})
 					.catch(() => {
 						this.$message({
@@ -217,12 +169,33 @@
 						});
 					});
 			},
+			//导航到创建页
 			directToAdd() {
 				this.$router.push({
 					path: "/addreturn"
 				}).catch(err => {
 					console.log(err)
 				})
+			},
+			
+			//复制内容
+			check_when_copyed(row, column, cell, event){
+				let identify = "123";
+				const clipboard = new Clipboard(identify);
+				clipboard.on("success", (e) => {
+					this.$message({
+						type:"success",
+						message:'已复制到剪切板'
+					});
+					// 释放内存
+					clipboard.destroy();
+				});
+				clipboard.on("error", e => {
+					// 不支持复制
+					this.$message.error('该浏览器不支持复制');
+					// 释放内存
+					clipboard.destroy();
+				});
 			}
 		}
 	};
