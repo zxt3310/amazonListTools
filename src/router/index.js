@@ -8,7 +8,8 @@ import About from "../views/About.vue";
 import TrackingCheck from "../views/TrackingCheck.vue";
 import UpgradeMission from "../views/UpgradeMission.vue";
 import Login from "../views/login.vue"
-import ReturnWarranty from "../views/ReturnWarranty.vue";
+import Return from "../views/Return.vue";
+import Warranty from "../views/Warranty.vue";
 import AddRtWrVue from "../views/AddRtWr.vue";
 
 Vue.use(VueRouter);
@@ -60,9 +61,14 @@ const routes = [
 	  component: Login
   },
   {
-	  path:"/returnwarranty",
-	  name:"Return&Warranty",
-	  component:ReturnWarranty
+	  path:"/return",
+	  name:"Return",
+	  component:Return
+  },
+  {
+  	  path:"/warranty",
+  	  name:"Warranty",
+  	  component:Warranty
   },
   {
 	  path:"/addreturn",

@@ -5,7 +5,8 @@
 			<el-menu-item index="1">Tracking SN管理</el-menu-item>
 			<el-menu-item index="2">CA Tracking追踪</el-menu-item>
 			<el-menu-item index="3">Upgrade Workbench</el-menu-item>
-			<el-menu-item index="4">退货和质保</el-menu-item>
+			<el-menu-item index="4">Return</el-menu-item>
+			<el-menu-item index="5">Warranty</el-menu-item>
 		</el-menu>
 	</div>
 </template>
@@ -26,17 +27,18 @@
 		},
 		methods: {
 			handleSelect(key, keyPath) {
-				// console.log(this.$router)
 				let curPath = this.$router.history.current.path;
 				let routerPath = [
 					"/",
 					"/trackingcheck",
 					"/UpgradeMission",
-					"/ReturnWarranty"
+					"/Return",
+					"/Warranty"
 				]
 				if(curPath === routerPath[key-1]){
 					return
 				}
+				
 				this.$router.replace({
 					path:routerPath[key-1]
 				});
