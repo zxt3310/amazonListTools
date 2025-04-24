@@ -212,7 +212,8 @@
 		},
 		created() {
 			this.uploadCos = new COS({
-				
+				SecretId:process.env.VUE_APP_COS_SecretID,
+				SecretKey:process.env.VUE_APP_COS_SecretKey
 			})
 			let query = this.$router.currentRoute.query
 			//是否从warranty进入编辑
