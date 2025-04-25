@@ -38,73 +38,72 @@
 				</el-header>
 				<el-container>
 					<el-main>
-						<el-tabs v-model="activeStatus" type="card" @tab-click="handleStatusClick">
+						<!-- <el-tabs v-model="activeStatus" type="card" @tab-click="handleStatusClick">
 							<el-tab-pane label="全部" name="all"></el-tab-pane>
 							<el-tab-pane label="需要质保" name="0"></el-tab-pane>
-						</el-tabs>
+						</el-tabs> -->
 						<el-table :cell-click="check_when_copyed" :height="table_max_height" v-loading="loading" :data="tableData" :row-style="tagBroke">
 							<el-table-column prop="rt_id" label="ID" width="100">
 							</el-table-column>
-							<el-table-column prop="decision" label="Decision" width="110" :formatter="decisionFmt">
-							</el-table-column>
-							<el-table-column prop="rec_dt" label="Received On" width="110" :formatter="dateformat">
-							</el-table-column>
+							<!-- <el-table-column prop="decision" label="Decision" width="110" :formatter="decisionFmt">
+							</el-table-column> -->
+							<!-- <el-table-column prop="rec_dt" label="Received On" width="110" :formatter="dateformat">
+							</el-table-column> -->
 							<el-table-column prop="created_at" label="Processed On" width="111" :formatter="dateformat">
 							</el-table-column>
 							<el-table-column prop="brand" label="Brand" width="90">
 							</el-table-column>
 							<el-table-column prop="model" label="Model" width="180">
 							</el-table-column>
-							<el-table-column prop="upc" label="UPC" width="115">
-							</el-table-column>
-							<el-table-column prop="rt_qty" label="Quantity" width="100">
-							</el-table-column>
-							<el-table-column prop="is_need_war" label="Repair" width="100">
-								<template slot-scope="scope">
-									<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_need_war" disabled></el-checkbox>
-								</template>
-							</el-table-column>
-							<el-table-column prop="rt_track" label="Return Tracking" width="170">
-							</el-table-column>
-							<el-table-column prop="cur_config" label="Current Config" width="160">
-							</el-table-column>
-							<el-table-column prop="lb_type" label="Label Type" width="100">
-							</el-table-column>
-							<el-table-column prop="order_id" label="Order#" width="170">
-							</el-table-column>
-							<el-table-column prop="seller" label="Store" width="90">
-							</el-table-column>
-							<el-table-column prop="creator" label="Operator" width="90">
-							</el-table-column>
-							<el-table-column prop="rt_dt" label="Returned Date" width="120" :formatter="dateformat">
-							</el-table-column>
 							<el-table-column prop="sn" label="SN" width="160">
 							</el-table-column>
-							<el-table-column prop="cur_config" label="Current Config" width="160">
+							<!-- <el-table-column prop="upc" label="UPC" width="115">
+							</el-table-column> -->
+							<!-- <el-table-column prop="rt_track" label="Return Tracking" width="170">
+							</el-table-column> -->
+							<el-table-column prop="war_ori_config" label="Origin Config" width="180">
 							</el-table-column>
-							<el-table-column prop="rt_cmt" label="Condition Notes:" width="200">
+							<el-table-column prop="cur_config" label="Current Config" width="180">
 							</el-table-column>
-							<el-table-column prop="rt_cmt_cs" label="Comments for service" width="200">
+							<!-- <el-table-column prop="lb_type" label="Label Type" width="100">
+							</el-table-column> -->
+							<!-- <el-table-column prop="order_id" label="Order#" width="170">
+							</el-table-column> -->
+							<el-table-column prop="seller" label="Store" width="90">
 							</el-table-column>
-							<el-table-column prop="rt_reason" label="Return Reason" width="200">
+							<!-- el-table-column prop="creator" label="Operator" width="90">
+							</el-table-column> -->
+							<!-- <el-table-column prop="rt_dt" label="Returned Date" width="120" :formatter="dateformat">
+							</el-table-column> -->
+							
+							<!-- <el-table-column prop="rt_cmt" label="Condition Notes:" width="200">
+							</el-table-column> -->
+							<!-- <el-table-column prop="rt_cmt_cs" label="Comments for service" width="200">
+							</el-table-column> -->
+							<!-- <el-table-column prop="rt_reason" label="Return Reason" width="200">
+							</el-table-column> -->
+							<el-table-column prop="war_expire_dt" label="Expire On" width="100" :formatter="dateformat">
 							</el-table-column>
-							<el-table-column prop="war_expire_dt" label="Expire On" width="100">
+							<el-table-column align="center"  prop="war_opr" label="Warranty Operator" width="150">
 							</el-table-column>
-							<el-table-column prop="war_opr" label="Operator" width="100">
+							<el-table-column prop="war_method" label="Repair Method" width="130">
 							</el-table-column>
-							<el-table-column prop="war_method" label="Repair Method" width="100">
+							<el-table-column prop="war_track_out" label="Outbound Tracking" width="170">
 							</el-table-column>
-							<el-table-column prop="war_track_out" label="Outbound Tracking" width="100">
+							<el-table-column prop="war_track_in" label="Inbound Tracking" width="170">
 							</el-table-column>
-							<el-table-column prop="war_track_in" label="Inbound Tracking" width="100">
-							</el-table-column>
-							<el-table-column prop="war_dt" label="Date" width="100">
+							<el-table-column prop="war_dt" label="Repair Date" width="100" :formatter="dateformat">
 							</el-table-column>
 							<el-table-column prop="war_case" label="Case#" width="150">
 							</el-table-column>
-							<el-table-column prop="war_def" label="Defects" width="150">
+							<el-table-column prop="war_def" label="Defects" width="180">
 							</el-table-column>
 							<el-table-column prop="war_cmt" label="Warranty Comments" width="200">
+								<template slot-scope="scope">
+									<el-tooltip :content="scope.row.war_cmt">
+										<div class="no-wrap">{{ scope.row.war_cmt }}</div>
+									</el-tooltip>
+								</template>
 							</el-table-column>
 							
 							<el-table-column label="操作" width="150">
@@ -153,13 +152,16 @@
 		},
 		methods: {
 			getInitData() {
-				axios.get("getReturn").then((e)=>{
+				axios.get("getWarranty").then((e)=>{
 					this.tableData = e.data;
 				})
 			},
 			dateformat(row, column, cellValue, index){
-				let res = cellValue.split(' ')
-				return res[0]
+				if(cellValue && cellValue.includes(' ')){
+					let res = cellValue.split(' ')
+					return res[0]
+				}else
+					return cellValue
 			},
 			decisionFmt(row, column, cellValue, index){
 				if(cellValue){

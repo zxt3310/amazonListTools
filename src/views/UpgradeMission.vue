@@ -189,18 +189,20 @@
 							<el-input v-model="missionData.asin" placeholder="请输入ASIN"></el-input>
 						</el-row>
 						<el-row class="row-bg">
-							<div v-for="(orderid,index) in missionData.orderids" :key="index">
+							<el-input v-model="missionData.orderid" placeholder="请输入OrderNumber"></el-input>
+							<!-- <div v-for="(orderid,index) in missionData.orderids" :key="index">
 								<el-input v-model="missionData.orderids[index]" placeholder="请输入OrderNumber">
 									<el-button v-if="index==missionData.orderids.length-1" style="font-size: 30px;" slot="append" type="primary" @click="addId">+</el-button>
 								</el-input>
-							</div>
+							</div> -->
 						</el-row>
 						<el-row class="row-bg">
-							<div v-for="(tracking,index) in missionData.trackings" :key="index">
+							<el-input v-model="missionData.tracking" placeholder="请输入Tracking"></el-input>
+							<!-- <div v-for="(tracking,index) in missionData.trackings" :key="index">
 								<el-input v-model="missionData.trackings[index]" placeholder="请输入Tracking">
 									<el-button v-if="index==missionData.trackings.length-1" style="font-size: 30px;" slot="append" type="primary" @click="addTracking">+</el-button>
 								</el-input>
-							</div>
+							</div> -->
 						</el-row>
 						<el-row class="row-bg">
 							<el-input v-model="missionData.ram" placeholder="请输入内存"></el-input>
@@ -868,8 +870,17 @@
 					console.log(trackContentMatch)
 					const trackContent = trackContentMatch ? trackContentMatch[0] : "未匹配";
 					//继续匹配
-					const upsMatch = trackContent.match(regex.upsTracking);
-					const uspsMatch = trackContent.match(regex.uspsTracking);
+					// let tracks = [];
+					// for(let trackContent of trackContentMatch){
+						const upsMatch = trackContent.match(regex.upsTracking);
+						const uspsMatch = trackContent.match(regex.uspsTracking);
+					// 	if(upsMatch){
+					// 		tracks.push(upsMatch);
+					// 	}
+					// 	if(uspsMatch){
+					// 		tracks.push(uspsMatch);
+					// 	}
+					// }
 
 					let ram = ""
 					let ssdStr = ""
@@ -910,8 +921,8 @@
 						upc: upcMatch ? upcMatch[1] : "未匹配",
 						asin: asinMatch ? asinMatch[1] : "未匹配",
 						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
-						orderids: orderNumberMatch, //? orderNumberMatch[1] : "未匹配",
-						trackings: upsMatch?upsMatch:uspsMatch, //? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
+						orderid: orderNumberMatch? orderNumberMatch[0] : "未匹配",
+						tracking: upsMatch? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
 						ram: ram,
 						system: system,
 						capacity1: ssd1,

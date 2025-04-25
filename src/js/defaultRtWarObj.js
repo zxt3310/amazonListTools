@@ -9,8 +9,8 @@ export const InitQuery = {
 	lb_type: "Amazon",
 	model: "",
 	order_id: "",
-	rt_dt:"",
-	rec_dt:"",
+	rt_dt: "",
+	rec_dt: "",
 	rt_cmt: "",
 	rt_cmt_cs: "",
 	rt_qty: "1",
@@ -25,6 +25,18 @@ export const InitQuery = {
 	war_opr: "",
 	war_track_in: "",
 	war_track_out: "",
-	war_def:"",
-	pics:[]
+	war_def: "",
+	pic_ids: []
 }
+
+export const DecisionOption = [
+	"Sell as new", "Used: Good", "Repair needed", "Junk for parts", "Pending Decision"
+]
+
+export const BrandOption = [
+	"HP", "LENOVO", "DELL", "ACER", "ASUS", "MSI", "LG", "SAMSUNG", "INTEL"
+]
+
+export const SellerOption = [
+	"ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC",	"CHILL_AU"
+]

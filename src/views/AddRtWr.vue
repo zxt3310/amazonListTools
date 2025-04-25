@@ -1,6 +1,6 @@
 <template>
 	<div style="position: relative;">
-		<h2>New Return Entry</h2>
+		<h2>{{warrantyAccess?"Edit":"New Return Entry"}}</h2>
 		<div style="text-align: left; margin:0 5%">
 			<span style="font-size: 20px;">Return ID: {{queryData.rt_id?queryData.rt_id:"提交后生成"}}</span>
 			<el-form label-position="top" :model="queryData" ref="dataform">
@@ -98,8 +98,14 @@
 								<el-input v-model="queryData.sn" placeholder=""></el-input>
 							</el-form-item>
 						</el-col>
-
-						<el-col :span="4">
+					</el-row>
+					<el-row>
+						<el-col :span="5">
+							<el-form-item label="Ori Config:" prop="war_ori_config">
+								<el-input style="width: 280px;" v-model="queryData.war_ori_config"></el-input>
+							</el-form-item>
+						</el-col>
+						<el-col :span="5">
 							<el-form-item label="Current Config:" prop="cur_config">
 								<el-input style="width: 280px;" v-model="queryData.cur_config"></el-input>
 							</el-form-item>
@@ -128,9 +134,9 @@
 						</el-col>
 					</el-row>
 
-					<el-row>
+					<el-row v-if="!warrantyAccess">
 						<el-form-item label="Quantity:" prop="rt_qty">
-							<el-input-number v-model="queryData.rt_qty" :min="1"></el-input-number><!--  -->
+							<el-input-number v-model="queryData.rt_qty" :min="1"></el-input-number>
 						</el-form-item>
 					</el-row>
 
@@ -167,7 +173,7 @@
 								<el-date-picker :value-format="dateFormat" type="date" :disabled="queryData.war_expired"
 									v-model="queryData.war_expire_dt"></el-date-picker>
 								<el-checkbox style="margin-left: 10px; transform:scale(1.2);"
-									v-model="queryData.war_expired" @change="warExpireChange">expired</el-checkbox>
+									:checked="queryData.war_expire_dt === 'expired'" @change="warExpireChange">expired</el-checkbox>
 							</el-form-item>
 						</el-col>
 						<el-col :span="5">
@@ -196,7 +202,7 @@
 					</el-row>
 					<el-row :gutter="20">
 						<el-col :span="4">
-							<el-form-item label="Date:" prop="war_dt">
+							<el-form-item label="Repair Date:" prop="war_dt">
 								<el-date-picker :value-format="dateFormat" type="date"
 									v-model="queryData.war_dt"></el-date-picker>
 							</el-form-item>
@@ -236,12 +242,27 @@
 					<div class="title_card" slot="header">
 						<span>Pictures</span>
 					</div>
-					<el-upload ref="upload" style="width: 50%;" list-type="picture" drag multiple :http-request="upload"
-						:on-remove="picRemove" :file-list="queryData.pics">
-						<i class="el-icon-upload"></i>
-						<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-						<div class="el-upload__tip" slot="tip">只能上传jpg/png文件</div>
-					</el-upload>
+					<div style="display: flex;">
+						<el-upload ref="upload" list-type="picture" drag multiple :http-request="upload" :show-file-list="false">
+							<i class="el-icon-upload"></i>
+							<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+							<div class="el-upload__tip" slot="tip">只能上传jpg/png文件</div>
+						</el-upload>
+						<div style="margin-left: 20px; flex: 1;">
+							Uploaded：
+							<div style="display: flex; flex-wrap: wrap;">
+								<div style="padding: 10px; position: relative;" v-for="(pic,idx) in picslist"
+									:key="idx">
+									<el-image style="width: 150px; height: 150px" :preview-src-list="[pic.url]"
+										:src="pic.url" :fit="fit"></el-image>
+									<el-button
+										style="width: 20px; height: 20px; font-size: 13px; text-align:center; padding: 0 !important; position: absolute; top:0; right:0;"
+										type="danger" icon="el-icon-close" circle @click="removePic(pic,index)"></el-button>
+								</div>
+							</div>
+						</div>
+					</div>
+
 				</el-card>
 				<el-card style="margin-top: 20px;">
 					<el-row>
@@ -269,14 +290,14 @@
 							</el-row>
 
 						</el-col>
-						<el-col :span="4">
+						<el-col v-if="warrantyAccess" :span="4">
 							<el-form-item label="Check Out">
-								<el-button style="width: 150px;" type="warning" @click="checkout">Check Out</el-button>
+								<el-button :disabled="queryData.is_check_out" style="width: 150px;" type="warning" @click="checkout">Check Out</el-button>
 							</el-form-item>
 						</el-col>
-						<el-col :span="4">
+						<el-col v-if="warrantyAccess" :span="4">
 							<el-form-item label="Refund">
-								<el-button style="width: 150px;" type="success" @click="refund">Refund</el-button>
+								<el-button :disabled="queryData.is_refunded" style="width: 150px;" type="success" @click="refund">Refund</el-button>
 							</el-form-item>
 						</el-col>
 					</el-row>
@@ -290,7 +311,9 @@
 <script>
 	import axios from "axios";
 	import COS from "cos-js-sdk-v5";
-	import {dateFormat} from "../js/Dateformat.js";
+	import {
+		dateFormat
+	} from "../js/Dateformat.js";
 	import {
 		InitQuery
 	} from "../js/defaultRtWarObj.js";
@@ -300,9 +323,10 @@
 				brands: ["HP", "LENOVO", "DELL", "ACER", "ASUS", "MSI", "LG", "SAMSUNG", "INTEL"],
 				seller: ["ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC", "CHILL_AU"],
 				queryData: {},
-				warrantyAccess: true, //是否从warranty进入
+				warrantyAccess: false, //是否从warranty进入
 				uploadCos: null,
 				dateFormat: "yyyy-MM-dd",
+				picslist: [],
 				// queryData: {
 				// 	brand: "LENOVO",
 				// 	creator: "XT",
@@ -327,14 +351,20 @@
 			}
 		},
 		created() {
+			//判断是新建还是编辑
 			let query = this.$router.currentRoute.query.data;
 			if (query) {
-				this.queryData = {...JSON.parse(query)}
-				console.log(query)
+				this.queryData = {
+					...JSON.parse(query)
+				}
+				this.warrantyAccess = true
+				this.getPics(this.queryData.pic_ids)
+				console.log(this.queryData)
 			} else {
 				this.queryData = {
 					...InitQuery
 				}
+				this.warrantyAccess = false
 			}
 			this.uploadCos = new COS({
 				SecretId: process.env.VUE_APP_COS_SecretID,
@@ -342,6 +372,13 @@
 			})
 		},
 		methods: {
+			getPics(pic_ids) {
+				axios.post("getpics", {
+					ids: pic_ids
+				}).then((e) => {
+					this.picslist = e.data
+				})
+			},
 			goBack() {
 				this.$router.back();
 			},
@@ -354,11 +391,6 @@
 				}
 				cb(res)
 			},
-			picRemove(file) {
-				let filename = file.name
-				let temp = this.queryData.pics
-				this.fileList = temp.filter(item => item.name !== filename);
-			},
 			upload(file) {
 				let param = {
 					Bucket: "pic-bucket-1317637543",
@@ -368,14 +400,29 @@
 				}
 				this.uploadCos.uploadFile(param).then((e) => {
 					console.log(e)
-					let filename = e.Key
 					let fileLocation = `Https://${e.Location}`
-					this.queryData.pics.push({
-						name: filename,
-						image_url: fileLocation
+					let pic = {
+						name: file.file.name,
+						url: fileLocation
+					}
+					axios.post("addpic", pic).then((e) => {
+						let id = e.pic_id;
+						this.queryData.pic_ids.push(id)
+						this.getPics(this.queryData.pic_ids)
 					})
+				}).catch((error)=>{
+					this.$message(error)
 				})
 
+			},
+			removePic(pic,index){
+				this.$confirm("是否要删除图片","提示",{
+					confirmButtonText:"删除",
+					cancelButtonText:"取消"
+				}).then((e)=>{
+					this.picslist.splice(index,1)
+					this.queryData.pic_ids.splice(index,1)
+				})
 			},
 			warExpireChange(e) {
 				this.queryData.war_expire_dt = e ? "expired" : ""
@@ -390,8 +437,12 @@
 					cancelButtonText: "取消",
 					type: "warning"
 				}).then(() => {
-					this.$refs.dataform.resetFields();
-					console.log(this.queryData)
+					axios.post("checkout",{
+						id:this.queryData.id
+					}).then((e)=>{
+						this.queryData.is_check_out = true;
+						this.$message("checkout successed")	
+					})
 				}).catch(() => {
 
 				})
@@ -404,9 +455,14 @@
 					cancelButtonText: "取消",
 					type: "warning"
 				}).then(() => {
-
+					axios.post("refund",{
+						id:this.queryData.id
+					}).then((e)=>{
+						this.queryData.is_refunded = true;
+						this.$message("refund successed")	
+					})
 				}).catch(() => {
-
+					
 				})
 			},
 			reset() {
@@ -415,16 +471,16 @@
 			submitQueryData() {
 				let data = this.queryData;
 				console.log(data)
-				// axios.post("createReturn", data).then((e) => {
-				// 	console.log(e)
-				// }).catch((e) => {
-				// 	console.log(e)
-				// })
+				axios.post("createReturn", data).then((e) => {
+					console.log(e)
+				}).catch((e) => {
+					console.log(e)
+				})
 			},
-			defaultDate(){
+			defaultDate() {
 				let date = this.queryData.created_at
 				let nowDate = dateFormat(new Date())
-				return date?date:nowDate
+				return date ? date : nowDate
 			}
 		}
 	}
