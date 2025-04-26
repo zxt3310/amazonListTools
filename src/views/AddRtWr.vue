@@ -4,266 +4,272 @@
 		<div style="text-align: left; margin:0 5%">
 			<span style="font-size: 20px;">Return ID: {{queryData.rt_id?queryData.rt_id:"提交后生成"}}</span>
 			<el-form label-position="top" :model="queryData" ref="dataform">
-				<el-card>
-					<div class="title_card" slot="header">
-						<span>General Information</span>
-					</div>
-					<el-row>
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Return Tracking:" prop="rt_track">
-								<el-input v-model="queryData.rt_track"></el-input>
-							</el-form-item>
-						</el-col>
+				<div v-loading="loading">
+					<el-card>
+						<div class="title_card" slot="header">
+							<span>General Information</span>
+						</div>
+						<el-row>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Return Tracking:" prop="rt_track">
+									<el-input v-model="queryData.rt_track"></el-input>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item label="Label Type:" prop="lb_type">
-								<el-select v-model="queryData.lb_type">
-									<el-option label="Amazon" value="Amazon"></el-option>
-									<el-option label="Warehouse" value="Warehouse"></el-option>
-									<el-option label="Customer" value="Customer"></el-option>
-								</el-select>
-							</el-form-item>
-						</el-col>
+							<el-col :span="5">
+								<el-form-item label="Label Type:" prop="lb_type">
+									<el-select v-model="queryData.lb_type">
+										<el-option label="Amazon" value="Amazon"></el-option>
+										<el-option label="Warehouse" value="Warehouse"></el-option>
+										<el-option label="Customer" value="Customer"></el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Order#:" prop="order_id">
-								<el-input v-model="queryData.order_id"></el-input>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item label="Store:" prop="seller">
-								<el-autocomplete v-model="queryData.seller"
-									:fetch-suggestions="querySearch"></el-autocomplete>
-							</el-form-item>
-						</el-col>
-						<el-col :span="4">
-							<el-form-item style="width: 80%;" label="Operator:" prop="creator">
-								<el-input v-model="queryData.creator" placeholder="Mia"></el-input>
-							</el-form-item>
-						</el-col>
-					</el-row>
-					<el-row>
-						<el-col :span="5">
-							<el-form-item label="Returned On:" prop="rt_dt">
-								<el-date-picker type="date" :value-format="dateFormat"
-									v-model="queryData.rt_dt"></el-date-picker>
-							</el-form-item>
-						</el-col>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Order#:" prop="order_id">
+									<el-input v-model="queryData.order_id"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item label="Store:" prop="seller">
+									<el-autocomplete v-model="queryData.seller"
+										:fetch-suggestions="querySellerSearch"></el-autocomplete>
+								</el-form-item>
+							</el-col>
+							<el-col :span="4">
+								<el-form-item style="width: 80%;" label="Operator:" prop="creator">
+									<el-input v-model="queryData.creator" placeholder="Mia"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="5">
+								<el-form-item label="Returned On:" prop="rt_dt">
+									<el-date-picker type="date" :value-format="dateFormat"
+										v-model="queryData.rt_dt"></el-date-picker>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item label="Received On:" prop="rec_dt">
-								<el-date-picker type="date" :value-format="dateFormat"
-									v-model="queryData.rec_dt"></el-date-picker>
-							</el-form-item>
-						</el-col>
+							<el-col :span="5">
+								<el-form-item label="Received On:" prop="rec_dt">
+									<el-date-picker type="date" :value-format="dateFormat"
+										v-model="queryData.rec_dt"></el-date-picker>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item label="Processed On:">
-								<el-date-picker type="date" :value-format="dateFormat" disabled
-									:value="defaultDate()"></el-date-picker>
-							</el-form-item>
-						</el-col>
-					</el-row>
-				</el-card>
+							<el-col :span="5">
+								<el-form-item label="Processed On:">
+									<el-date-picker type="date" :value-format="dateFormat" disabled
+										:value="defaultDate()"></el-date-picker>
+								</el-form-item>
+							</el-col>
+						</el-row>
+					</el-card>
 
-				<el-card style="margin-top: 20px;">
-					<div class="title_card" slot="header">
-						<span>Return Item Details</span>
-					</div>
+					<el-card style="margin-top: 20px;">
+						<div class="title_card" slot="header">
+							<span>Return Item Details</span>
+						</div>
 
-					<el-row>
-						<el-col :span="5">
-							<el-form-item label="Brand:" prop="brand">
-								<el-select placeholder="" v-model="queryData.brand">
-									<el-option v-for="(item,index) in brands" :key="index" :label="item"
-										:value="item"></el-option>
-								</el-select>
-							</el-form-item>
-						</el-col>
+						<el-row>
+							<el-col :span="5">
+								<el-form-item label="Brand:" prop="brand">
+									<el-autocomplete v-model="queryData.brand"
+										:fetch-suggestions="queryBrandSearch"></el-autocomplete>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Model:" prop="model">
-								<el-input v-model="queryData.model" placeholder=""></el-input>
-							</el-form-item>
-						</el-col>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Model:" prop="model">
+									<el-input v-model="queryData.model" placeholder=""></el-input>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="UPC:" prop="upc">
-								<el-input v-model="queryData.upc" placeholder=""></el-input>
-							</el-form-item>
-						</el-col>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="UPC:" prop="upc">
+									<el-input v-model="queryData.upc" placeholder=""></el-input>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="SN:" prop="sn">
-								<el-input v-model="queryData.sn" placeholder=""></el-input>
-							</el-form-item>
-						</el-col>
-					</el-row>
-					<el-row>
-						<el-col :span="5">
-							<el-form-item label="Ori Config:" prop="war_ori_config">
-								<el-input style="width: 280px;" v-model="queryData.war_ori_config"></el-input>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item label="Current Config:" prop="cur_config">
-								<el-input style="width: 280px;" v-model="queryData.cur_config"></el-input>
-							</el-form-item>
-						</el-col>
-					</el-row>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="SN:" prop="sn">
+									<el-input v-model="queryData.sn" placeholder=""></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="5">
+								<el-form-item label="Ori Config:" prop="war_ori_config">
+									<el-input style="width: 280px;" v-model="queryData.war_ori_config"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item label="Current Config:" prop="cur_config">
+									<el-input style="width: 280px;" v-model="queryData.cur_config"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
 
-					<el-row>
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Condition Notes:" prop="rt_cmt">
-								<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
-									v-model="queryData.rt_cmt"></el-input>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Comments for service:" prop="rt_cmt_cs">
-								<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
-									v-model="queryData.rt_cmt_cs"></el-input>
-							</el-form-item>
-						</el-col>
+						<el-row>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Condition Notes:" prop="rt_cmt">
+									<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
+										v-model="queryData.rt_cmt"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Comments for service:" prop="rt_cmt_cs">
+									<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
+										v-model="queryData.rt_cmt_cs"></el-input>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Return Reason:" prop="rt_reason">
-								<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
-									v-model="queryData.rt_reason"></el-input>
-							</el-form-item>
-						</el-col>
-					</el-row>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Return Reason:" prop="rt_reason">
+									<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
+										v-model="queryData.rt_reason"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
 
-					<el-row v-if="!warrantyAccess">
-						<el-form-item label="Quantity:" prop="rt_qty">
-							<el-input-number v-model="queryData.rt_qty" :min="1"></el-input-number>
-						</el-form-item>
-					</el-row>
+						<el-row v-if="!warrantyAccess">
+							<el-form-item label="Quantity:" prop="rt_qty">
+								<el-input-number v-model="queryData.rt_qty" :min="1"></el-input-number>
+							</el-form-item>
+						</el-row>
 
-					<el-row style="margin-left: 150px;transform: scale(1.2);">
-						<el-col :span="3">
-							<el-form-item prop="is_need_war">
-								<el-checkbox v-model="queryData.is_need_war" @change="needWarrantyChanged">Need
-									Repair</el-checkbox>
-							</el-form-item>
-						</el-col>
+						<el-row style="margin-left: 150px;transform: scale(1.2);">
+							<el-col :span="3">
+								<el-form-item prop="is_need_war">
+									<el-checkbox v-model="queryData.is_need_war" @change="needWarrantyChanged">Need
+										Repair</el-checkbox>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="3">
-							<el-form-item prop="is_fraud">
-								<el-checkbox v-model="queryData.is_fraud">Fraud Return</el-checkbox>
-							</el-form-item>
-						</el-col>
+							<el-col :span="3">
+								<el-form-item prop="is_fraud">
+									<el-checkbox v-model="queryData.is_fraud">Fraud Return</el-checkbox>
+								</el-form-item>
+							</el-col>
 
-						<el-col :span="3">
-							<el-form-item prop="is_junk">
-								<el-checkbox v-model="queryData.is_junk">Junk / Parts</el-checkbox>
-							</el-form-item>
-						</el-col>
-					</el-row>
-				</el-card>
+							<el-col :span="3">
+								<el-form-item prop="is_junk">
+									<el-checkbox v-model="queryData.is_junk">Junk / Parts</el-checkbox>
+								</el-form-item>
+							</el-col>
+						</el-row>
+					</el-card>
 
-				<el-card v-if="warrantyAccess" style="margin-top: 20px;">
-					<div class="title_card" slot="header">
-						<span>Warranty Repair</span>
-					</div>
+					<el-card v-if="warrantyAccess" style="margin-top: 20px;">
+						<div class="title_card" slot="header">
+							<span>Warranty Repair</span>
+						</div>
 
-					<el-row>
-						<el-col :span="4">
-							<el-form-item label="Expire On:" prop="war_expire_dt">
-								<el-date-picker :value-format="dateFormat" type="date" :disabled="queryData.war_expired"
-									v-model="queryData.war_expire_dt"></el-date-picker>
-								<el-checkbox style="margin-left: 10px; transform:scale(1.2);"
-									:checked="queryData.war_expire_dt === 'expired'" @change="warExpireChange">expired</el-checkbox>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item style="width:80%;" label="Warranty Operator:" prop="war_opr">
-								<el-input v-model="queryData.war_opr"></el-input>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item label="Repair Method:" prop="war_method">
-								<el-select v-model="queryData.war_method">
-									<el-option label="Factory" value="Factory"></el-option>
-									<el-option label="Warehouse" value="Warehouse"></el-option>
-								</el-select>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Outbound Tracking:" prop="war_track_out">
-								<el-input v-model="queryData.war_track_out"></el-input>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item style="width: 80%;" label="Inbound Tracking:" prop="war_track_in">
-								<el-input v-model="queryData.war_track_in"></el-input>
-							</el-form-item>
-						</el-col>
-					</el-row>
-					<el-row :gutter="20">
-						<el-col :span="4">
-							<el-form-item label="Repair Date:" prop="war_dt">
-								<el-date-picker :value-format="dateFormat" type="date"
-									v-model="queryData.war_dt"></el-date-picker>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item label="Case#:" prop="war_case">
-								<el-input v-model="queryData.war_case"></el-input>
-							</el-form-item>
-						</el-col>
-						<el-col :span="5">
-							<el-form-item label="Defects" prop="war_def">
-								<el-select v-model="queryData.war_def">
-									<el-option label="No Power" value="No Powe"></el-option>
-									<el-option label="Power On, No display" value="Power On, No display"></el-option>
-									<el-option label="Random BSOD" value="Random BSOD"></el-option>
-									<el-option label="Display Artifacts" value="Display Artifacts"></el-option>
-									<el-option label="Broken Display" value="Broken Display"></el-option>
-									<el-option label="Water damage" value="Water damage"></el-option>
-									<el-option label="Physical damage" value="Physical damage"></el-option>
-									<el-option label="Others" value="Others"></el-option>
-								</el-select>
-							</el-form-item>
-						</el-col>
-					</el-row>
+						<el-row>
+							<el-col :span="4">
+								<el-form-item label="Expire On:" prop="war_expire_dt">
+									<el-date-picker :value-format="dateFormat" type="date"
+										:disabled="queryData.war_expired"
+										v-model="queryData.war_expire_dt"></el-date-picker>
+									<el-checkbox style="margin-left: 10px; transform:scale(1.2);"
+										:checked="queryData.war_expire_dt === 'expired'"
+										@change="warExpireChange">expired</el-checkbox>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item style="width:80%;" label="Warranty Operator:" prop="war_opr">
+									<el-input v-model="queryData.war_opr"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item label="Repair Method:" prop="war_method">
+									<el-select v-model="queryData.war_method">
+										<el-option label="Factory" value="Factory"></el-option>
+										<el-option label="Warehouse" value="Warehouse"></el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Outbound Tracking:" prop="war_track_out">
+									<el-input v-model="queryData.war_track_out"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="Inbound Tracking:" prop="war_track_in">
+									<el-input v-model="queryData.war_track_in"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row :gutter="20">
+							<el-col :span="4">
+								<el-form-item label="Repair Date:" prop="war_dt">
+									<el-date-picker :value-format="dateFormat" type="date"
+										v-model="queryData.war_dt"></el-date-picker>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item label="Case#:" prop="war_case">
+									<el-input v-model="queryData.war_case"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="5">
+								<el-form-item label="Defects" prop="war_def">
+									<el-select v-model="queryData.war_def">
+										<el-option label="No Power" value="No Power"></el-option>
+										<el-option label="Power On, No display"
+											value="Power On, No display"></el-option>
+										<el-option label="Random BSOD" value="Random BSOD"></el-option>
+										<el-option label="Display Artifacts" value="Display Artifacts"></el-option>
+										<el-option label="Broken Display" value="Broken Display"></el-option>
+										<el-option label="Water damage" value="Water damage"></el-option>
+										<el-option label="Physical damage" value="Physical damage"></el-option>
+										<el-option label="Others" value="Others"></el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+						</el-row>
 
-					<el-row>
-						<el-col :span="4">
-							<el-form-item label="Warranty Comments:" prop="war_cmt">
-								<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
-									v-model="queryData.war_cmt"></el-input>
-							</el-form-item>
-						</el-col>
-					</el-row>
-				</el-card>
+						<el-row>
+							<el-col :span="4">
+								<el-form-item label="Warranty Comments:" prop="war_cmt">
+									<el-input type="textarea" :autosize="{minRows: 4, maxRows: 6}"
+										v-model="queryData.war_cmt"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+					</el-card>
 
-				<el-card style="margin-top: 20px;">
-					<div class="title_card" slot="header">
-						<span>Pictures</span>
-					</div>
-					<div style="display: flex;">
-						<el-upload ref="upload" list-type="picture" drag multiple :http-request="upload" :show-file-list="false">
-							<i class="el-icon-upload"></i>
-							<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-							<div class="el-upload__tip" slot="tip">只能上传jpg/png文件</div>
-						</el-upload>
-						<div style="margin-left: 20px; flex: 1;">
-							Uploaded：
-							<div style="display: flex; flex-wrap: wrap;">
-								<div style="padding: 10px; position: relative;" v-for="(pic,idx) in picslist"
-									:key="idx">
-									<el-image style="width: 150px; height: 150px" :preview-src-list="[pic.url]"
-										:src="pic.url" :fit="fit"></el-image>
-									<el-button
-										style="width: 20px; height: 20px; font-size: 13px; text-align:center; padding: 0 !important; position: absolute; top:0; right:0;"
-										type="danger" icon="el-icon-close" circle @click="removePic(pic,index)"></el-button>
+					<el-card style="margin-top: 20px;">
+						<div class="title_card" slot="header">
+							<span>Pictures</span>
+						</div>
+						<div style="display: flex;">
+							<el-upload ref="upload" list-type="picture" drag multiple :http-request="upload"
+								:show-file-list="false">
+								<i class="el-icon-upload"></i>
+								<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+								<div class="el-upload__tip" slot="tip">只能上传jpg/png文件</div>
+							</el-upload>
+							<div style="margin-left: 20px; flex: 1;">
+								Uploaded：
+								<div style="display: flex; flex-wrap: wrap; width: 100%; height: 100%;"
+									element-loading-text="上传中..." element-loading-spinner="el-icon-loading"
+									element-loading-background="rgba(0, 0, 0, 0.2)" v-loading="upPicLoading">
+									<div style="padding: 10px; position: relative;" v-for="(pic,idx) in picslist"
+										:key="idx">
+										<el-image style="width: 150px; height: 150px" :preview-src-list="[pic.url]"
+											:src="pic.url" :fit="fit"></el-image>
+										<el-button
+											style="width: 20px; height: 20px; font-size: 13px; text-align:center; padding: 0 !important; position: absolute; top:0; right:0;"
+											type="danger" icon="el-icon-close" circle
+											@click="removePic(pic,index)"></el-button>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-
-				</el-card>
+					</el-card>
+				</div>
 				<el-card style="margin-top: 20px;">
 					<el-row>
 						<el-col :span="16">
@@ -282,7 +288,7 @@
 
 								<el-col :span="5">
 									<el-form-item label="Submit">
-										<el-button :disabled="queryData.decision<1" style="width: 150px;" type="primary"
+										<el-button :loading="loading" :disabled="queryData.decision<1" style="width: 150px;" type="primary"
 											@click="submitQueryData">Submit</el-button>
 									</el-form-item>
 								</el-col>
@@ -292,12 +298,14 @@
 						</el-col>
 						<el-col v-if="warrantyAccess" :span="4">
 							<el-form-item label="Check Out">
-								<el-button :disabled="queryData.is_check_out" style="width: 150px;" type="warning" @click="checkout">Check Out</el-button>
+								<el-button :disabled="queryData.is_check_out" style="width: 150px;" type="warning"
+									@click="checkout">Check Out</el-button>
 							</el-form-item>
 						</el-col>
 						<el-col v-if="warrantyAccess" :span="4">
 							<el-form-item label="Refund">
-								<el-button :disabled="queryData.is_refunded" style="width: 150px;" type="success" @click="refund">Refund</el-button>
+								<el-button :disabled="queryData.is_refunded" style="width: 150px;" type="success"
+									@click="refund">Refund</el-button>
 							</el-form-item>
 						</el-col>
 					</el-row>
@@ -315,39 +323,23 @@
 		dateFormat
 	} from "../js/Dateformat.js";
 	import {
-		InitQuery
+		InitQuery,
+		DefectsOption,
+		BrandOption,
+		SellerOption
 	} from "../js/defaultRtWarObj.js";
 	export default {
 		data() {
 			return {
-				brands: ["HP", "LENOVO", "DELL", "ACER", "ASUS", "MSI", "LG", "SAMSUNG", "INTEL"],
-				seller: ["ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC", "CHILL_AU"],
+				brands: BrandOption, //["HP", "LENOVO", "DELL", "ACER", "ASUS", "MSI", "LG", "SAMSUNG", "INTEL"],
+				seller: SellerOption, //["ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC", "CHILL_AU"],
 				queryData: {},
 				warrantyAccess: false, //是否从warranty进入
 				uploadCos: null,
 				dateFormat: "yyyy-MM-dd",
 				picslist: [],
-				// queryData: {
-				// 	brand: "LENOVO",
-				// 	creator: "XT",
-				// 	cur_config: "fa312312312",
-				// 	decision: 3,
-				// 	is_need_war: true,
-				// 	lb_type: "Warehouse",
-				// 	model: "f123123",
-				// 	order_id: "fasdf123123",
-				// 	proc_dt: "2025-04-22T16:00:00.000Z",
-				// 	rec_dt: "2025-04-29T16:00:00.000Z",
-				// 	rt_cmt: "asdasdasdasdasdasd",
-				// 	rt_cmt_cs: "asdasdasdasdasdasd",
-				// 	rt_dt: "2025-04-16T16:00:00.000Z",
-				// 	rt_qty: "2",
-				// 	rt_reason: "asdasdasdasdasd",
-				// 	rt_track: "123123",
-				// 	seller: "VNE",
-				// 	sn: "asdfasdfasdf",
-				// 	upc: "r12312312",
-				// }
+				upPicLoading: false,
+				loading:false
 			}
 		},
 		created() {
@@ -359,7 +351,6 @@
 				}
 				this.warrantyAccess = true
 				this.getPics(this.queryData.pic_ids)
-				console.log(this.queryData)
 			} else {
 				this.queryData = {
 					...InitQuery
@@ -377,12 +368,13 @@
 					ids: pic_ids
 				}).then((e) => {
 					this.picslist = e.data
+					this.upPicLoading = false;
 				})
 			},
 			goBack() {
 				this.$router.back();
 			},
-			querySearch(query, cb) {
+			querySellerSearch(query, cb) {
 				let res = []
 				for (let seller of this.seller) {
 					res.push({
@@ -391,6 +383,16 @@
 				}
 				cb(res)
 			},
+			queryBrandSearch(query, cb) {
+				let res = []
+				for (let brand of this.brands) {
+					res.push({
+						value: brand
+					})
+				}
+				cb(res)
+			},
+			//上传图片
 			upload(file) {
 				let param = {
 					Bucket: "pic-bucket-1317637543",
@@ -399,7 +401,7 @@
 					Body: file.file
 				}
 				this.uploadCos.uploadFile(param).then((e) => {
-					console.log(e)
+					this.upPicLoading = true;
 					let fileLocation = `Https://${e.Location}`
 					let pic = {
 						name: file.file.name,
@@ -410,18 +412,19 @@
 						this.queryData.pic_ids.push(id)
 						this.getPics(this.queryData.pic_ids)
 					})
-				}).catch((error)=>{
+				}).catch((error) => {
 					this.$message(error)
+					this.upPicLoading = false;
 				})
 
 			},
-			removePic(pic,index){
-				this.$confirm("是否要删除图片","提示",{
-					confirmButtonText:"删除",
-					cancelButtonText:"取消"
-				}).then((e)=>{
-					this.picslist.splice(index,1)
-					this.queryData.pic_ids.splice(index,1)
+			removePic(pic, index) {
+				this.$confirm("是否要删除图片", "提示", {
+					confirmButtonText: "删除",
+					cancelButtonText: "取消"
+				}).then((e) => {
+					this.picslist.splice(index, 1)
+					this.queryData.pic_ids.splice(index, 1)
 				})
 			},
 			warExpireChange(e) {
@@ -437,16 +440,15 @@
 					cancelButtonText: "取消",
 					type: "warning"
 				}).then(() => {
-					axios.post("checkout",{
-						id:this.queryData.id
-					}).then((e)=>{
+					axios.post("checkout", {
+						id: this.queryData.id
+					}).then((e) => {
 						this.queryData.is_check_out = true;
-						this.$message("checkout successed")	
+						this.$message("checkout successed")
 					})
 				}).catch(() => {
 
 				})
-
 			},
 			//退款
 			refund() {
@@ -455,26 +457,28 @@
 					cancelButtonText: "取消",
 					type: "warning"
 				}).then(() => {
-					axios.post("refund",{
-						id:this.queryData.id
-					}).then((e)=>{
+					axios.post("refund", {
+						id: this.queryData.id
+					}).then((e) => {
 						this.queryData.is_refunded = true;
-						this.$message("refund successed")	
+						this.$message("refund successed")
 					})
 				}).catch(() => {
-					
+
 				})
 			},
 			reset() {
 				this.$refs.dataform.resetFields();
 			},
 			submitQueryData() {
+				this.loading = true;
 				let data = this.queryData;
-				console.log(data)
 				axios.post("createReturn", data).then((e) => {
-					console.log(e)
+					this.loading = false;
+					this.goBack();
 				}).catch((e) => {
 					console.log(e)
+					this.loading = false;
 				})
 			},
 			defaultDate() {

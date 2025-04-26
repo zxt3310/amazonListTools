@@ -26,7 +26,7 @@
 						@keyup.enter.native="searchRecord"></el-input>
 
 					<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam" type="daterange"
-						align="right" unlink-panels range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+						align="right" unlink-panels range-separator="to" start-placeholder="Start Date" end-placeholder="End Date"
 						value-format="yyyy-MM-dd HH:mm:ss">
 					</el-date-picker>
 
@@ -39,11 +39,11 @@
 				<el-container>
 					<el-main style="padding-top: 0 !important;">
 						<div style="padding: 10px 0;text-align: left; display: flex; align-items: center;">
-							<el-checkbox-group v-model="filters.check" @change="filterChange">
-								<el-checkbox border label="Checked Out" key="is_check_out"></el-checkbox>
-								<el-checkbox border label="Repair" key="is_need_war"></el-checkbox>
-								<el-checkbox border label="Fraud" key="is_fraud"></el-checkbox>
-								<el-checkbox border label="Junk" key="is_junk"></el-checkbox>
+							<el-checkbox-group v-model="filters.check">
+								<el-checkbox border label="is_check_out">In Stock</el-checkbox>
+								<el-checkbox border label="is_need_war">Repair</el-checkbox>
+								<el-checkbox border label="is_fraud">Fraud</el-checkbox>
+								<el-checkbox border label="is_junk">Junk</el-checkbox>
 							</el-checkbox-group>
 							<div style="margin-left: 20px;">
 								<span>Decision:</span>
@@ -64,30 +64,32 @@
 							</div>
 
 							<div style="margin-left: 20px;">
-								<el-button type="primary">Filter</el-button>
+								<el-button type="primary" @click="filter">Filter</el-button>
+							</div>
+							<div style="margin-left: 20px;">
+								<el-button type="primary" @click="clearfilter">Clear</el-button>
 							</div>
 						</div>
 
-						<el-table :cell-click="check_when_copyed" :height="table_max_height" v-loading="loading"
-							:data="tableData" :row-style="tagBroke" @cell-click="cellClickCopy">
+						<el-table ref="dataTable" :height="table_max_height" v-loading="loading" :data="tableData"
+							@cell-click="cellClickCopy">
 							<el-table-column prop="rt_id" label="ID" width="100">
 							</el-table-column>
-							<el-table-column prop="decision" label="Decision" width="120" :formatter="decisionFmt">
+							<el-table-column prop="decision" label="Decision" width="120" :formatter="decisionFmt"
+								:filter-method="filterMethod">
 							</el-table-column>
 							<el-table-column prop="rec_dt" label="Received On" width="110" :formatter="dateformat">
 							</el-table-column>
 							<el-table-column prop="created_at" label="Processed On" width="111" :formatter="dateformat">
 							</el-table-column>
-							<el-table-column prop="brand" label="Brand" width="90">
+							<el-table-column prop="brand" label="Brand" width="90" :filter-method="filterMethod">
 							</el-table-column>
 							<el-table-column prop="model" label="Model" width="180">
 							</el-table-column>
 							<el-table-column prop="upc" label="UPC" width="115">
 							</el-table-column>
-							<el-table-column align="center" prop="is_need_war" label="Repair" width="100" :filters="[
-      { text: 'Repaired', value: true },
-      { text: 'Not Repaired', value: false }
-    ]" :filter-method="filterRepairStatus">
+							<el-table-column align="center" prop="is_need_war" label="Repair" width="100"
+								:filters="[{text:'Yes',value:true}]" :filter-method="filterMethod">
 								<template slot-scope="scope">
 									<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_need_war"
 										disabled></el-checkbox>
@@ -103,7 +105,7 @@
 							</el-table-column>
 							<el-table-column prop="rt_dt" label="Returned Date" width="120" :formatter="dateformat">
 							</el-table-column>
-							<el-table-column prop="seller" label="Store" width="90">
+							<el-table-column prop="seller" label="Store" width="90" :filter-method="filterMethod">
 							</el-table-column>
 							<el-table-column prop="creator" label="Operator" width="90">
 							</el-table-column>
@@ -132,15 +134,30 @@
 									</el-tooltip>
 								</template>
 							</el-table-column>
-							<el-table-column align="center" prop="is_fraud" label="Fraud" width="80">
+							<el-table-column align="center" prop="is_fraud" label="Fraud" width="80"
+								:filters="[{text:'Yes',value:true}]" :filter-method="filterMethod">
 								<template slot-scope="scope">
 									<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_fraud"
 										disabled></el-checkbox>
 								</template>
 							</el-table-column>
-							<el-table-column align="center" prop="is_junk" label="Junk" width="80">
+							<el-table-column align="center" prop="is_junk" label="Junk" width="80"
+								:filters="[{text:'Yes',value:true}]" :filter-method="filterMethod">
 								<template slot-scope="scope">
 									<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_junk"
+										disabled></el-checkbox>
+								</template>
+							</el-table-column>
+							<el-table-column align="center" prop="is_refund" label="Refunded" width="90">
+								<template slot-scope="scope">
+									<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_refund"
+										disabled></el-checkbox>
+								</template>
+							</el-table-column>
+							<el-table-column align="center" prop="is_check_out" label="Checked Out" width="120"
+								:filters="[{text:'Yes',value:true},{text:'No',value:false}]" :filter-method="filterMethod" :filtered-value="[false]">
+								<template slot-scope="scope">
+									<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_check_out"
 										disabled></el-checkbox>
 								</template>
 							</el-table-column>
@@ -184,9 +201,6 @@
 		BrandOption,
 		SellerOption
 	} from "../js/defaultRtWarObj.js";
-	import {
-		Loading
-	} from "element-ui";
 
 	export default {
 		data() {
@@ -203,23 +217,62 @@
 				brandOption: BrandOption,
 				sellerOption: SellerOption,
 				filters: {
-					check: [],
+					check: ['is_check_out'],
 					decision: "",
 					brand: "",
 					seller: ""
-				}
+				},
+				loading:false
 			};
 		},
 		created() {
 			this.getInitData();
 		},
-		mounted() {
-			console.log("刷新页面")
-		},
+		mounted() {},
 		methods: {
+			activeFilterChange(prop, value) {
+				const table = this.$refs.dataTable;
+				let columnIndex = table.columns.findIndex(column => column.property == prop)
+				let column = table.columns[columnIndex]
+				column.filteredValue = [...value]
+				table.store.commit('filterChange', {
+					column,
+					values: column.filteredValue,
+					silent: true
+				})
+			},
+			filter() {
+				let filterOption = this.filters
+				let targets = ['is_check_out', 'is_need_war', 'is_fraud', 'is_junk']
+				for (let key of targets) {
+					if (filterOption.check.indexOf(key) == -1) {
+						this.activeFilterChange(key, [])
+					} else
+						key==="is_check_out" ? this.activeFilterChange(key, [false]) : this.activeFilterChange(key, [true]);
+				}
+				this.activeFilterChange("brand", filterOption.brand === '' ? [] : [filterOption.brand]);
+				this.activeFilterChange("decision", filterOption.decision === '' ? [] : [filterOption.decision]);
+				this.activeFilterChange("seller", filterOption.seller === '' ? [] : [filterOption.seller]);
+			},
+			clearfilter(key) {
+				let filters = {
+					check: ['is_check_out'],
+					decision: "",
+					brand: "",
+					seller: ""
+				}
+				this.filters = filters;
+				this.filter()
+				// this.$refs.dataTable.clearFilter();
+			},
 			getInitData() {
+				this.loading = true;
 				axios.get("getReturn").then((e) => {
 					this.tableData = e.data;
+					this.loading = false;
+				}).catch((e) => {
+					console.log(e)
+					this.loading = false;
 				})
 			},
 			dateformat(row, column, cellValue, index) {
@@ -232,16 +285,6 @@
 					return ori[parseInt(cellValue) - 1]
 				} else {
 					return ""
-				}
-			},
-			//标记某行为警示颜色
-			tagBroke(rowObj) {
-				let index = rowObj.rowIndex
-				if (this.tableData[index].is_need_war) {
-					return {
-						// "background-color":"red",
-						// "color":"white"
-					}
 				}
 			},
 			searchBtnText(e) {
@@ -274,13 +317,23 @@
 			},
 
 			handleDelete(index, row) {
-				this.$confirm("此操作将删除该运单, 是否继续?", "提示", {
-						confirmButtonText: "确定",
+				this.$confirm("此操作将删除该退货, 是否继续?", "提示", {
+						confirmButtonText: "删除",
 						cancelButtonText: "取消",
 						type: "warning"
 					})
 					.then(() => {
-
+						this.loading = true
+						axios.post("removeReturn",{
+							id:row.id
+						}).then((e)=>{
+							if(e.ret == 0){
+								this.tableData = this.tableData.filter((item)=> item.id != row.id)
+								this.loading = false
+							}
+						}).catch((e)=>{
+							this.$message(e)
+						})
 					})
 					.catch(() => {
 						this.$message({
@@ -298,9 +351,6 @@
 				})
 			},
 
-			filterChange(e) {
-				console.log(e)
-			},
 			brandQuerySearch(query, cb) {
 				let res = []
 				for (let brand of this.brandOption) {
@@ -323,7 +373,7 @@
 			//单元格点击事件
 			cellClickCopy(row, column, cell, event) {
 				let cellText = cell.textContent || cell.innerText;
-				if (cellText.length) {
+				if (column.property && cellText.length) {
 					navigator.clipboard.writeText(cellText).then((e) => {
 						this.$message({
 							type: "success",
@@ -333,8 +383,8 @@
 				}
 			},
 			// 过滤逻辑
-			filterRepairStatus(value, row) {
-				return row.is_need_war === value;
+			filterMethod(value, row, column) {
+				return row[column.property] === value;
 			}
 		}
 	};

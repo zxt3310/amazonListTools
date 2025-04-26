@@ -1,12 +1,12 @@
 export const InitQuery = {
-	brand: "HP",
+	brand: "",
 	creator: "",
 	cur_config: "",
 	decision: "",
 	is_fraud: false,
 	is_junk: false,
 	is_need_war: false,
-	lb_type: "Amazon",
+	lb_type: "",
 	model: "",
 	order_id: "",
 	rt_dt: "",
@@ -21,7 +21,7 @@ export const InitQuery = {
 	upc: "",
 	war_case: "",
 	war_cmt: "",
-	war_method: "Factory",
+	war_method: "",
 	war_opr: "",
 	war_track_in: "",
 	war_track_out: "",
@@ -39,4 +39,15 @@ export const BrandOption = [
 
 export const SellerOption = [
 	"ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC",	"CHILL_AU"
+]
+
+export const DefectsOption = [
+	"No Power",
+	"Power On, No display",
+	"Random BSOD",
+	"Display Artifacts",
+	"Broken Display",
+	"Water damage",
+	"Physical damage",
+	"Others"
 ]

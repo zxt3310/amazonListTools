@@ -5,8 +5,8 @@
 			<el-menu-item index="1">Tracking SN管理</el-menu-item>
 			<el-menu-item index="2">CA Tracking追踪</el-menu-item>
 			<el-menu-item index="3">Upgrade Workbench</el-menu-item>
-			<el-menu-item index="4">Return</el-menu-item>
-			<el-menu-item index="5">Warranty</el-menu-item>
+			<el-menu-item index="4">Return(Beta)</el-menu-item>
+			<el-menu-item index="5">Warranty(Beta)</el-menu-item>
 		</el-menu>
 	</div>
 </template>

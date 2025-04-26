@@ -37,12 +37,41 @@
 						@click="directToAdd">新增退货</el-button>
 				</el-header>
 				<el-container>
-					<el-main>
-						<!-- <el-tabs v-model="activeStatus" type="card" @tab-click="handleStatusClick">
-							<el-tab-pane label="全部" name="all"></el-tab-pane>
-							<el-tab-pane label="需要质保" name="0"></el-tab-pane>
-						</el-tabs> -->
-						<el-table :cell-click="check_when_copyed" :height="table_max_height" v-loading="loading" :data="tableData" :row-style="tagBroke">
+					<el-main style="padding-top: 0 !important;">
+						<div style="padding: 10px 0;text-align: left; display: flex; align-items: center;">
+							<div style="margin-left: 20px;">
+								<span>Store:</span>
+								<el-autocomplete style="width: 120px;" v-model="filters.seller"
+									:fetch-suggestions="sellerQuerySearch"></el-autocomplete>
+							</div>
+							<div style="margin-left: 20px;display: flex; align-items: center;">
+								<span>Operator:</span>
+								<el-input style="width: 120px;" v-model="filters.operator"></el-input>
+							</div>
+							<div style="margin-left: 20px;">
+								<span>Method:</span>
+								<el-select v-model="filters.repairMethod">
+									<el-option label="Factory" value="Factory"></el-option>
+									<el-option label="Warehouse" value="Warehouse"></el-option>
+								</el-select>
+							</div>
+							<div style="margin-left: 20px;">
+								<span>Defects:</span>
+								<el-select v-model="filters.defects">
+									<el-option v-for="(option,index) in defectsOption" :key="index" :label="option"
+										:value="option"></el-option>
+								</el-select>
+							</div>
+
+							<div style="margin-left: 20px;">
+								<el-button type="primary" @click="filter">Filter</el-button>
+							</div>
+							<div style="margin-left: 20px;">
+								<el-button type="primary" @click="clearfilter">Clear</el-button>
+							</div>
+						</div>
+						<el-table ref="dataTable" @cell-click="cellClickCopy" :height="table_max_height"
+							v-loading="loading" :data="tableData">
 							<el-table-column prop="rt_id" label="ID" width="100">
 							</el-table-column>
 							<!-- <el-table-column prop="decision" label="Decision" width="110" :formatter="decisionFmt">
@@ -69,13 +98,13 @@
 							</el-table-column> -->
 							<!-- <el-table-column prop="order_id" label="Order#" width="170">
 							</el-table-column> -->
-							<el-table-column prop="seller" label="Store" width="90">
+							<el-table-column prop="seller" label="Store" width="90" :filter-method="filterMethod">
 							</el-table-column>
 							<!-- el-table-column prop="creator" label="Operator" width="90">
 							</el-table-column> -->
 							<!-- <el-table-column prop="rt_dt" label="Returned Date" width="120" :formatter="dateformat">
 							</el-table-column> -->
-							
+
 							<!-- <el-table-column prop="rt_cmt" label="Condition Notes:" width="200">
 							</el-table-column> -->
 							<!-- <el-table-column prop="rt_cmt_cs" label="Comments for service" width="200">
@@ -84,9 +113,11 @@
 							</el-table-column> -->
 							<el-table-column prop="war_expire_dt" label="Expire On" width="100" :formatter="dateformat">
 							</el-table-column>
-							<el-table-column align="center"  prop="war_opr" label="Warranty Operator" width="150">
+							<el-table-column align="center" prop="war_opr" label="Warranty Operator" width="160"
+								:filter-method="filterMethod">
 							</el-table-column>
-							<el-table-column prop="war_method" label="Repair Method" width="130">
+							<el-table-column prop="war_method" label="Repair Method" width="140"
+								:filter-method="filterMethod">
 							</el-table-column>
 							<el-table-column prop="war_track_out" label="Outbound Tracking" width="170">
 							</el-table-column>
@@ -96,7 +127,7 @@
 							</el-table-column>
 							<el-table-column prop="war_case" label="Case#" width="150">
 							</el-table-column>
-							<el-table-column prop="war_def" label="Defects" width="180">
+							<el-table-column prop="war_def" label="Defects" width="180" :filter-method="filterMethod">
 							</el-table-column>
 							<el-table-column prop="war_cmt" label="Warranty Comments" width="200">
 								<template slot-scope="scope">
@@ -105,13 +136,13 @@
 									</el-tooltip>
 								</template>
 							</el-table-column>
-							
-							<el-table-column label="操作" width="150">
+
+							<el-table-column label="操作" width="80">
 								<template slot-scope="scope">
 									<el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">
 										Edit</el-button>
-									<el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
-										Del</el-button>
+									<!-- <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
+										Del</el-button> -->
 								</template>
 							</el-table-column>
 						</el-table>
@@ -125,10 +156,10 @@
 <script>
 	import moment from "moment-timezone";
 	import axios from "../js/request.js";
-	import Clipboard from "clipboard";
 	import {
-		Loading
-	} from "element-ui";
+		DefectsOption,
+		SellerOption
+	} from "../js/defaultRtWarObj.js";
 
 	export default {
 		data() {
@@ -141,45 +172,87 @@
 				searchParam: "",
 				//页面数据
 				table_max_height: window.innerHeight - 220,
-				
+				//加载
+				loading:false,
+				defectsOption: DefectsOption,
+				sellerOption: SellerOption,
+				filters: {
+					seller: "",
+					operator: "",
+					repairMethod: "",
+					defects: ""
+				}
 			};
 		},
 		created() {
 			this.getInitData();
 		},
-		mounted(){
-			console.log("刷新页面")
+		mounted() {
+			
 		},
 		methods: {
-			getInitData() {
-				axios.get("getWarranty").then((e)=>{
-					this.tableData = e.data;
+			activeFilterChange(prop, value) {
+				const table = this.$refs.dataTable;
+				let columnIndex = table.columns.findIndex(column => column.property == prop)
+				let column = table.columns[columnIndex]
+				column.filteredValue = [...value]
+				table.store.commit('filterChange', {
+					column,
+					values: column.filteredValue,
+					silent: true
 				})
 			},
-			dateformat(row, column, cellValue, index){
-				if(cellValue && cellValue.includes(' ')){
+			filter() {
+				let filterOption = this.filters
+				this.activeFilterChange("seller", filterOption.seller === '' ? [] : [filterOption.seller]);
+				this.activeFilterChange("war_opr", filterOption.operator === '' ? [] : [filterOption.operator]);
+				this.activeFilterChange("war_method", filterOption.repairMethod === '' ? [] : [filterOption.repairMethod]);
+				this.activeFilterChange("war_def", filterOption.defects === '' ? [] : [filterOption.defects]);
+			},
+			clearfilter(key) {
+				let filters = {
+					seller: "",
+					operator: "",
+					repairMethod: "",
+					defects: ""
+				}
+				this.filters = filters;
+				this.filter()
+				// this.$refs.dataTable.clearFilter();
+			},
+			getInitData() {
+				this.loading = true;
+				axios.get("getWarranty").then((e) => {
+					this.tableData = e.data;
+					this.loading = false;
+				}).catch((e)=>{
+					console.log(e)
+					this.loading = false;
+				})
+			},
+			dateformat(row, column, cellValue, index) {
+				if (cellValue && cellValue.includes(' ')) {
 					let res = cellValue.split(' ')
 					return res[0]
-				}else
+				} else
 					return cellValue
 			},
-			decisionFmt(row, column, cellValue, index){
-				if(cellValue){
-					let ori = ["Sell as new","Used: Good","Repair needed","Junk for parts","Pending Decision"]
+			decisionFmt(row, column, cellValue, index) {
+				if (cellValue) {
+					let ori = ["Sell as new", "Used: Good", "Repair needed", "Junk for parts", "Pending Decision"]
 					return ori[parseInt(cellValue)]
-				}else{
+				} else {
 					return ""
 				}
 			},
-			//标记某行为警示颜色
-			tagBroke(rowObj){
-				let index = rowObj.rowIndex
-				if(this.tableData[index].is_need_war){
-					return{
-						// "background-color":"red",
-						// "color":"white"
-					}
+			sellerQuerySearch(query, cb) {
+				let res = []
+				for (let seller of this.sellerOption) {
+					res.push({
+						value: seller
+					})
 				}
+				cb(res)
 			},
 			searchBtnText(e) {
 				var text = "";
@@ -200,7 +273,7 @@
 				return text;
 			},
 			searchRecord(e) {},
-			
+
 			handleEdit(index, row) {
 				this.$router.push({
 					path: "/addreturn",
@@ -216,7 +289,7 @@
 						type: "warning"
 					})
 					.then(() => {
-						
+
 					})
 					.catch(() => {
 						this.$message({
@@ -233,25 +306,21 @@
 					console.log(err)
 				})
 			},
-			
-			//复制内容
-			check_when_copyed(row, column, cell, event){
-				let identify = "123";
-				const clipboard = new Clipboard(identify);
-				clipboard.on("success", (e) => {
-					this.$message({
-						type:"success",
-						message:'已复制到剪切板'
-					});
-					// 释放内存
-					clipboard.destroy();
-				});
-				clipboard.on("error", e => {
-					// 不支持复制
-					this.$message.error('该浏览器不支持复制');
-					// 释放内存
-					clipboard.destroy();
-				});
+
+			//单元格点击复制
+			cellClickCopy(row, column, cell, event) {
+				let cellText = cell.textContent || cell.innerText;
+				if (column.property && cellText.length) {
+					navigator.clipboard.writeText(cellText).then((e) => {
+						this.$message({
+							type: "success",
+							message: '已复制到剪切板'
+						});
+					})
+				}
+			},
+			filterMethod(value, row, column) {
+				return row[column.property] === value;
 			}
 		}
 	};
