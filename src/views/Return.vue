@@ -72,7 +72,7 @@
 						</div>
 
 						<el-table ref="dataTable" :height="table_max_height" v-loading="loading" :data="tableData"
-							@cell-click="cellClickCopy">
+							@cell-click="cellClickCopy" @row-click="rowClickRead">
 							<el-table-column prop="rt_id" label="ID" width="100">
 							</el-table-column>
 							<el-table-column prop="decision" label="Decision" width="120" :formatter="decisionFmt"
@@ -345,6 +345,7 @@
 			//导航到创建页
 			directToAdd() {
 				this.$router.push({
+					readOnly:"no",
 					path: "/addreturn"
 				}).catch(err => {
 					console.log(err)
@@ -381,6 +382,16 @@
 						});
 					})
 				}
+			},
+			//点击行 阅览
+			rowClickRead(row, column, event){
+				this.$router.push({
+					path: "/addreturn",
+					query: {
+						readOnly:"yes",
+						data: JSON.stringify(row)
+					}
+				})
 			},
 			// 过滤逻辑
 			filterMethod(value, row, column) {

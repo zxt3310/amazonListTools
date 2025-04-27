@@ -3,7 +3,7 @@
 		<h2>{{warrantyAccess?"Edit":"New Return Entry"}}</h2>
 		<div style="text-align: left; margin:0 5%">
 			<span style="font-size: 20px;">Return ID: {{queryData.rt_id?queryData.rt_id:"提交后生成"}}</span>
-			<el-form label-position="top" :model="queryData" ref="dataform">
+			<el-form :disabled="isReadOnly" label-position="top" :model="queryData" ref="dataform">
 				<div v-loading="loading">
 					<el-card>
 						<div class="title_card" slot="header">
@@ -216,15 +216,8 @@
 							<el-col :span="5">
 								<el-form-item label="Defects" prop="war_def">
 									<el-select v-model="queryData.war_def">
-										<el-option label="No Power" value="No Power"></el-option>
-										<el-option label="Power On, No display"
-											value="Power On, No display"></el-option>
-										<el-option label="Random BSOD" value="Random BSOD"></el-option>
-										<el-option label="Display Artifacts" value="Display Artifacts"></el-option>
-										<el-option label="Broken Display" value="Broken Display"></el-option>
-										<el-option label="Water damage" value="Water damage"></el-option>
-										<el-option label="Physical damage" value="Physical damage"></el-option>
-										<el-option label="Others" value="Others"></el-option>
+										<el-option v-for="(item,index) in defects" :key="index" :label="item"
+											:value="item"></el-option>
 									</el-select>
 								</el-form-item>
 							</el-col>
@@ -277,18 +270,16 @@
 								<el-col :span="5">
 									<el-form-item label="Decision:" prop="decision">
 										<el-select placeholder="" v-model="queryData.decision">
-											<el-option label="Sell as new" :value="1"></el-option>
-											<el-option label="Used: Good" :value="2"></el-option>
-											<el-option label="Repair needed" :value="3"></el-option>
-											<el-option label="Junk for parts" :value="4"></el-option>
-											<el-option label="Pending Decision" :value="5"></el-option>
+											<el-option v-for="(item,index) in decisions" :key="index" :label="item"
+												:value="index+1"></el-option>
 										</el-select>
 									</el-form-item>
 								</el-col>
 
 								<el-col :span="5">
 									<el-form-item label="Submit">
-										<el-button :loading="loading" :disabled="queryData.decision<1" style="width: 150px;" type="primary"
+										<el-button :loading="loading" :disabled="queryData.decision<1"
+											style="width: 150px;" type="primary"
 											@click="submitQueryData">Submit</el-button>
 									</el-form-item>
 								</el-col>
@@ -326,23 +317,28 @@
 		InitQuery,
 		DefectsOption,
 		BrandOption,
-		SellerOption
+		SellerOption,
+		DecisionOption
 	} from "../js/defaultRtWarObj.js";
 	export default {
 		data() {
 			return {
 				brands: BrandOption, //["HP", "LENOVO", "DELL", "ACER", "ASUS", "MSI", "LG", "SAMSUNG", "INTEL"],
 				seller: SellerOption, //["ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC", "CHILL_AU"],
+				defects: DefectsOption,
+				decisions: DecisionOption,
 				queryData: {},
+				isReadOnly:false, //仅查看
 				warrantyAccess: false, //是否从warranty进入
 				uploadCos: null,
 				dateFormat: "yyyy-MM-dd",
 				picslist: [],
 				upPicLoading: false,
-				loading:false
+				loading: false,
 			}
 		},
 		created() {
+			this.isReadOnly = this.$router.currentRoute.query.readOnly=="yes"?true:false
 			//判断是新建还是编辑
 			let query = this.$router.currentRoute.query.data;
 			if (query) {
@@ -358,8 +354,18 @@
 				this.warrantyAccess = false
 			}
 			this.uploadCos = new COS({
-				SecretId: process.env.VUE_APP_COS_SecretID,
-				SecretKey: process.env.VUE_APP_COS_SecretKey
+				getAuthorization: async function(options, callback) {
+					const data = await axios.get("gettempkeys");
+					callback({
+						TmpSecretId: data.data.credentials.tmpSecretId,
+						TmpSecretKey: data.data.credentials.tmpSecretKey,
+						SecurityToken: data.data.credentials.sessionToken,
+						// 建议返回服务器时间作为签名的开始时间，避免客户端本地时间偏差过大导致签名错误
+						StartTime: data.data.startTime, // 时间戳，单位秒，如：1580000000
+						ExpiredTime: data.data.expiredTime, // 时间戳，单位秒，如：1580000000
+						ScopeLimit: true, // 细粒度控制权限需要设为 true，会限制密钥只在相同请求时重复使用
+					})
+				}
 			})
 		},
 		methods: {
@@ -393,7 +399,8 @@
 				cb(res)
 			},
 			//上传图片
-			upload(file) {
+			async upload(file) {
+				this.upPicLoading = true;
 				let param = {
 					Bucket: "pic-bucket-1317637543",
 					Region: "ap-beijing",
@@ -401,7 +408,6 @@
 					Body: file.file
 				}
 				this.uploadCos.uploadFile(param).then((e) => {
-					this.upPicLoading = true;
 					let fileLocation = `Https://${e.Location}`
 					let pic = {
 						name: file.file.name,
@@ -515,5 +521,21 @@
 	.el-checkbox__label {
 		font-weight: 700 !important;
 		/* 400=正常，700=加粗 */
+	}
+	
+	/* 覆盖所有禁用状态下的文字颜色 */
+	.el-form-item.is-disabled .el-form-item__label,
+	.el-input.is-disabled .el-input__inner,
+	.el-textarea.is-disabled .el-textarea__inner,
+	.el-select.is-disabled .el-select__tags-text {
+	  color: #000000 !important; /* 自定义颜色 */
+	}
+	
+	/* 单选框/复选框禁用状态 */
+	.el-radio.is-disabled .el-radio__label,
+	.el-checkbox.is-disabled.is-checked .el-checkbox__inner::after,
+	.el-checkbox.is-disabled .el-checkbox__label{
+	  color: #000000 !important;
+	   border-color: #000000 !important;
 	}
 </style>

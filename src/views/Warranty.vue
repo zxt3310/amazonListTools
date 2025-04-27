@@ -33,8 +33,8 @@
 					<el-button type="primary" @click="searchRecord">
 						搜索 <i class="el-icon-search"></i>
 					</el-button>
-					<el-button type="primary" style="position: absolute; right: 50px;"
-						@click="directToAdd">新增退货</el-button>
+					<!-- <el-button type="primary" style="position: absolute; right: 50px;"
+						@click="directToAdd">新增退货</el-button> -->
 				</el-header>
 				<el-container>
 					<el-main style="padding-top: 0 !important;">
@@ -278,6 +278,7 @@
 				this.$router.push({
 					path: "/addreturn",
 					query: {
+						readOnly:"no",
 						data: JSON.stringify(row)
 					}
 				})
@@ -300,11 +301,7 @@
 			},
 			//导航到创建页
 			directToAdd() {
-				this.$router.push({
-					path: "/addreturn"
-				}).catch(err => {
-					console.log(err)
-				})
+				
 			},
 
 			//单元格点击复制
