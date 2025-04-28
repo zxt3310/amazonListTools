@@ -19,7 +19,7 @@
 							<el-dropdown-item command="order">订单号</el-dropdown-item>
 							<el-dropdown-item command="tracker">运单号</el-dropdown-item>
 							<el-dropdown-item command="SN">SN</el-dropdown-item>
-							<el-dropdown-item command="date">日期</el-dropdown-item>
+							<!-- <el-dropdown-item command="date">日期</el-dropdown-item> -->
 						</el-dropdown-menu>
 					</el-dropdown>
 					<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px; width: 70%;"
@@ -82,7 +82,12 @@
 							</el-table-column>
 							<el-table-column prop="brand" label="Brand" width="90">
 							</el-table-column>
-							<el-table-column prop="model" label="Model" width="180">
+							<el-table-column prop="model" label="Model" width="200">
+								<template slot-scope="scope">
+									<el-tooltip :content="scope.row.model">
+										<div class="no-wrap">{{ scope.row.model }}</div>
+									</el-tooltip>
+								</template>
 							</el-table-column>
 							<el-table-column prop="sn" label="SN" width="160">
 							</el-table-column>
@@ -272,7 +277,28 @@
 				}
 				return text;
 			},
-			searchRecord(e) {},
+			searchRecord() {
+				if (this.searchParam.length == 0) {
+					return;
+				}
+				this.loading = true;
+				axios
+					.post("searchwarranty", {
+						type: this.searchKey,
+						param: this.searchParam
+					})
+					.then(res => {
+						this.tableData = res.data;
+						this.loading = false;
+					})
+					.catch(e => {
+						console.log(e);
+						if (e.statusCode != 200) {
+							alert("出错了！");
+							this.loading = false;
+						}
+					});
+			},
 
 			handleEdit(index, row) {
 				this.$router.push({

@@ -19,15 +19,15 @@
 							<el-dropdown-item command="order">Oder#</el-dropdown-item>
 							<el-dropdown-item command="tracker">Tracking</el-dropdown-item>
 							<el-dropdown-item command="SN">SN</el-dropdown-item>
-							<el-dropdown-item command="date">Date</el-dropdown-item>
+							<!-- <el-dropdown-item command="date">Date</el-dropdown-item> -->
 						</el-dropdown-menu>
 					</el-dropdown>
 					<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px; width: 70%;"
 						@keyup.enter.native="searchRecord"></el-input>
 
 					<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam" type="daterange"
-						align="right" unlink-panels range-separator="to" start-placeholder="Start Date" end-placeholder="End Date"
-						value-format="yyyy-MM-dd HH:mm:ss">
+						align="right" unlink-panels range-separator="to" start-placeholder="Start Date"
+						end-placeholder="End Date" value-format="yyyy-MM-dd HH:mm:ss">
 					</el-date-picker>
 
 					<el-button type="primary" @click="searchRecord">
@@ -72,10 +72,11 @@
 						</div>
 
 						<el-table ref="dataTable" :height="table_max_height" v-loading="loading" :data="tableData"
-							@cell-click="cellClickCopy" @row-click="rowClickRead">
+							@cell-click="cellClickCopy" @row-dblclick="rowClickRead"
+							@row-contextmenu="handleContextMenu">
 							<el-table-column prop="rt_id" label="ID" width="100">
 							</el-table-column>
-							<el-table-column prop="decision" label="Decision" width="120" :formatter="decisionFmt"
+							<el-table-column prop="decision" label="Decision" width="130" :formatter="decisionFmt"
 								:filter-method="filterMethod">
 							</el-table-column>
 							<el-table-column prop="rec_dt" label="Received On" width="110" :formatter="dateformat">
@@ -84,7 +85,12 @@
 							</el-table-column>
 							<el-table-column prop="brand" label="Brand" width="90" :filter-method="filterMethod">
 							</el-table-column>
-							<el-table-column prop="model" label="Model" width="180">
+							<el-table-column prop="model" label="Model" width="200">
+								<template slot-scope="scope">
+									<el-tooltip :content="scope.row.model">
+										<div class="no-wrap">{{ scope.row.model }}</div>
+									</el-tooltip>
+								</template>
 							</el-table-column>
 							<el-table-column prop="upc" label="UPC" width="115">
 							</el-table-column>
@@ -97,7 +103,7 @@
 							</el-table-column>
 							<el-table-column prop="rt_track" label="Return Tracking" width="170">
 							</el-table-column>
-							<el-table-column prop="cur_config" label="Current Config" width="160">
+							<el-table-column prop="cur_config" label="Current Config" width="180">
 							</el-table-column>
 							<el-table-column prop="lb_type" label="Label Type" width="100">
 							</el-table-column>
@@ -105,7 +111,7 @@
 							</el-table-column>
 							<el-table-column prop="rt_dt" label="Returned Date" width="120" :formatter="dateformat">
 							</el-table-column>
-							<el-table-column prop="seller" label="Store" width="90" :filter-method="filterMethod">
+							<el-table-column prop="seller" label="Store" width="100" :filter-method="filterMethod">
 							</el-table-column>
 							<el-table-column prop="creator" label="Operator" width="90">
 							</el-table-column>
@@ -155,7 +161,8 @@
 								</template>
 							</el-table-column>
 							<el-table-column align="center" prop="is_check_out" label="Checked Out" width="120"
-								:filters="[{text:'Yes',value:true},{text:'No',value:false}]" :filter-method="filterMethod" :filtered-value="[false]">
+								:filters="[{text:'Yes',value:true},{text:'No',value:false}]"
+								:filter-method="filterMethod" :filtered-value="[false]">
 								<template slot-scope="scope">
 									<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_check_out"
 										disabled></el-checkbox>
@@ -179,17 +186,45 @@
 							</el-table-column> -->
 							<el-table-column label="操作" width="150">
 								<template slot-scope="scope">
-									<el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">
+									<el-button size="mini" type="primary"
+										@click="handleEditByTable(scope.$index, scope.row)">
 										Edit</el-button>
-									<el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">
+									<el-button size="mini" type="danger"
+										@click="handleDeleteByTable(scope.$index, scope.row)">
 										Del</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
+
 					</el-main>
 				</el-container>
 			</el-container>
 		</div>
+		<transition name="menu-fade">
+			<div v-show="menu.visible" class="custom-context-menu" :style="menuPosition">
+				<div class="menu-header">
+					<span class="menu-title">操作菜单</span>
+					<el-button type="text" icon="el-icon-close" class="close-btn" @click="closeMenu"></el-button>
+				</div>
+
+				<!-- <div class="menu-item" @click="handleCopy">
+					<i class="el-icon-document-copy"></i>
+					<span>复制数据</span>
+				</div> -->
+
+				<div class="menu-divider"></div>
+
+				<div class="menu-item" @click="handleEdit">
+					<i class="el-icon-edit"></i>
+					<span>编辑条目</span>
+				</div>
+
+				<div class="menu-item danger" @click="handleDelete">
+					<i class="el-icon-delete"></i>
+					<span>删除条目</span>
+				</div>
+			</div>
+		</transition>
 	</div>
 </template>
 
@@ -222,13 +257,36 @@
 					brand: "",
 					seller: ""
 				},
-				loading:false
+				loading: false,
+
+				menu: {
+					visible: false,
+					left: 0,
+					top: 0,
+					currentRow: null
+				}
 			};
 		},
+		computed: {
+			menuPosition() {
+				return {
+					left: this.adjustX(this.menu.left) + 'px',
+					top: this.adjustY(this.menu.top) + 'px'
+				};
+			},
+		},
+		mounted() {
+			document.addEventListener('click', this.closeMenu);
+			// document.addEventListener('contextmenu', this.closeMenu);
+		},
+		beforeDestroy() {
+			document.removeEventListener('click', this.closeMenu);
+			// document.removeEventListener('contextmenu', this.closeMenu);
+		},
+
 		created() {
 			this.getInitData();
 		},
-		mounted() {},
 		methods: {
 			activeFilterChange(prop, value) {
 				const table = this.$refs.dataTable;
@@ -248,7 +306,9 @@
 					if (filterOption.check.indexOf(key) == -1) {
 						this.activeFilterChange(key, [])
 					} else
-						key==="is_check_out" ? this.activeFilterChange(key, [false]) : this.activeFilterChange(key, [true]);
+						key === "is_check_out" ? this.activeFilterChange(key, [false]) : this.activeFilterChange(key, [
+							true
+						]);
 				}
 				this.activeFilterChange("brand", filterOption.brand === '' ? [] : [filterOption.brand]);
 				this.activeFilterChange("decision", filterOption.decision === '' ? [] : [filterOption.decision]);
@@ -276,8 +336,11 @@
 				})
 			},
 			dateformat(row, column, cellValue, index) {
-				let res = cellValue.split(' ')
-				return res[0]
+				if (cellValue && cellValue.includes(' ')) {
+					let res = cellValue.split(' ')
+					return res[0]
+				} else
+					return cellValue
 			},
 			decisionFmt(row, column, cellValue, index) {
 				if (cellValue) {
@@ -305,9 +368,30 @@
 				}
 				return text;
 			},
-			searchRecord(e) {},
+			searchRecord() {
+				if (this.searchParam.length == 0) {
+					return;
+				}
+				this.loading = true;
+				axios
+					.post("searchreturn", {
+						type: this.searchKey,
+						param: this.searchParam
+					})
+					.then(res => {
+						this.tableData = res.data;
+						this.loading = false;
+					})
+					.catch(e => {
+						console.log(e);
+						if (e.statusCode != 200) {
+							alert("出错了！");
+							this.loading = false;
+						}
+					});
+			},
 
-			handleEdit(index, row) {
+			handleEditByTable(index, row) {
 				this.$router.push({
 					path: "/addreturn",
 					query: {
@@ -316,22 +400,22 @@
 				})
 			},
 
-			handleDelete(index, row) {
-				this.$confirm("此操作将删除该退货, 是否继续?", "提示", {
+			handleDeleteByTable(index, row) {
+				this.$confirm("此操作将删除该退货, 是否继续?", "警告", {
 						confirmButtonText: "删除",
 						cancelButtonText: "取消",
 						type: "warning"
 					})
 					.then(() => {
 						this.loading = true
-						axios.post("removeReturn",{
-							id:row.id
-						}).then((e)=>{
-							if(e.ret == 0){
-								this.tableData = this.tableData.filter((item)=> item.id != row.id)
+						axios.post("removeReturn", {
+							id: row.id
+						}).then((e) => {
+							if (e.ret == 0) {
+								this.tableData = this.tableData.filter((item) => item.id != row.id)
 								this.loading = false
 							}
-						}).catch((e)=>{
+						}).catch((e) => {
 							this.$message(e)
 						})
 					})
@@ -345,7 +429,7 @@
 			//导航到创建页
 			directToAdd() {
 				this.$router.push({
-					readOnly:"no",
+					readOnly: "no",
 					path: "/addreturn"
 				}).catch(err => {
 					console.log(err)
@@ -384,11 +468,11 @@
 				}
 			},
 			//点击行 阅览
-			rowClickRead(row, column, event){
+			rowClickRead(row, column, event) {
 				this.$router.push({
 					path: "/addreturn",
 					query: {
-						readOnly:"yes",
+						readOnly: "yes",
 						data: JSON.stringify(row)
 					}
 				})
@@ -396,6 +480,72 @@
 			// 过滤逻辑
 			filterMethod(value, row, column) {
 				return row[column.property] === value;
+			},
+
+			handleContextMenu(row, _, event) {
+				event.preventDefault();
+				this.menu = {
+					visible: true,
+					left: event.clientX,
+					top: event.clientY,
+					currentRow: row
+				};
+			},
+			adjustX(x) {
+				const menuWidth = 200;
+				const windowWidth = document.documentElement.clientWidth;
+				return x + menuWidth > windowWidth ? x - menuWidth : x;
+			},
+			adjustY(y) {
+				const menuHeight = 210;
+				const windowHeight = document.documentElement.clientHeight;
+				return y + menuHeight > windowHeight ? y - menuHeight : y;
+			},
+			closeMenu() {
+				// console.log("关上了")
+				this.menu.visible = false;
+			},
+			handleCopy() {
+				navigator.clipboard.writeText(JSON.stringify(this.menu.currentRow));
+				this.$message.success('数据已复制');
+				this.closeMenu();
+			},
+			handleEdit() {
+				this.$router.push({
+					path: "/addreturn",
+					query: {
+						data: JSON.stringify(this.menu.currentRow)
+					}
+				})
+				this.closeMenu();
+			},
+			handleDelete() {
+				this.$confirm('此操作将删除该退货, 是否继续?', '警告', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						let row = this.menu.currentRow;
+						this.loading = true
+						axios.post("removeReturn", {
+							id: row.id
+						}).then((e) => {
+							if (e.ret == 0) {
+								this.tableData = this.tableData.filter((item) => item.id != row.id)
+								this.loading = false
+							}
+							this.$message.success('删除成功');
+						}).catch((e) => {
+							this.$message(e)
+						})
+					})
+					.catch(() => {
+						this.$message({
+							type: "info",
+							message: "已取消删除"
+						});
+					});
+				this.closeMenu();
 			}
 		}
 	};
@@ -441,5 +591,101 @@
 
 	.el-container:nth-child(7) .el-aside {
 		line-height: 320px;
+	}
+
+
+
+	/* 菜单过渡动画 */
+	.menu-fade-enter-active,
+	.menu-fade-leave-active {
+		transition: opacity 0.2s, transform 0.2s;
+	}
+
+	.menu-fade-enter,
+	.menu-fade-leave-to {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+
+	/* 菜单容器样式 */
+	.custom-context-menu {
+		position: fixed;
+		width: 200px;
+		background: #ffffff;
+		border-radius: 8px;
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+		user-select: none;
+		z-index: 9999;
+	}
+
+	/* 菜单头部 */
+	.menu-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12px 16px;
+		border-bottom: 1px solid #f0f0f0;
+	}
+
+	.menu-title {
+		font-weight: 600;
+		color: #333;
+		font-size: 14px;
+	}
+
+	.close-btn {
+		padding: 0;
+		color: #999;
+
+		&:hover {
+			color: #666;
+		}
+	}
+
+	/* 菜单项样式 */
+	.menu-item {
+		display: flex;
+		align-items: center;
+		padding: 10px 16px;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: #333;
+
+		&:hover {
+			background: #f5f7fa;
+		}
+
+		i {
+			margin-right: 12px;
+			font-size: 16px;
+		}
+
+		&.danger {
+			color: #f56c6c;
+
+			i {
+				color: inherit;
+			}
+
+			&:hover {
+				background: #fef0f0;
+			}
+		}
+
+		&.disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+
+			&:hover {
+				background: none;
+			}
+		}
+	}
+
+	/* 分隔线 */
+	.menu-divider {
+		height: 1px;
+		background: #f0f0f0;
+		margin: 6px 0;
 	}
 </style>
