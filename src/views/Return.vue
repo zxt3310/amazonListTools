@@ -44,6 +44,7 @@
 								<el-checkbox border label="is_need_war">Repair</el-checkbox>
 								<el-checkbox border label="is_fraud">Fraud</el-checkbox>
 								<el-checkbox border label="is_junk">Junk</el-checkbox>
+								<el-checkbox border label="rt_lpn">FBA</el-checkbox>
 							</el-checkbox-group>
 							<div style="margin-left: 20px;">
 								<span>Decision:</span>
@@ -168,6 +169,13 @@
 										disabled></el-checkbox>
 								</template>
 							</el-table-column>
+							<el-table-column prop="rt_lpn" label="LPN" width="100" :filter-method="fbaFilter">
+								<template slot-scope="scope">
+									<el-tooltip :content="scope.row.rt_lpn">
+										<div class="no-wrap">{{ scope.row.rt_lpn }}</div>
+									</el-tooltip>
+								</template>
+							</el-table-column>
 							<!-- <el-table-column prop="war_expire_dt" label="Expire On" width="100">
 							</el-table-column>
 							<el-table-column prop="war_opr" label="Warranty Operator" width="100">
@@ -195,7 +203,10 @@
 								</template>
 							</el-table-column>
 						</el-table>
-
+						<el-pagination background @current-change="handleCurrentChange"
+							@size-change="handleCurrentChange" :page-size.sync="page.persize" :page-sizes="[20,50,100]"
+							:current-page.sync="page.cur" layout="prev, pager, next, jumper, sizes" :total="page.total">
+						</el-pagination>
 					</el-main>
 				</el-container>
 			</el-container>
@@ -255,10 +266,14 @@
 					check: ['is_check_out'],
 					decision: "",
 					brand: "",
-					seller: ""
+					seller: "",
 				},
 				loading: false,
-
+				page: {
+					cur: 1,
+					total: 0,
+					persize: 20
+				},
 				menu: {
 					visible: false,
 					left: 0,
@@ -301,7 +316,7 @@
 			},
 			filter() {
 				let filterOption = this.filters
-				let targets = ['is_check_out', 'is_need_war', 'is_fraud', 'is_junk']
+				let targets = ['is_check_out', 'is_need_war', 'is_fraud', 'is_junk', 'rt_lpn']
 				for (let key of targets) {
 					if (filterOption.check.indexOf(key) == -1) {
 						this.activeFilterChange(key, [])
@@ -328,6 +343,17 @@
 			getInitData() {
 				this.loading = true;
 				axios.get("getReturn").then((e) => {
+					this.tableData = e.data;
+					this.loading = false;
+					this.page.total = e.total;
+				}).catch((e) => {
+					console.log(e)
+					this.loading = false;
+				})
+			},
+			handleCurrentChange(curpage) {
+				this.loading = true;
+				axios.get(`getReturn?page=${this.page.cur}&per_page=${this.page.persize}`).then((e) => {
 					this.tableData = e.data;
 					this.loading = false;
 				}).catch((e) => {
@@ -482,6 +508,12 @@
 				return row[column.property] === value;
 			},
 
+			fbaFilter(value, row, column) {
+				if (value) {
+					return row[column.property] != null
+				}
+				return true
+			},
 			handleContextMenu(row, _, event) {
 				event.preventDefault();
 				this.menu = {

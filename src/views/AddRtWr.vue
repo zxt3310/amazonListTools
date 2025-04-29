@@ -57,6 +57,12 @@
 										v-model="queryData.rec_dt"></el-date-picker>
 								</el-form-item>
 							</el-col>
+							
+							<el-col :span="5">
+								<el-form-item style="width: 80%;" label="LPN:" prop="rt_lpn">
+									<el-input v-model="queryData.rt_lpn"></el-input>
+								</el-form-item>
+							</el-col>
 
 							<el-col :span="5">
 								<el-form-item label="Processed On:">
