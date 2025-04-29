@@ -128,10 +128,11 @@
                   </el-tooltip>
                 </template>
               </el-table-column>
+              <el-table-column prop="upc" label="UPC" width="115">
+              </el-table-column>
               <el-table-column prop="sn" label="SN" width="160">
               </el-table-column>
-              <!-- <el-table-column prop="upc" label="UPC" width="115">
-							</el-table-column> -->
+
               <!-- <el-table-column prop="rt_track" label="Return Tracking" width="170">
 							</el-table-column> -->
               <el-table-column

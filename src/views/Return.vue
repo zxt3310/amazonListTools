@@ -146,7 +146,7 @@
                 :filter-method="filterMethod"
               >
               </el-table-column>
-              <el-table-column prop="model" label="Model" width="200">
+              <el-table-column prop="model" label="Model" width="400">
                 <template slot-scope="scope">
                   <el-tooltip :content="scope.row.model">
                     <div class="no-wrap">{{ scope.row.model }}</div>
@@ -211,6 +211,7 @@
                 width="160"
               >
               </el-table-column>
+
               <el-table-column
                 prop="rt_cmt"
                 label="Condition Notes:"
@@ -222,14 +223,15 @@
                   </el-tooltip>
                 </template>
               </el-table-column>
+
               <el-table-column
                 prop="rt_cmt_cs"
                 label="Comments for service"
                 width="200"
               >
                 <template slot-scope="scope">
-                  <el-tooltip :content="scope.row.rt_cmt">
-                    <div class="no-wrap">{{ scope.row.rt_cmt }}</div>
+                  <el-tooltip :content="scope.row.rt_cmt_cs">
+                    <div class="no-wrap">{{ scope.row.rt_cmt_cs }}</div>
                   </el-tooltip>
                 </template>
               </el-table-column>

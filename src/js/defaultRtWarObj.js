@@ -38,7 +38,7 @@ export const BrandOption = [
 ]
 
 export const SellerOption = [
-	"ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC",	"CHILL_AU"
+	"ROC","ONT", "COU", "VNE", "IVY", "RTC", "HLT", "ROB", "DAS", "ETS", "KLT", "GFA", "WWC",	"CHILL_AU"
 ]
 
 export const DefectsOption = [
