@@ -496,6 +496,7 @@ export default {
       this.queryData = {
         ...InitQuery
       };
+      this.queryData.pic_ids = [];
       this.warrantyAccess = false;
     }
     this.uploadCos = new COS({
