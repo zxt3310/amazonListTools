@@ -18,7 +18,10 @@
               }}<i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="rt_id">ReturnID</el-dropdown-item>
               <el-dropdown-item command="order">Oder#</el-dropdown-item>
+              <el-dropdown-item command="upc">UPC</el-dropdown-item>
+              <el-dropdown-item command="model">Model</el-dropdown-item>
               <el-dropdown-item command="tracker">Tracking</el-dropdown-item>
               <el-dropdown-item command="SN">SN</el-dropdown-item>
               <el-dropdown-item command="date">Date</el-dropdown-item>
@@ -574,8 +577,17 @@ export default {
     searchBtnText(e) {
       var text = "";
       switch (e) {
+        case "rt_id":
+          text = "ReturnID";
+          break;
         case "order":
           text = "Order#";
+          break;
+        case "model":
+          text = "Model";
+          break;
+        case "upc":
+          text = "UPC";
           break;
         case "tracker":
           text = "Tracking";
