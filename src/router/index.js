@@ -11,6 +11,7 @@ import Login from "../views/login.vue"
 import Return from "../views/Return.vue";
 import Warranty from "../views/Warranty.vue";
 import AddRtWrVue from "../views/AddRtWr.vue";
+import store from "../store";
 
 Vue.use(VueRouter);
 
@@ -63,7 +64,8 @@ const routes = [
   {
 	  path:"/return",
 	  name:"Return",
-	  component:Return
+	  component:Return,
+	  meta: { keepAlive: true }
   },
   {
   	  path:"/warranty",
@@ -72,7 +74,7 @@ const routes = [
   },
   {
 	  path:"/addreturn",
-	  name:"新增退货",
+	  name:"addreturn",
 	  component:AddRtWrVue
   }
 ];
@@ -81,6 +83,12 @@ const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  // 记录上一个路由到Vuex
+  store.commit('setPreviousRoute', from);
+  next();
 });
 
 export default router;

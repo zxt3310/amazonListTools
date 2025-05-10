@@ -637,6 +637,7 @@ export default {
         .post("createReturn", data)
         .then(e => {
           this.loading = false;
+          this.$store.commit("clearTempPageAData"); // 清除缓存,重新拉取
           this.goBack();
         })
         .catch(e => {

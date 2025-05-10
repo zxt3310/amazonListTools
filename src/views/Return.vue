@@ -117,6 +117,7 @@
               @cell-click="cellClickCopy"
               @row-dblclick="rowClickRead"
               @row-contextmenu="handleContextMenu"
+              :row-style="markRefundedRows"
             >
               <el-table-column prop="rt_id" label="ID" width="100">
               </el-table-column>
@@ -290,7 +291,7 @@
                 <template slot-scope="scope">
                   <el-checkbox
                     style="transform: scale(1.3);"
-                    :value="scope.row.is_refund"
+                    :value="scope.row.is_refunded"
                     disabled
                   ></el-checkbox>
                 </template>
@@ -327,22 +328,6 @@
                   </el-tooltip>
                 </template>
               </el-table-column>
-              <!-- <el-table-column prop="war_expire_dt" label="Expire On" width="100">
-							</el-table-column>
-							<el-table-column prop="war_opr" label="Warranty Operator" width="100">
-							</el-table-column>
-							<el-table-column prop="war_method" label="Repair Method" width="100">
-							</el-table-column>
-							<el-table-column prop="war_track_out" label="Outbound Tracking" width="100">
-							</el-table-column>
-							<el-table-column prop="war_track_in" label="Inbound Tracking" width="100">
-							</el-table-column>
-							<el-table-column prop="war_dt" label="Date" width="100">
-							</el-table-column>
-							<el-table-column prop="war_case" label="Case#" width="100">
-							</el-table-column>
-							<el-table-column prop="war_cmt" label="Warranty Comments" width="200">
-							</el-table-column> -->
               <el-table-column label="操作" width="150">
                 <template slot-scope="scope">
                   <el-button
@@ -368,7 +353,7 @@
               @current-change="handleCurrentChange"
               @size-change="handleCurrentChange"
               :page-size.sync="page.persize"
-              :page-sizes="[20, 50, 100, 1000]"
+              :page-sizes="[100, 250, 500, 1000]"
               :current-page.sync="page.cur"
               layout="prev, pager, next, jumper, sizes"
               :total="page.total"
@@ -469,6 +454,9 @@ export default {
   mounted() {
     document.addEventListener("click", this.closeMenu);
     // document.addEventListener('contextmenu', this.closeMenu);
+
+    //回退后筛选保持数据
+    this.filter();
   },
   beforeDestroy() {
     document.removeEventListener("click", this.closeMenu);
@@ -476,7 +464,22 @@ export default {
   },
 
   created() {
-    this.getInitData();
+    // 当且仅当从B页面返回时恢复数据
+    if (
+      this.$store.state.previousRoute?.name === "addreturn" &&
+      this.$store.state.tempPageAData
+    ) {
+      Object.assign(this.$data, this.$store.state.tempPageAData);
+      this.$store.commit("clearTempPageAData"); // 恢复后立即清除缓存
+    } else {
+      this.getInitData();
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    if (to.name === "addreturn") {
+      this.$store.commit("setTempPageAData", this.$data);
+    }
+    next();
   },
   methods: {
     activeFilterChange(prop, value) {
@@ -729,6 +732,16 @@ export default {
         }
       });
     },
+    //标记已退款的行
+    markRefundedRows({ row, index }) {
+      if (row.is_refunded) {
+        return {
+          // backgroundColor: "#f6ffed", // 成功状态背景
+          color: "#389e0d", // 主文字颜色
+          borderBottom: "2px solid #b7eb8f" // 底部边框
+        };
+      }
+    },
     // 过滤逻辑
     filterMethod(value, row, column) {
       return row[column.property] === value;
@@ -769,13 +782,13 @@ export default {
       this.closeMenu();
     },
     handleEdit() {
+      this.closeMenu();
       this.$router.push({
         path: "/addreturn",
         query: {
           data: JSON.stringify(this.menu.currentRow)
         }
       });
-      this.closeMenu();
     },
     handleDelete() {
       this.$confirm("此操作将删除该退货, 是否继续?", "警告", {

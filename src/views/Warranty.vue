@@ -18,10 +18,15 @@
               }}<i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="order">订单号</el-dropdown-item>
-              <el-dropdown-item command="tracker">运单号</el-dropdown-item>
+              <el-dropdown-item command="rt_id">ReturnID</el-dropdown-item>
+              <el-dropdown-item command="order">Oder#</el-dropdown-item>
+              <el-dropdown-item command="upc">UPC</el-dropdown-item>
+              <el-dropdown-item command="model">Model</el-dropdown-item>
+              <el-dropdown-item command="tracker">Tracking</el-dropdown-item>
               <el-dropdown-item command="SN">SN</el-dropdown-item>
-              <!-- <el-dropdown-item command="date">日期</el-dropdown-item> -->
+              <el-dropdown-item command="date">Date</el-dropdown-item>
+              <el-dropdown-item command="fraud">Fraud</el-dropdown-item>
+              <el-dropdown-item command="junk">Junk</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
           <el-input
@@ -105,6 +110,7 @@
               :height="table_max_height"
               v-loading="loading"
               :data="tableData"
+              :row-style="markRefundedRows"
             >
               <el-table-column prop="rt_id" label="ID" width="100">
               </el-table-column>
@@ -281,9 +287,27 @@ export default {
     };
   },
   created() {
-    this.getInitData();
+    // 当且仅当从B页面返回时恢复数据
+    if (
+      this.$store.state.previousRoute?.name === "addreturn" &&
+      this.$store.state.tempPageAData
+    ) {
+      Object.assign(this.$data, this.$store.state.tempPageAData);
+      this.$store.commit("clearTempPageAData"); // 恢复后立即清除缓存
+    } else {
+      this.getInitData();
+    }
   },
-  mounted() {},
+  beforeRouteLeave(to, from, next) {
+    if (to.name === "addreturn") {
+      this.$store.commit("setTempPageAData", this.$data);
+    }
+    next();
+  },
+  mounted() {
+    //回退后筛选保持数据
+    this.filter();
+  },
   methods: {
     activeFilterChange(prop, value) {
       const table = this.$refs.dataTable;
@@ -373,17 +397,34 @@ export default {
     searchBtnText(e) {
       var text = "";
       switch (e) {
+        case "rt_id":
+          text = "ReturnID";
+          break;
         case "order":
-          text = "订单号";
+          text = "Order#";
+          break;
+        case "model":
+          text = "Model";
+          break;
+        case "upc":
+          text = "UPC";
           break;
         case "tracker":
-          text = "运单号";
+          text = "Tracking";
           break;
         case "SN":
           text = "SN";
           break;
         case "date":
-          text = "日期";
+          text = "Date";
+          break;
+        case "fraud":
+          text = "Fraud";
+          this.searchParam = "点击搜索全部 Fraud";
+          break;
+        case "junk":
+          text = "Junk";
+          this.searchParam = "点击搜索全部 Junk for parts";
           break;
       }
       return text;
@@ -394,9 +435,10 @@ export default {
       }
       this.loading = true;
       axios
-        .post("searchwarranty", {
+        .post("searchreturn", {
           type: this.searchKey,
-          param: this.searchParam
+          param: this.searchParam,
+          category: "warranty"
         })
         .then(res => {
           this.tableData = res.data;
@@ -436,6 +478,17 @@ export default {
     },
     //导航到创建页
     directToAdd() {},
+
+    //标记已退款的行
+    markRefundedRows({ row, index }) {
+      if (row.is_refunded) {
+        return {
+          // backgroundColor: "#f6ffed", // 成功状态背景
+          color: "#389e0d", // 主文字颜色
+          borderBottom: "2px solid #b7eb8f" // 底部边框
+        };
+      }
+    },
 
     //单元格点击复制
     cellClickCopy(row, column, cell, event) {
