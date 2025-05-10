@@ -440,7 +440,7 @@ export default {
       page: {
         cur: 1,
         total: 0,
-        persize: 20
+        persize: 100
       },
       menu: {
         visible: false,
