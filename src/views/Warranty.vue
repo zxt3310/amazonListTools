@@ -107,6 +107,7 @@
             <el-table
               ref="dataTable"
               @cell-click="cellClickCopy"
+              @row-dblclick="rowClickRead"
               :height="table_max_height"
               v-loading="loading"
               :data="tableData"
@@ -488,6 +489,17 @@ export default {
           borderBottom: "2px solid #b7eb8f" // 底部边框
         };
       }
+    },
+
+    //点击行 阅览
+    rowClickRead(row, column, event) {
+      this.$router.push({
+        path: "/addreturn",
+        query: {
+          readOnly: "yes",
+          data: JSON.stringify(row)
+        }
+      });
     },
 
     //单元格点击复制

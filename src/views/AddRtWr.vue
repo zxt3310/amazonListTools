@@ -104,6 +104,15 @@
                   ></el-date-picker>
                 </el-form-item>
               </el-col>
+
+              <el-col :span="4">
+                <el-form-item label="Return Region">
+                  <el-select v-model="queryData.rt_region">
+                    <el-option label="US" :value="1"></el-option>
+                    <el-option label="CA" :value="2"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
             </el-row>
           </el-card>
 
@@ -430,7 +439,9 @@
                   style="width: 150px;"
                   type="warning"
                   @click="checkout"
-                  >Check Out</el-button
+                  >{{
+                    queryData.is_check_out ? "Is Checked Out" : "Check Out"
+                  }}</el-button
                 >
               </el-form-item>
             </el-col>
@@ -441,7 +452,9 @@
                   style="width: 150px;"
                   type="success"
                   @click="refund"
-                  >Refund</el-button
+                  >{{
+                    queryData.is_refunded ? "Is Refunded" : "Refund"
+                  }}</el-button
                 >
               </el-form-item>
             </el-col>

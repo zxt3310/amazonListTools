@@ -26,7 +26,8 @@ export const InitQuery = {
 	war_track_in: "",
 	war_track_out: "",
 	war_def: "",
-	pic_ids: []
+	pic_ids: [],
+	rt_region:1
 }
 
 export const DecisionOption = [

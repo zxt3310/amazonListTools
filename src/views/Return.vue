@@ -317,6 +317,13 @@
                 </template>
               </el-table-column>
               <el-table-column
+                prop="rt_region"
+                label="Region"
+                width="100"
+                :formatter="regionFmt"
+              >
+              </el-table-column>
+              <el-table-column
                 prop="rt_lpn"
                 label="LPN"
                 width="100"
@@ -741,6 +748,10 @@ export default {
           borderBottom: "2px solid #b7eb8f" // 底部边框
         };
       }
+    },
+    //Region格式化
+    regionFmt(row, column, cellValue, index) {
+      return cellValue == 1 ? "US" : "CA";
     },
     // 过滤逻辑
     filterMethod(value, row, column) {
