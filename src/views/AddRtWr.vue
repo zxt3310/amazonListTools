@@ -11,7 +11,11 @@
         :model="queryData"
         ref="dataform"
       >
-        <div v-loading="loading">
+        <div
+          v-loading="loading"
+          element-loading-text="saving..."
+          element-loading-spinner="el-icon-loading"
+        >
           <el-card>
             <div class="title_card" slot="header">
               <span>General Information</span>
@@ -617,6 +621,8 @@ export default {
             .then(e => {
               this.queryData.is_check_out = true;
               this.$message("checkout successed");
+              //自动触发一次提交
+              this.submitQueryData();
             });
         })
         .catch(() => {});
@@ -650,7 +656,9 @@ export default {
         .post("createReturn", data)
         .then(e => {
           this.loading = false;
-          this.$store.commit("clearTempPageAData"); // 清除缓存,重新拉取
+          if (!this.warrantyAccess) {
+            this.$store.commit("clearTempPageAData"); // 如果是新增退货则清除缓存,重新拉取，保证列表一致性
+          }
           this.goBack();
         })
         .catch(e => {

@@ -3,8 +3,8 @@ import VueRouter from "vue-router";
 // import Home from "../views/Home.vue";
 import About from "../views/About.vue";
 // import CAConvert from "../views/CAConvert.vue";
-// import UPC from "../views/UPC.vue";
-// import CaculateUPC from "../views/CaculateUPC.vue";
+import UPC from "../views/UPC.vue";
+import CaculateUPC from "../views/CaculateUPC.vue";
 import TrackingCheck from "../views/TrackingCheck.vue";
 import UpgradeMission from "../views/UpgradeMission.vue";
 import Login from "../views/login.vue"
@@ -35,17 +35,17 @@ const routes = [
 	//   path:"/CAConvert",
 	//   name:"CAConvert",
 	//   component: CAConvert
- //  },
- //  {
-	//   path:"/UPC",
-	//   name:"UPC",
-	//   component: UPC
- //  },
- //  {
-	//   path:"/CaculateUPC",
-	//   name:"UPC计算器",
-	//   component: CaculateUPC
- //  },
+  // },
+  {
+	  path:"/UPC",
+	  name:"UPC",
+	  component: UPC
+  },
+  {
+	  path:"/CaculateUPC",
+	  name:"UPC计算器",
+	  component: CaculateUPC
+  },
   {
 	  path:"/trackingcheck",
 	  name:"CA Tracking Check",
