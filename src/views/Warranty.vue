@@ -485,8 +485,8 @@ export default {
       if (row.is_refunded) {
         return {
           // backgroundColor: "#f6ffed", // 成功状态背景
-          color: "#389e0d", // 主文字颜色
-          borderBottom: "2px solid #b7eb8f" // 底部边框
+          color: "#ff8d22", // 主文字颜色
+          // borderBottom: "2px solid #b7eb8f" // 底部边框
         };
       }
     },

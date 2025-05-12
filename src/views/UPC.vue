@@ -5,7 +5,7 @@
       <router-link to="/caculateupc">Caculate UPC</router-link>
     </div>
 
-    <div style="width: 60%; margin: 0 20%;">
+    <div style="width: 66%; margin: 0 17%;">
       <el-row :gutter="20">
         <el-col :span="12">
           <el-container>
