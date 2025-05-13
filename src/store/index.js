@@ -14,6 +14,13 @@ export default new Vuex.Store({
 		setTempPageAData(state, data) {
 			state.tempPageAData = JSON.parse(JSON.stringify(data));
 		},
+		setModifiedData(state,data){
+			let list = state.tempPageAData.tableData;
+			let index = list.findIndex(item=>item.id===data.id);
+			if(index != -1){
+				list[index] = data
+			}
+		},
 		clearTempPageAData(state) {
 			state.tempPageAData = null;
 		},

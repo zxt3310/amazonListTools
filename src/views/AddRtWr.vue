@@ -511,6 +511,8 @@
 							.then(e => {
 								this.queryData.is_refunded = true;
 								this.$message("refund successed");
+								//自动触发一次提交
+								this.submitQueryData();
 							});
 					})
 					.catch(() => {});
@@ -527,6 +529,8 @@
 						this.loading = false;
 						if (!this.warrantyAccess) {
 							this.$store.commit("clearTempPageAData"); // 如果是新增退货则清除缓存,重新拉取，保证列表一致性
+						}else{
+							this.$store.commit("setModifiedData",data)
 						}
 						this.goBack();
 					})

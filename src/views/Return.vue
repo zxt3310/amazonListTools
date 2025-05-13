@@ -18,13 +18,13 @@
               }}<i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="rt_id">ReturnID</el-dropdown-item>
+              <el-dropdown-item command="rt_id">Return ID</el-dropdown-item>
               <el-dropdown-item command="order">Oder#</el-dropdown-item>
               <el-dropdown-item command="upc">UPC</el-dropdown-item>
               <el-dropdown-item command="model">Model</el-dropdown-item>
-              <el-dropdown-item command="tracker">Tracking</el-dropdown-item>
+              <el-dropdown-item command="tracker">Return Tracking</el-dropdown-item>
               <el-dropdown-item command="SN">SN</el-dropdown-item>
-              <el-dropdown-item command="date">Date</el-dropdown-item>
+              <el-dropdown-item command="date">Process Date</el-dropdown-item>
               <el-dropdown-item command="repair">Repair</el-dropdown-item>
               <el-dropdown-item command="fraud">Fraud</el-dropdown-item>
               <el-dropdown-item command="junk">Junk</el-dropdown-item>
@@ -187,8 +187,8 @@
                 width="180"
               >
               </el-table-column>
-              <el-table-column prop="lb_type" label="Label Type" width="100">
-              </el-table-column>
+              <!-- <el-table-column prop="lb_type" label="Label Type" width="100">
+              </el-table-column> -->
               <el-table-column prop="order_id" label="Order#" width="170">
               </el-table-column>
               <el-table-column
@@ -588,7 +588,7 @@ export default {
       var text = "";
       switch (e) {
         case "rt_id":
-          text = "ReturnID";
+          text = "Return ID";
           break;
         case "order":
           text = "Order#";
@@ -600,13 +600,13 @@ export default {
           text = "UPC";
           break;
         case "tracker":
-          text = "Tracking";
+          text = "Return Tracking";
           break;
         case "SN":
           text = "SN";
           break;
         case "date":
-          text = "Date";
+          text = "Process Date";
           break;
         case "repair":
           text = "Repair";

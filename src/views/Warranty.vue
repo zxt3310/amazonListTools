@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <my-navi activeIndex="5"></my-navi>
+    <my-navi activeIndex="6"></my-navi>
     <!-- <h2>Return & Warranty</h2> -->
     <div class="" style="">
       <el-container>

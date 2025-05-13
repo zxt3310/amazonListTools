@@ -9,6 +9,7 @@ import TrackingCheck from "../views/TrackingCheck.vue";
 import UpgradeMission from "../views/UpgradeMission.vue";
 import Login from "../views/login.vue"
 import Return from "../views/Return.vue";
+import UnRefund from "../views/UnRefund.vue";
 import Warranty from "../views/Warranty.vue";
 import AddRtWrVue from "../views/AddRtWr.vue";
 import store from "../store";
@@ -71,6 +72,11 @@ const routes = [
   	  path:"/warranty",
   	  name:"Warranty",
   	  component:Warranty
+  },
+  {
+  	  path:"/unrefund",
+  	  name:"UnRefund",
+  	  component:UnRefund
   },
   {
 	  path:"/addreturn",
