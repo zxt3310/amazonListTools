@@ -13,6 +13,7 @@ import UnRefund from "../views/UnRefund.vue";
 import Warranty from "../views/Warranty.vue";
 import AddRtWrVue from "../views/AddRtWr.vue";
 import store from "../store";
+import InventoryAjustment from "../views/InventoryAjustment.vue";
 
 Vue.use(VueRouter);
 
@@ -82,6 +83,11 @@ const routes = [
 	  path:"/addreturn",
 	  name:"addreturn",
 	  component:AddRtWrVue
+  },
+  {
+	  path:"/inventory-adjustment",
+	  name:"inventory",
+	  component:InventoryAjustment
   }
 ];
 

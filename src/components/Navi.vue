@@ -8,6 +8,7 @@
 			<el-menu-item index="4">Return</el-menu-item>
 			<el-menu-item index="5">Need Refund</el-menu-item>
 			<el-menu-item index="6">Warranty</el-menu-item>
+			<el-menu-item index="7">上下架(Beta)</el-menu-item>
 		</el-menu>
 	</div>
 </template>
@@ -35,7 +36,8 @@
 					"/UpgradeMission",
 					"/Return",
 					"/unrefund",
-					"/Warranty"
+					"/Warranty",
+					"/inventory-adjustment"
 				]
 				if(curPath === routerPath[key-1]){
 					return

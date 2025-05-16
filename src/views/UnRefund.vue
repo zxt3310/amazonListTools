@@ -1,87 +1,10 @@
 <template>
 	<div class="about">
 		<my-navi activeIndex="5"></my-navi>
-		<!-- <h2>Return & Warranty</h2> -->
 		<div class="" style="">
 			<el-container>
-				<!-- <el-header style="position: relative;">
-          <el-dropdown
-            @command="
-              e => {
-                searchKey = e;
-                searchParam = '';
-              }
-            "
-          >
-            <el-button type="primary">
-              {{ searchBtnText(searchKey)
-              }}<i class="el-icon-arrow-down el-icon--right"></i>
-            </el-button>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="rt_id">Return ID</el-dropdown-item>
-              <el-dropdown-item command="order">Oder#</el-dropdown-item>
-              <el-dropdown-item command="upc">UPC</el-dropdown-item>
-              <el-dropdown-item command="model">Model</el-dropdown-item>
-              <el-dropdown-item command="tracker">Return Tracking</el-dropdown-item>
-              <el-dropdown-item command="SN">SN</el-dropdown-item>
-              <el-dropdown-item command="date">Process Date</el-dropdown-item>
-              <el-dropdown-item command="repair">Repair</el-dropdown-item>
-              <el-dropdown-item command="fraud">Fraud</el-dropdown-item>
-              <el-dropdown-item command="junk">Junk</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-          <el-input
-            v-model="searchParam"
-            v-if="searchKey != 'date'"
-            style="margin:0 10px; width: 70%;"
-            @keyup.enter.native="searchRecord"
-          ></el-input>
-
-          <el-date-picker
-            v-else
-            style="margin: 0 10px; width: 50%;"
-            v-model="searchParam"
-            type="daterange"
-            align="right"
-            unlink-panels
-            range-separator="to"
-            start-placeholder="Start Date"
-            end-placeholder="End Date"
-            value-format="yyyy-MM-dd HH:mm:ss"
-          >
-          </el-date-picker>
-
-          <el-button type="primary" @click="searchRecord">
-            Search <i class="el-icon-search"></i>
-          </el-button>
-          <el-button
-            type="primary"
-            style="position: absolute; right: 50px;"
-            @click="directToAdd"
-            >Create Return</el-button
-          >
-        </el-header> -->
-				<!-- <el-container> -->
 				<el-main style="padding-top: 0 !important;">
 					<div style="padding: 10px 0;text-align: left; display: flex; align-items: center;">
-						<!-- <el-checkbox-group v-model="filters.check">
-                <el-checkbox border label="is_check_out">In Stock</el-checkbox>
-                <el-checkbox border label="is_need_war">Repair</el-checkbox>
-                <el-checkbox border label="is_fraud">Fraud</el-checkbox>
-                <el-checkbox border label="is_junk">Junk</el-checkbox>
-                <el-checkbox border label="rt_lpn">FBA</el-checkbox>
-              </el-checkbox-group>
-              <div style="margin-left: 20px;">
-                <span>Decision:</span>
-                <el-select style=" width: 160px;" v-model="filters.decision">
-                  <el-option
-                    v-for="(item, index) in decisionOption"
-                    :key="index"
-                    :label="item"
-                    :value="index + 1"
-                  ></el-option>
-                </el-select>
-              </div> -->
 						<div style="margin-left: 20px;">
 							<span>Store: </span>
 							<el-autocomplete style="width: 120px;" v-model="filters.seller"
@@ -91,15 +14,6 @@
 							<span>Order#: </span>
 							<el-input style="width: 200px;" v-model="filters.order_id"></el-input>
 						</div>
-						<!-- <div style="margin-left: 20px;">
-                <span>Brand:</span>
-                <el-autocomplete
-                  style="width: 120px;"
-                  v-model="filters.brand"
-                  :fetch-suggestions="brandQuerySearch"
-                ></el-autocomplete>
-              </div> -->
-
 						<div style="margin-left: 20px;">
 							<el-button type="primary" @click="filter">Filter</el-button>
 						</div>
@@ -125,31 +39,6 @@
 						</el-table-column>
 						<el-table-column prop="seller" label="Store" width="80" :filter-method="filterMethod">
 						</el-table-column>
-						<!-- <el-table-column
-                prop="brand"
-                label="Brand"
-                width="100"
-                :filter-method="filterMethod"
-              >
-              </el-table-column> -->
-						<!-- <el-table-column prop="upc" label="UPC" width="115">
-              </el-table-column> -->
-						<!-- <el-table-column
-                align="center"
-                prop="is_need_war"
-                label="Repair"
-                width="100"
-                :filters="[{ text: 'Yes', value: true }]"
-                :filter-method="filterMethod"
-              >
-                <template slot-scope="scope">
-                  <el-checkbox
-                    style="transform: scale(1.3);"
-                    :value="scope.row.is_need_war"
-                    disabled
-                  ></el-checkbox>
-                </template>
-              </el-table-column> -->
 						<el-table-column prop="rt_track" label="Return Tracking" width="170">
 						</el-table-column>
 						<el-table-column prop="model" label="Model" width="400">
@@ -159,25 +48,6 @@
 								</el-tooltip>
 							</template>
 						</el-table-column>
-						<!-- <el-table-column
-                prop="cur_config"
-                label="Current Config"
-                width="180"
-              >
-              </el-table-column> -->
-						<!-- <el-table-column prop="lb_type" label="Label Type" width="100">
-              </el-table-column> -->
-						<!-- <el-table-column prop="creator" label="Operator" width="90">
-              </el-table-column> -->
-						<!-- <el-table-column prop="sn" label="SN" width="160">
-              </el-table-column> -->
-						<!-- <el-table-column
-                prop="cur_config"
-                label="Current Config"
-                width="160"
-              >
-              </el-table-column> -->
-
 						<el-table-column prop="rt_cmt" label="Condition Notes:" width="200">
 							<template slot-scope="scope">
 								<el-tooltip :content="scope.row.rt_cmt">
@@ -200,86 +70,8 @@
 								</el-tooltip>
 							</template>
 						</el-table-column>
-						<!-- <el-table-column
-                align="center"
-                prop="is_fraud"
-                label="Fraud"
-                width="80"
-                :filters="[{ text: 'Yes', value: true }]"
-                :filter-method="filterMethod"
-              >
-                <template slot-scope="scope">
-                  <el-checkbox
-                    style="transform: scale(1.3);"
-                    :value="scope.row.is_fraud"
-                    disabled
-                  ></el-checkbox>
-                </template>
-              </el-table-column> -->
-						<!-- <el-table-column
-                align="center"
-                prop="is_junk"
-                label="Junk"
-                width="80"
-                :filters="[{ text: 'Yes', value: true }]"
-                :filter-method="filterMethod"
-              >
-                <template slot-scope="scope">
-                  <el-checkbox
-                    style="transform: scale(1.3);"
-                    :value="scope.row.is_junk"
-                    disabled
-                  ></el-checkbox>
-                </template>
-              </el-table-column> -->
-						<!-- <el-table-column
-                align="center"
-                prop="is_refund"
-                label="Refunded"
-                width="90"
-              >
-                <template slot-scope="scope">
-                  <el-checkbox
-                    style="transform: scale(1.3);"
-                    :value="scope.row.is_refunded"
-                    disabled
-                  ></el-checkbox>
-                </template>
-              </el-table-column> -->
-						<!-- <el-table-column
-                align="center"
-                prop="is_check_out"
-                label="Checked Out"
-                width="120"
-                :filters="[
-                  { text: 'Yes', value: true },
-                  { text: 'No', value: false }
-                ]"
-                :filter-method="filterMethod"
-                :filtered-value="[false]"
-              >
-                <template slot-scope="scope">
-                  <el-checkbox
-                    style="transform: scale(1.3);"
-                    :value="scope.row.is_check_out"
-                    disabled
-                  ></el-checkbox>
-                </template>
-              </el-table-column> -->
 						<el-table-column prop="rt_region" label="Region" width="100" :formatter="regionFmt">
 						</el-table-column>
-						<!-- <el-table-column
-                prop="rt_lpn"
-                label="LPN"
-                width="100"
-                :filter-method="fbaFilter"
-              >
-                <template slot-scope="scope">
-                  <el-tooltip :content="scope.row.rt_lpn">
-                    <div class="no-wrap">{{ scope.row.rt_lpn }}</div>
-                  </el-tooltip>
-                </template>
-              </el-table-column> -->
 						<el-table-column label="操作" width="150">
 							<template slot-scope="scope">
 								<el-button size="mini" type="primary"
@@ -291,20 +83,7 @@
 							</template>
 						</el-table-column>
 					</el-table>
-					<!-- <el-pagination
-              v-if="searchParam == ''"
-              background
-              @current-change="handleCurrentChange"
-              @size-change="handleCurrentChange"
-              :page-size.sync="page.persize"
-              :page-sizes="[100, 250, 500, 1000]"
-              :current-page.sync="page.cur"
-              layout="prev, pager, next, jumper, sizes"
-              :total="page.total"
-            >
-            </el-pagination> -->
 				</el-main>
-				<!-- </el-container> -->
 			</el-container>
 		</div>
 		<transition name="menu-fade">

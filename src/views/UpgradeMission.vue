@@ -119,6 +119,11 @@
 													@click="showall=!showall">{{showall?"部分":"完整"}}</el-button>
 											</template>
 										</el-table-column>
+										<template #empty>
+											<div class="custom-empty">
+												<p class="empty-text">今日无数据</p>
+											</div>
+										</template>
 									</el-table>
 								</el-main>
 								<el-aside width="120px">
@@ -283,11 +288,11 @@
 		// components: {
 		// 	VueBarcode
 		// },
-		computed:{
+		computed: {
 			draw_style() {
 				return {
 					margin: "20px",
-					backgroundColor:"white",
+					backgroundColor: "white",
 					height: `${window.innerHeight - 110}px`
 				}
 			}
@@ -317,10 +322,10 @@
 				//页面数据
 				table_max_height: window.innerHeight - 220,
 				missionData: {
-					orderids:[
+					orderids: [
 						""
 					],
-					trackings:[
+					trackings: [
 						""
 					]
 				},
@@ -467,25 +472,25 @@
 			onSubmit(e) {
 				console.log(e);
 			},
-			
-			addId(){
+
+			addId() {
 				this.missionData.orderids.push("")
 			},
-			addTracking(){
+			addTracking() {
 				this.missionData.trackings.push("")
 			},
 			//重置missionData
-			resetData(){
-				return{
-					orderids:[
+			resetData() {
+				return {
+					orderids: [
 						""
 					],
-					trackings:[
+					trackings: [
 						""
 					]
 				}
 			},
-			
+
 			confirm_Submit() {
 				let data = this.missionData;
 				const regex = /^-?\d+$/;
@@ -859,7 +864,7 @@
 					const upcMatch = text.match(regex.upc);
 					const asinMatch = text.match(regex.asin);
 					const itemCountMatch = text.match(regex.itemCount);
-					const orderNumberMatch = [...text.matchAll(regex.orderNumber)].map(match=>match[1]);
+					const orderNumberMatch = [...text.matchAll(regex.orderNumber)].map(match => match[1]);
 					console.log(orderNumberMatch)
 					const brandMatch = text.match(regex.brand);
 					const customized = text.match(regex.custom);
@@ -872,8 +877,8 @@
 					//继续匹配
 					// let tracks = [];
 					// for(let trackContent of trackContentMatch){
-						const upsMatch = trackContent.match(regex.upsTracking);
-						const uspsMatch = trackContent.match(regex.uspsTracking);
+					const upsMatch = trackContent.match(regex.upsTracking);
+					const uspsMatch = trackContent.match(regex.uspsTracking);
 					// 	if(upsMatch){
 					// 		tracks.push(upsMatch);
 					// 	}
@@ -921,8 +926,8 @@
 						upc: upcMatch ? upcMatch[1] : "未匹配",
 						asin: asinMatch ? asinMatch[1] : "未匹配",
 						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
-						orderid: orderNumberMatch? orderNumberMatch[0] : "未匹配",
-						tracking: upsMatch? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
+						orderid: orderNumberMatch ? orderNumberMatch[0] : "未匹配",
+						tracking: upsMatch ? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
 						ram: ram,
 						system: system,
 						capacity1: ssd1,

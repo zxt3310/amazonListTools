@@ -50,4 +50,29 @@
 		white-space: pre-line !important;
 		word-break: break-word;
 	}
+	/* 无数据居中 */
+	.custom-empty {
+	  display: flex;
+	  flex-direction: column;
+	  justify-content: center;
+	  align-items: center;
+	  height: 100%;
+	  padding: 40px 0;
+	}
+	
+	.empty-text {
+	  color: #909399;
+	  font-size: 14px;
+	}
+	
+	/* 强制覆盖 Element 默认样式 */
+	.el-table__empty-block {
+	  width: 100% !important;
+	  height: 100% !important;
+	}
+	
+	.el-table__empty-text {
+	  position: static !important;
+	  transform: none !important;
+	}
 </style>
