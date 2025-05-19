@@ -60,7 +60,7 @@
 									@click="handleDeleteByTable(scope.$index, scope.row)">
 									Del</el-button>
 							</template>
-						</el-table-column> -->
+						</el-table-column> --> 
 						<template #empty>
 							<div class="custom-empty">
 								<p class="empty-text">今日无数据</p>
