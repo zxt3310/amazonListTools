@@ -20,7 +20,7 @@
 							<el-dropdown-item command="date">Date</el-dropdown-item>
 						</el-dropdown-menu>
 					</el-dropdown>
-					<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px; width: 70%;"
+					<el-input v-model="searchParam" v-if="searchKey != 'date'" style="margin:0 10px; width: 50%;"
 						@keyup.enter.native="searchRecord"></el-input>
 
 					<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam" type="daterange"
@@ -45,13 +45,13 @@
 						<el-table-column label="Note" prop="note" show-overflow-tooltip width="200"></el-table-column>
 						<el-table-column label="Stores" prop="stores">
 							<template slot-scope="scope">
-								<el-checkbox-group v-model="scope.row.stores">
+								<el-checkbox-group v-model="scope.row.stores" @change="storeChange(scope.row)">
 									<el-checkbox v-for="(item, index) in Seller_Option" :key="index" :label="item">{{item}}</el-checkbox>
 								</el-checkbox-group>
 							</template>
 							
 						</el-table-column>
-						<el-table-column label="操作" width="150">
+						<!-- <el-table-column label="操作" width="150">
 							<template slot-scope="scope">
 								<el-button size="mini" type="primary"
 									@click="handleEditByTable(scope.$index, scope.row)">
@@ -60,7 +60,7 @@
 									@click="handleDeleteByTable(scope.$index, scope.row)">
 									Del</el-button>
 							</template>
-						</el-table-column>
+						</el-table-column> -->
 						<template #empty>
 							<div class="custom-empty">
 								<p class="empty-text">今日无数据</p>
@@ -151,8 +151,10 @@
 					upc: "",
 					model: "",
 					note: "",
+					adjustment:"",
 					price_before: "",
-					price_after: ""
+					price_after: "",
+					stores:[]
 				},
 				AddDialogVisible: false,
 				menu: {
@@ -232,6 +234,20 @@
 				})
 				
 			},
+			storeChange(row){
+				let stores = row.stores
+				axios.post("updateStores",{
+					id:row.id,
+					stores:stores
+				}).then((e)=>{
+					if(e.ret == 0){
+						this.$message({
+							type:"success",
+							message:"更新成功"
+						})
+					}
+				})
+			},
 			dateformat(row, column, cellValue, index) {
 				if (cellValue && cellValue.includes(" ")) {
 					let res = cellValue.split(" ");
@@ -257,23 +273,23 @@
 				if (this.searchParam.length == 0) {
 					return;
 				}
-				// this.loading = true;
-				// axios
-				// 	.post("searchreturn", {
-				// 		type: this.searchKey,
-				// 		param: this.searchParam
-				// 	})
-				// 	.then(res => {
-				// 		this.tableData = res.data;
-				// 		this.loading = false;
-				// 	})
-				// 	.catch(e => {
-				// 		console.log(e);
-				// 		if (e.statusCode != 200) {
-				// 			alert("出错了！");
-				// 			this.loading = false;
-				// 		}
-				// 	});
+				this.loading = true;
+				axios
+					.post("searchAdjustments", {
+						type: this.searchKey,
+						param: this.searchParam
+					})
+					.then(res => {
+						this.tableData = res.data;
+						this.loading = false;
+					})
+					.catch(e => {
+						console.log(e);
+						if (e.statusCode != 200) {
+							alert("出错了！");
+							this.loading = false;
+						}
+					});
 			},
 
 			handleEditByTable(index, row) {
