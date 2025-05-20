@@ -43,6 +43,7 @@
 						<el-table-column label="Adjustment" prop="adjustment" width="120"></el-table-column>
 						<el-table-column label="Price" width="200" :formatter="PriceFmt"></el-table-column>
 						<el-table-column label="Note" prop="note" show-overflow-tooltip width="200"></el-table-column>
+						<el-table-column label= "Created at" prop="created_at" width="100"></el-table-column>
 						<el-table-column label="Stores" prop="stores">
 							<template slot-scope="scope">
 								<el-checkbox-group v-model="scope.row.stores" @change="storeChange(scope.row)">
@@ -330,7 +331,7 @@
 			},
 			sellerQuerySearch(query, cb) {
 				let res = []
-				let options = ["下架", "调价", "重新上架", "重新上架并调价"];
+				let options = ["下架", "调价", "重新上架", "重新上架并调价","其他"];
 				for (let item of options) {
 					res.push({
 						value: item
