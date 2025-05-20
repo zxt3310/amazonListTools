@@ -25,7 +25,7 @@
 
 					<el-date-picker v-else style="margin: 0 10px; width: 50%;" v-model="searchParam" type="daterange"
 						align="right" unlink-panels range-separator="to" start-placeholder="Start Date"
-						end-placeholder="End Date" value-format="yyyy-MM-dd HH:mm:ss">
+						end-placeholder="End Date" value-format="yyyy-MM-dd HH:mm:ss" :picker-options="pickerOptions">
 					</el-date-picker>
 
 					<el-button type="primary" @click="searchRecord">
@@ -146,7 +146,7 @@
 				//搜索条件
 				searchParam: "",
 				//页面数据
-				table_max_height: window.innerHeight - 220,
+				table_max_height: window.innerHeight - 150,
 				loading: false,
 				queryData: {
 					upc: "",
@@ -156,6 +156,45 @@
 					price_before: "",
 					price_after: "",
 					stores:[]
+				},
+				pickerOptions: {
+					shortcuts: [{
+							text: "昨天",
+							onClick(picker) {
+								const end = new Date();
+								const start = new Date();
+								start.setTime(start.getTime() - 3600 * 1000 * 24 * 1);
+								picker.$emit("pick", [start, end]);
+							}
+						},
+						{
+							text: "近2天",
+							onClick(picker) {
+								const end = new Date();
+								const start = new Date();
+								start.setTime(start.getTime() - 3600 * 1000 * 24 * 2);
+								picker.$emit("pick", [start, end]);
+							}
+						},
+						{
+							text: "近3天",
+							onClick(picker) {
+								const end = new Date();
+								const start = new Date();
+								start.setTime(start.getTime() - 3600 * 1000 * 24 * 3);
+								picker.$emit("pick", [start, end]);
+							}
+						},
+						{
+							text: "近一周",
+							onClick(picker) {
+								const end = new Date();
+								const start = new Date();
+								start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+								picker.$emit("pick", [start, end]);
+							}
+						}
+					]
 				},
 				AddDialogVisible: false,
 				menu: {

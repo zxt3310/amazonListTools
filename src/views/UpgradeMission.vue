@@ -71,6 +71,8 @@
 										<el-table-column v-if="activeStatus == 'all'" prop="orderid" label="订单号"
 											width="170">
 										</el-table-column>
+										<el-table-column prop="seller" label="店铺" width="80">
+										</el-table-column>
 										<el-table-column v-if="activeStatus== 'all'" prop="asin" label="ASIN"
 											width="120">
 										</el-table-column>
@@ -231,6 +233,10 @@
 							</el-select>
 						</el-row>
 						<el-row class="row-bg">
+							<el-autocomplete v-model="missionData.seller" placeholder="请选择店铺"
+								:fetch-suggestions="querySellerSearch"></el-autocomplete>
+						</el-row>
+						<el-row class="row-bg">
 							<el-select style="width: 100%;" v-model="missionData.operator" placeholder="请选择操作员">
 								<el-option v-for="(item, index) in config.operator" :key="index" :label="item"
 									:value="item"></el-option>
@@ -283,6 +289,7 @@
 	import moment from "moment-timezone";
 	import axios from "../js/request.js";
 	import axiosEx from "axios";
+	import { SellerOption } from "../js/defaultRtWarObj.js";
 	// import VueBarcode from "vue-barcode";
 	export default {
 		// components: {
@@ -357,7 +364,8 @@
 				//弹窗状态
 				centerDialogVisible: false,
 				//是否触发搜索
-				isSearched: false
+				isSearched: false,
+				sellerOptions:SellerOption
 			};
 		},
 		created() {
@@ -478,6 +486,15 @@
 			},
 			addTracking() {
 				this.missionData.trackings.push("")
+			},
+			querySellerSearch(query,cb){
+				let res = [];
+				for (let seller of this.sellerOptions) {
+					res.push({
+						value: seller
+					});
+				}
+				cb(res);
 			},
 			//重置missionData
 			resetData() {
@@ -852,6 +869,7 @@
 					asin: /ASIN:[\s\u3000]*([A-Z0-9]{10})/, // 用 \u3000 代替全角空格
 					itemCount: /Item Count:[\s\u3000]*(\d+)/, // 用 \u3000 代替全角空格
 					orderNumber: /Amazon Order#\s*([0-9-]+)/gm,
+					store: /\{(\w+)\}/,
 					custom: /\[Customize\].*/,
 					// size: /:\s*([^-\s]+)-((?:[^-\s+]+)(?:\+[^-\s+]+)*)-([^-\s]+)/
 					size: /G\d+:\s*([^-]+(?:-[^-]+)*)/,
@@ -865,14 +883,14 @@
 					const asinMatch = text.match(regex.asin);
 					const itemCountMatch = text.match(regex.itemCount);
 					const orderNumberMatch = [...text.matchAll(regex.orderNumber)].map(match => match[1]);
-					console.log(orderNumberMatch)
+					const storeMatch = text.match(regex.store);
 					const brandMatch = text.match(regex.brand);
 					const customized = text.match(regex.custom);
 					const customizeLine = customized ? customized[0] : null;
 
 					//先找到包含Tracking的行
 					const trackContentMatch = text.match(regex.trackingContent);
-					console.log(trackContentMatch)
+					// console.log(trackContentMatch)
 					const trackContent = trackContentMatch ? trackContentMatch[0] : "未匹配";
 					//继续匹配
 					// let tracks = [];
@@ -927,6 +945,7 @@
 						asin: asinMatch ? asinMatch[1] : "未匹配",
 						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
 						orderid: orderNumberMatch ? orderNumberMatch[0] : "未匹配",
+						seller: storeMatch? storeMatch[1] : "未匹配",
 						tracking: upsMatch ? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
 						ram: ram,
 						system: system,
