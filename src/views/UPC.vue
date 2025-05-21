@@ -224,6 +224,7 @@ export default {
     }
   }
 };
+//测试构建触发
 </script>
 
 <style></style>
