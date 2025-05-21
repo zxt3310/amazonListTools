@@ -16,6 +16,6 @@ jobs:
       - name: Push to Gitee
         run: |
           git remote add gitee https://zxt3310:$GITEE_TOKEN@gitee.com/zxt3310/amazonListTools.git
-          git push gitee HEAD:main --force
+          git push gitee HEAD:master --force
         env:
           GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
