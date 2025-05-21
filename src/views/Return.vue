@@ -109,7 +109,7 @@
 						</el-table-column>
 						<el-table-column prop="rt_track" label="Return Tracking" width="170">
 						</el-table-column>
-						<el-table-column prop="cur_config" label="Current Config" width="180">
+						<el-table-column prop="war_ori_config" label="Ori Config" width="180">
 						</el-table-column>
 						<!-- <el-table-column prop="lb_type" label="Label Type" width="100">
               </el-table-column> -->
