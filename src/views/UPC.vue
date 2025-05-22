@@ -1,9 +1,6 @@
 <template>
   <div class="about" style="text-align: center;">
-    <div id="nav" style="padding-top: 30px; padding-bottom: 30px;">
-      <router-link to="/upc">UPC</router-link> |
-      <router-link to="/caculateupc">Caculate UPC</router-link>
-    </div>
+    <my-navi activeIndex="8"></my-navi>
 
     <div style="width: 66%; margin: 0 17%;">
       <el-row :gutter="20">
@@ -112,12 +109,16 @@ export default {
         disable: false,
         title: "获取 UPC"
       },
-      showHeight: window.innerHeight - 220
+      showHeight: window.innerHeight - 220,
+	  interval:null
     };
   },
   created() {
     this.loadUPCStores();
-    setInterval(this.loadUPCStores, 30000);
+    this.interval = setInterval(this.loadUPCStores, 30000);
+  },
+  beforeDestroy() {
+  	clearInterval(this.interval)
   },
   methods: {
     loadUPCStores() {

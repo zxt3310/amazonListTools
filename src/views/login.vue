@@ -11,7 +11,7 @@
 
 				<el-form-item prop="password">
 					<el-input v-model="loginForm.password" type="password" placeholder="请输入密码" prefix-icon="Lock"
-						size="large" show-password clearable />
+						size="large" show-password clearable @keyup.enter.native="handleLogin" />
 				</el-form-item>
 
 				<el-form-item>
@@ -73,10 +73,7 @@
 								});
 								
 								localStorage.setItem('api_token', res.token);
-								let router = this.$router
-								router.replace({
-									path: router.currentRoute.query.from
-								})
+								this.$store.commit("login",res.user)
 							} else {
 								this.$message({
 									message: res.error,
