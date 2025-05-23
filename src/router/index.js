@@ -14,6 +14,7 @@ import Warranty from "../views/Warranty.vue";
 import AddRtWrVue from "../views/AddRtWr.vue";
 import store from "../store";
 import InventoryAjustment from "../views/InventoryAjustment.vue";
+import WinProCode from "../views/WinProCode.vue";
 
 Vue.use(VueRouter);
 
@@ -88,6 +89,11 @@ const routes = [
 	  path:"/inventory-adjustment",
 	  name:"inventory",
 	  component:InventoryAjustment
+  },
+  {
+	  path:"/procode",
+	  name:"ProCode",
+	  component:WinProCode
   }
 ];
 

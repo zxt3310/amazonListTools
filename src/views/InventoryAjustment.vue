@@ -162,8 +162,10 @@
 							text: "昨天",
 							onClick(picker) {
 								const end = new Date();
+								end.setHours(0,0,0,0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 1);
+								start.setHours(0,0,0,0)
 								picker.$emit("pick", [start, end]);
 							}
 						},
@@ -171,8 +173,10 @@
 							text: "近2天",
 							onClick(picker) {
 								const end = new Date();
+								end.setHours(0,0,0,0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 2);
+								start.setHours(0,0,0,0)
 								picker.$emit("pick", [start, end]);
 							}
 						},
@@ -180,8 +184,10 @@
 							text: "近3天",
 							onClick(picker) {
 								const end = new Date();
+								end.setHours(0,0,0,0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 3);
+								start.setHours(0,0,0,0)
 								picker.$emit("pick", [start, end]);
 							}
 						},
@@ -189,8 +195,10 @@
 							text: "近一周",
 							onClick(picker) {
 								const end = new Date();
+								end.setHours(0,0,0,0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+								start.setHours(0,0,0,0)
 								picker.$emit("pick", [start, end]);
 							}
 						}

@@ -15,6 +15,7 @@
 				<template slot="title">Material</template>
 				<el-menu-item index="8">UPC 获取</el-menu-item>
 				<el-menu-item index="9">UPC 计算</el-menu-item>
+				<el-menu-item index="10">Pro Code(Beta)</el-menu-item>
 			</el-submenu>
 			<el-menu-item index="7">上下架(Beta)</el-menu-item>
 			<div style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%);">
@@ -61,7 +62,8 @@
 					"/Warranty",
 					"/inventory-adjustment",
 					"/UPC",
-					"/CaculateUPC"
+					"/CaculateUPC",
+					"/procode"
 				]
 				if (curPath === routerPath[key - 1]) {
 					return
