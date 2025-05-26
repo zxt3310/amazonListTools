@@ -29,7 +29,7 @@
 				</el-header>
 				<el-main style="padding-top: 0 !important;">
 					<el-table ref="dataTable" :height="table_max_height" v-loading="loading" :data="tableData" fit
-						@row-contextmenu="handleContextMenu">
+						@row-contextmenu="handleContextMenu" row-class-name="table_text">
 						<el-table-column label="ID" prop="id" width="80"></el-table-column>
 						<el-table-column label="Code" prop="code" width="400"></el-table-column>
 						<el-table-column label="SN" :formatter="SnsFmt"></el-table-column>
@@ -497,7 +497,7 @@
 		margin: 6px 0;
 	}
 
-	.el-table {
+	.table_text {
 		font-size: 16px !important;
 	}
 </style>

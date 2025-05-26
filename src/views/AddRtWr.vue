@@ -2,6 +2,14 @@
 	<div style="position: relative;">
 		<h2>{{ warrantyAccess ? "Edit" : "New Return Entry" }}</h2>
 		<div style="text-align: left; margin:0 5%">
+			<el-card v-if="!warrantyAccess">
+				<div class="title_card" slot="header">
+					<span>Auto Fill</span>
+					<el-button style="margin-left: 50px;" type="primary" @click="autofill">Click to Fill</el-button>
+				</div>
+				<el-input type="textarea" v-model="autofillStr" :autosize="{minRows: 6, maxRows: 6}"
+					placeholder="Paste return email here"></el-input>
+			</el-card>
 			<span style="font-size: 20px;">Return ID: {{ queryData.rt_id ? queryData.rt_id : "提交后生成" }}</span>
 			<el-form :disabled="isReadOnly" label-position="top" :model="queryData" ref="dataform">
 				<div v-loading="loading" element-loading-text="saving..." element-loading-spinner="el-icon-loading">
@@ -353,7 +361,8 @@
 				dateFormat: "yyyy-MM-dd",
 				picslist: [],
 				upPicLoading: false,
-				loading: false
+				loading: false,
+				autofillStr:""
 			};
 		},
 		created() {
@@ -529,8 +538,8 @@
 						this.loading = false;
 						if (!this.warrantyAccess) {
 							this.$store.commit("clearTempPageAData"); // 如果是新增退货则清除缓存,重新拉取，保证列表一致性
-						}else{
-							this.$store.commit("setModifiedData",data)
+						} else {
+							this.$store.commit("setModifiedData", data)
 						}
 						this.goBack();
 					})
@@ -549,6 +558,35 @@
 				let date = this.queryData.created_at;
 				let nowDate = dateFormat(new Date());
 				return date ? date : nowDate;
+			},
+			autofill() {				
+				let content = this.autofillStr
+				if(content == ""){
+					return
+				}
+				const patterns = {
+					order_id: /Order ID:\s*([A-Z0-9-]+)/,
+					asin: /ASIN[\s\S]*?\n([A-Z0-9]{10})/,
+					rt_track: /Tracking ID:\s*([A-Z0-9]+)/,
+					model: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
+					rt_qty: /Return Quantity[\s\S]*?\n(\d+)/,
+					rt_dt: /Return Request Date:\s*(\d{4}-\d{2}-\d{2})/,
+					rt_reason: /Customer’s Comment[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
+					cur_config: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/
+				};
+
+				const result = {};
+
+				for (const [key, regex] of Object.entries(patterns)) {
+					const match = content.match(regex);
+					result[key] = match ? match[1].trim() : "";
+				}
+				
+				if(result.model){
+					result.brand = result.model.split("-")[1];
+				}
+				
+				this.queryData = result
 			}
 		}
 	};
