@@ -10,7 +10,7 @@
 				<el-input type="textarea" v-model="autofillStr" :autosize="{minRows: 6, maxRows: 6}"
 					placeholder="Paste return email here"></el-input>
 			</el-card>
-			<span style="font-size: 20px;">Return ID: {{ queryData.rt_id ? queryData.rt_id : "提交后生成" }}</span>
+			<span style="font-size: 20px;">Return ID: {{ queryData.rt_id ? queryData.rt_id : "Generate after submit" }}</span>
 			<el-form :disabled="isReadOnly" label-position="top" :model="queryData" ref="dataform">
 				<div v-loading="loading" element-loading-text="saving..." element-loading-spinner="el-icon-loading">
 					<el-card>
@@ -265,9 +265,9 @@
 								:show-file-list="false">
 								<i class="el-icon-upload"></i>
 								<div class="el-upload__text">
-									将文件拖到此处，或<em>点击上传</em>
+									Drag files here, or <em>click upload</em>
 								</div>
-								<div class="el-upload__tip" slot="tip">只能上传jpg/png文件</div>
+								<div class="el-upload__tip" slot="tip">only JPG or PNG file</div>
 							</el-upload>
 							<div style="margin-left: 20px; flex: 1;">
 								Uploaded：

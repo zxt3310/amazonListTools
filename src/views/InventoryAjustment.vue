@@ -43,14 +43,15 @@
 						<el-table-column label="Adjustment" prop="adjustment" width="120"></el-table-column>
 						<el-table-column label="Price" width="200" :formatter="PriceFmt"></el-table-column>
 						<el-table-column label="Note" prop="note" show-overflow-tooltip width="200"></el-table-column>
-						<el-table-column label= "Created at" prop="created_at" width="100"></el-table-column>
+						<el-table-column label="Created at" prop="created_at" width="100"></el-table-column>
 						<el-table-column label="Stores" prop="stores">
 							<template slot-scope="scope">
-								<el-checkbox-group v-model="scope.row.stores" @change="storeChange(scope.row)">
-									<el-checkbox v-for="(item, index) in Seller_Option" :key="index" :label="item">{{item}}</el-checkbox>
+								<el-checkbox-group v-model="scope.row.stores" @change="storeChange(scope.row,scope.$index)">
+									<el-checkbox v-for="(item, index) in Seller_Option" :key="index"
+										:label="item">{{item}}</el-checkbox>
 								</el-checkbox-group>
 							</template>
-							
+
 						</el-table-column>
 						<!-- <el-table-column label="操作" width="150">
 							<template slot-scope="scope">
@@ -61,7 +62,7 @@
 									@click="handleDeleteByTable(scope.$index, scope.row)">
 									Del</el-button>
 							</template>
-						</el-table-column> --> 
+						</el-table-column> -->
 						<template #empty>
 							<div class="custom-empty">
 								<p class="empty-text">今日无数据</p>
@@ -134,8 +135,10 @@
 <script>
 	import moment from "moment-timezone";
 	import axios from "../js/request.js";
-	import { SellerOption } from "../js/defaultRtWarObj.js";
-	
+	import {
+		SellerOption
+	} from "../js/defaultRtWarObj.js";
+
 	export default {
 		data() {
 			return {
@@ -152,20 +155,20 @@
 					upc: "",
 					model: "",
 					note: "",
-					adjustment:"",
+					adjustment: "",
 					price_before: "",
 					price_after: "",
-					stores:[]
+					stores: []
 				},
 				pickerOptions: {
 					shortcuts: [{
 							text: "昨天",
 							onClick(picker) {
 								const end = new Date();
-								end.setHours(0,0,0,0)
+								end.setHours(0, 0, 0, 0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 1);
-								start.setHours(0,0,0,0)
+								start.setHours(0, 0, 0, 0)
 								picker.$emit("pick", [start, end]);
 							}
 						},
@@ -173,10 +176,10 @@
 							text: "近2天",
 							onClick(picker) {
 								const end = new Date();
-								end.setHours(0,0,0,0)
+								end.setHours(0, 0, 0, 0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 2);
-								start.setHours(0,0,0,0)
+								start.setHours(0, 0, 0, 0)
 								picker.$emit("pick", [start, end]);
 							}
 						},
@@ -184,10 +187,10 @@
 							text: "近3天",
 							onClick(picker) {
 								const end = new Date();
-								end.setHours(0,0,0,0)
+								end.setHours(0, 0, 0, 0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 3);
-								start.setHours(0,0,0,0)
+								start.setHours(0, 0, 0, 0)
 								picker.$emit("pick", [start, end]);
 							}
 						},
@@ -195,10 +198,10 @@
 							text: "近一周",
 							onClick(picker) {
 								const end = new Date();
-								end.setHours(0,0,0,0)
+								end.setHours(0, 0, 0, 0)
 								const start = new Date();
 								start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-								start.setHours(0,0,0,0)
+								start.setHours(0, 0, 0, 0)
 								picker.$emit("pick", [start, end]);
 							}
 						}
@@ -211,7 +214,7 @@
 					top: 0,
 					currentRow: null
 				},
-				Seller_Option:SellerOption,
+				Seller_Option: SellerOption,
 				rulses: {
 					upc: [{
 						required: true,
@@ -223,12 +226,13 @@
 						message: '请填写Model',
 						trigger: 'blur'
 					}],
-					adjustment:[{
+					adjustment: [{
 						required: true,
 						message: '请填写Adjustment',
 						trigger: 'blur'
 					}]
-				}
+				},
+				current_row:null
 			};
 		},
 		computed: {
@@ -273,27 +277,42 @@
 			},
 			submit() {
 				this.$refs.addform.validate((valid) => {
-					if(valid){
+					if (valid) {
 						axios.post("addAdjustment", this.queryData).then((e) => {
 							this.AddDialogVisible = false;
 							this.getInitData()
 						})
 					}
 				})
-				
+
 			},
-			storeChange(row){
+			storeChange(row,index) {
+				this.loading = true
 				let stores = row.stores
-				axios.post("updateStores",{
-					id:row.id,
-					stores:stores
-				}).then((e)=>{
-					if(e.ret == 0){
+				axios.post("updateStores", {
+					id: row.id,
+					stores: stores,
+					version: row.version
+				}).then((e) => {
+					if (e.ret == 0) {
 						this.$message({
-							type:"success",
-							message:"更新成功"
+							type: "success",
+							message: "更新成功"
+						})
+					} else {
+						this.$message({
+							type: "error",
+							message: e.message
 						})
 					}
+					axios.post("refreshStores",{id:row.id}).then((res)=>{
+						let temp = this.tableData;
+						temp[index] = res.data;
+						this.tableData = [...temp]
+					})
+					this.loading = false;
+				}).catch((e)=>{
+					this.loading = false;
 				})
 			},
 			dateformat(row, column, cellValue, index) {
@@ -378,7 +397,7 @@
 			},
 			sellerQuerySearch(query, cb) {
 				let res = []
-				let options = ["下架", "调价", "重新上架", "重新上架并调价","其他"];
+				let options = ["下架", "调价", "重新上架", "重新上架并调价", "其他"];
 				for (let item of options) {
 					res.push({
 						value: item
