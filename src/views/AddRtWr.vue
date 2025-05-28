@@ -10,7 +10,8 @@
 				<el-input type="textarea" v-model="autofillStr" :autosize="{minRows: 6, maxRows: 6}"
 					placeholder="Paste return email here"></el-input>
 			</el-card>
-			<span style="font-size: 20px;">Return ID: {{ queryData.rt_id ? queryData.rt_id : "Generate after submit" }}</span>
+			<span style="font-size: 20px;">Return ID:
+				{{ queryData.rt_id ? queryData.rt_id : "Generate after submit" }}</span>
 			<el-form :disabled="isReadOnly" label-position="top" :model="queryData" ref="dataform">
 				<div v-loading="loading" element-loading-text="saving..." element-loading-spinner="el-icon-loading">
 					<el-card>
@@ -259,6 +260,9 @@
 					<el-card style="margin-top: 20px;">
 						<div class="title_card" slot="header">
 							<span>Pictures</span>
+							<el-button ref="downloadBtn" style="float: right;" type="text" v-if="warrantyAccess"
+								@click="downloadPictures">Download for
+								Zip</el-button>
 						</div>
 						<div style="display: flex;">
 							<el-upload ref="upload" list-type="picture" drag multiple :http-request="upload"
@@ -347,6 +351,10 @@
 		SellerOption,
 		DecisionOption
 	} from "../js/defaultRtWarObj.js";
+	import JSZip from "jszip";
+	import {
+		saveAs
+	} from "file-saver";
 	export default {
 		data() {
 			return {
@@ -362,7 +370,7 @@
 				picslist: [],
 				upPicLoading: false,
 				loading: false,
-				autofillStr:""
+				autofillStr: ""
 			};
 		},
 		created() {
@@ -402,6 +410,14 @@
 						ScopeLimit: true // 细粒度控制权限需要设为 true，会限制密钥只在相同请求时重复使用
 					});
 				}
+			});
+		},
+		mounted() {
+			// 直接操作 DOM 移除禁用属性
+			this.$nextTick(() => {
+				const btn = this.$refs.downloadBtn.$el;
+				btn.disabled = false;
+				btn.classList.remove('is-disabled');
 			});
 		},
 		beforeDestroy() {
@@ -559,9 +575,54 @@
 				let nowDate = dateFormat(new Date());
 				return date ? date : nowDate;
 			},
-			autofill() {				
+			async downloadPictures() {
+				if (this.picslist.length == 0) {
+					this.$message({
+						message: "No photos of the current return",
+						type: "error"
+					})
+					return
+				}
+				const zip = new JSZip();
+				const promises = [];
+
+				// 遍历文件列表
+				this.picslist.forEach((file) => {
+					// 添加每个文件到 ZIP
+					const promise = this.addFileToZip(zip, file);
+					promises.push(promise);
+				});
+
+				// 等待所有文件处理完成
+				Promise.all(promises)
+					.then(() => {
+						// 生成 ZIP 文件
+						zip.generateAsync({
+							type: "blob"
+						}).then((blob) => {
+							// 触发下载
+							saveAs(blob, `${this.queryData.rt_id}.zip`);
+						});
+					})
+					.catch((err) => {
+						console.error("打包失败:", err);
+					});
+			},
+			async addFileToZip(zip, file) {
+				if (file.url.startsWith("http")) {
+					// 远程文件：通过 Fetch 获取
+					const response = await fetch(file.url);
+					const data = await response.blob();
+					zip.file(file.name, data);
+				} else {
+					// 本地文件：直接读取（需确保文件存在）
+					const data = await fetch(file.url).then((res) => res.blob());
+					zip.file(file.name, data);
+				}
+			},
+			autofill() {
 				let content = this.autofillStr
-				if(content == ""){
+				if (content == "") {
 					return
 				}
 				const patterns = {
@@ -571,7 +632,8 @@
 					model: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
 					rt_qty: /Return Quantity[\s\S]*?\n(\d+)/,
 					rt_dt: /Return Request Date:\s*(\d{4}-\d{2}-\d{2})/,
-					rt_reason: /Customer’s Comment[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
+					reason: /Return Reason[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
+					cmt: /Customer’s Comment[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
 					cur_config: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/
 				};
 
@@ -581,12 +643,32 @@
 					const match = content.match(regex);
 					result[key] = match ? match[1].trim() : "";
 				}
-				
-				if(result.model){
-					result.brand = result.model.split("-")[1];
+
+				result.rt_reason = `${result.reason} ${result.cmt}`;
+
+				if (result.model) {
+					let sku_split = result.model.split("-");
+					for (let item of sku_split) {
+						if (this.brands.includes(item)) {
+							result.brand = item
+						}
+						if (item.length > 2 && this.seller.includes(item.slice(0, 3))) {
+							result.seller = item.slice(0, 3)
+						}
+					}
+
+					//检查有效性
+					// let brand = sku_split[1];
+					// if(this.brands.includes()){
+					// 	result.brand = brand
+					// }					
+					// let seller = sku_split[0].slice(0,3);
+					// if(this.seller.includes(seller)){
+					// 	result.seller = seller
+					// }
 				}
-				
-				this.queryData = result
+
+				Object.assign(this.queryData, result);
 			}
 		}
 	};

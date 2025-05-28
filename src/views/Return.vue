@@ -17,6 +17,7 @@
 						</el-button>
 						<el-dropdown-menu slot="dropdown">
 							<el-dropdown-item command="rt_id">Return ID</el-dropdown-item>
+							<el-dropdown-item command="brand">Brand</el-dropdown-item>
 							<el-dropdown-item command="order">Oder#</el-dropdown-item>
 							<el-dropdown-item command="upc">UPC</el-dropdown-item>
 							<el-dropdown-item command="model">Model</el-dropdown-item>
@@ -423,6 +424,9 @@
 						break;
 					case "order":
 						text = "Order#";
+						break;
+					case "brand":
+						text = "Brand";
 						break;
 					case "model":
 						text = "Model";
