@@ -170,9 +170,9 @@
 							</template>
 						</el-table-column>
 						<el-table-column align="center" prop="is_check_out" label="Checked Out" width="120" :filters="[
-                  { text: 'Yes', value: true },
-                  { text: 'No', value: false }
-                ]" :filter-method="filterMethod" :filtered-value="[false]">
+						  { text: 'Yes', value: true },
+						  { text: 'No', value: false }
+						]" :filter-method="filterMethod" :filtered-value="[false]">
 							<template slot-scope="scope">
 								<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_check_out"
 									disabled></el-checkbox>
@@ -192,7 +192,7 @@
 								<el-button size="mini" type="primary"
 									@click="handleEditByTable(scope.$index, scope.row)">
 									Edit</el-button>
-								<el-button size="mini" type="danger"
+								<el-button v-if="$store.getters.isAdmin" size="mini" type="danger"
 									@click="handleDeleteByTable(scope.$index, scope.row)">
 									Del</el-button>
 							</template>
@@ -230,7 +230,14 @@
 					<span>编辑条目</span>
 				</div>
 
-				<div class="menu-item danger" @click="handleDelete">
+				<div class="menu-item">
+					<i class="el-icon-collection-tag"></i>
+					<span>标记条目</span>
+					<el-color-picker style="margin-left: 10px;" size="small" v-model="color" color-format="hex"
+						:predefine="predefineColors" @change="handleTag"/>
+				</div>
+
+				<div v-if="$store.getters.isAdmin" class="menu-item danger" @click="handleDelete">
 					<i class="el-icon-delete"></i>
 					<span>删除条目</span>
 				</div>
@@ -279,7 +286,17 @@
 					left: 0,
 					top: 0,
 					currentRow: null
-				}
+				},
+				color: '#90ee90',
+				predefineColors: [
+					'#FFFFFF',
+					'#ff4500',
+					'#ff8c00',
+					'#ffd700',
+					'#90ee90',
+					'#00ced1',
+					'#1e90ff'
+				]
 			};
 		},
 		computed: {
@@ -579,12 +596,18 @@
 				row,
 				index
 			}) {
-				if (!row.is_refunded) {
-					return {
-						// backgroundColor: "#f6ffed", // 成功状态背景
-						color: "#ff8d22", // 主文字颜色
-					};
+				let style = {};
+				let tags = row.tags;
+				for(let item of tags){
+					if(this.$store.state.userinfo.id == item.user_id){
+						style.backgroundColor = item.color
+						break;
+					}
 				}
+				if (!row.is_refunded) {
+					style.color = "#ff8d22";
+				}
+				return style;
 			},
 			//Region格式化
 			regionFmt(row, column, cellValue, index) {
@@ -637,6 +660,16 @@
 						data: JSON.stringify(this.menu.currentRow)
 					}
 				});
+			},
+			handleTag(e) {
+				let row = this.menu.currentRow;
+				axios.post('tagColor',{
+					id:row.id,
+					color:this.color
+				}).then((e)=>{
+					row.tags = e.data
+				})
+
 			},
 			handleDelete() {
 				this.$confirm("此操作将删除该退货, 是否继续?", "警告", {
@@ -738,7 +771,7 @@
 		border-radius: 8px;
 		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 		user-select: none;
-		z-index: 9999;
+		z-index: 999 !important;
 	}
 
 	/* 菜单头部 */

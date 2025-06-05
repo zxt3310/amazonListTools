@@ -77,7 +77,7 @@
 								<el-button size="mini" type="primary"
 									@click="handleEditByTable(scope.$index, scope.row)">
 									Edit</el-button>
-								<el-button size="mini" type="danger"
+								<el-button v-if="$store.getters.isAdmin" size="mini" type="danger"
 									@click="handleDeleteByTable(scope.$index, scope.row)">
 									Del</el-button>
 							</template>
@@ -105,7 +105,7 @@
 					<span>编辑条目</span>
 				</div>
 
-				<div class="menu-item danger" @click="handleDelete">
+				<div v-if="$store.getters.isAdmin" class="menu-item danger" @click="handleDelete">
 					<i class="el-icon-delete"></i>
 					<span>删除条目</span>
 				</div>

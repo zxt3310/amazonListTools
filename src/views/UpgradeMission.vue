@@ -110,7 +110,7 @@
 												<el-button :disabled="activeStatus!='all'" size="mini" type="primary"
 													@click="handleEdit(scope.$index, scope.row)">
 													编辑</el-button>
-												<el-button :disabled="activeStatus!='all'" size="mini" type="danger"
+												<el-button v-if="$store.getters.isAdmin" :disabled="activeStatus!='all'" size="mini" type="danger"
 													@click="handleDelete(scope.$index, scope.row)">
 													删除</el-button>
 											</template>

@@ -41,6 +41,9 @@
 				</el-header>
 				<el-main style="padding-top: 0 !important;">
 					<div style="padding: 10px 0;text-align: left; display: flex; align-items: center;">
+						<div>
+							<el-checkbox v-model="filters.is_check_out" border>In Stock</el-checkbox>
+						</div>
 						<div style="margin-left: 20px;">
 							<span>Store:</span>
 							<el-autocomplete style="width: 120px;" v-model="filters.seller"
@@ -122,7 +125,15 @@
 								</el-tooltip>
 							</template>
 						</el-table-column>
-
+						<el-table-column align="center" prop="is_check_out" label="Checked Out" width="120" :filters="[
+						  { text: 'Yes', value: true },
+						  { text: 'No', value: false }
+						]" :filter-method="filterMethod" :filtered-value="[false]">
+							<template slot-scope="scope">
+								<el-checkbox style="transform: scale(1.3);" :value="scope.row.is_check_out"
+									disabled></el-checkbox>
+							</template>
+						</el-table-column>
 						<el-table-column label="操作" width="80">
 							<template slot-scope="scope">
 								<el-button size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">
@@ -165,6 +176,7 @@
 				defectsOption: DefectsOption,
 				sellerOption: SellerOption,
 				filters: {
+					is_check_out: true,
 					seller: "",
 					operator: "",
 					repairMethod: "",
@@ -210,6 +222,10 @@
 			},
 			filter() {
 				let filterOption = this.filters;
+				this.activeFilterChange(
+					"is_check_out", 
+					filterOption.is_check_out ? [false] : [],
+				);
 				this.activeFilterChange(
 					"seller",
 					filterOption.seller === "" ? [] : [filterOption.seller]

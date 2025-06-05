@@ -47,7 +47,7 @@
             </el-footer>
           </el-container>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="12" v-if="$store.getters.isAdmin">
           <el-container>
             <el-header>UPC 存</el-header>
             <el-main>

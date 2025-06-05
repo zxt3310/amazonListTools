@@ -19,7 +19,7 @@
 							<el-dropdown-item command="sn">SN</el-dropdown-item>
 						</el-dropdown-menu>
 					</el-dropdown>
-					<el-input v-model="searchParam" style="margin:0 10px; width: 50%;"
+					<el-input v-model="searchParam" style="margin:0 10px; width: 50%;" clearable
 						@keyup.enter.native="searchRecord"></el-input>
 					<el-button type="primary" @click="searchRecord">
 						Search <i class="el-icon-search"></i>
@@ -85,7 +85,7 @@
 					<span>注册SN</span>
 				</div>
 
-				<div class="menu-item danger" @click="handleDelete">
+				<div v-if="$store.getters.isAdmin" class="menu-item danger" @click="handleDelete">
 					<i class="el-icon-delete"></i>
 					<span>删除Code</span>
 				</div>
@@ -225,9 +225,9 @@
 				return text;
 			},
 			searchRecord() {
-				if (this.searchParam.length == 0) {
-					return;
-				}
+				// if (this.searchParam.length == 0) {
+				// 	return;
+				// }
 				this.loading = true;
 				axios
 					.post("searchCodes", {

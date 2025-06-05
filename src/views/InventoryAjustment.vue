@@ -51,7 +51,6 @@
 										:label="item">{{item}}</el-checkbox>
 								</el-checkbox-group>
 							</template>
-
 						</el-table-column>
 						<!-- <el-table-column label="操作" width="150">
 							<template slot-scope="scope">
@@ -123,7 +122,7 @@
 					<span>编辑条目</span>
 				</div>
 
-				<div class="menu-item danger" @click="handleDelete">
+				<div v-if="$store.getters.isAdmin" class="menu-item danger" @click="handleDelete">
 					<i class="el-icon-delete"></i>
 					<span>删除条目</span>
 				</div>

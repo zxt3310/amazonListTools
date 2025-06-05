@@ -48,5 +48,10 @@ export default new Vuex.Store({
 		}
 	},
 	actions: {},
-	modules: {}
+	modules: {},
+	getters:{
+		isAdmin: state =>{
+			return state.userinfo.is_admin;
+		}
+	}
 });

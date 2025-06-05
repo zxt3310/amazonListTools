@@ -2,6 +2,7 @@ import axios from 'axios';
 import router from '../router'
 
 axios.defaults.baseURL = 'https://wtodland.store/api';
+// axios.defaults.baseURL = 'http://101.43.173.210:8081/api';
 axios.defaults.timeout = 100000;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 // axios.defaults.headers.post['X-Requested-With'] = 'XMLHttpRequest';
