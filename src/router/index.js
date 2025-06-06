@@ -15,6 +15,7 @@ import AddRtWrVue from "../views/AddRtWr.vue";
 import store from "../store";
 import InventoryAjustment from "../views/InventoryAjustment.vue";
 import WinProCode from "../views/WinProCode.vue";
+import UserManage from "../views/UserManage.vue";
 
 Vue.use(VueRouter);
 
@@ -94,6 +95,11 @@ const routes = [
 	  path:"/procode",
 	  name:"ProCode",
 	  component:WinProCode
+  },
+  {
+	  path:"/user",
+	  name:"User Manage",
+	  component:UserManage
   }
 ];
 
