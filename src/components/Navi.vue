@@ -28,7 +28,7 @@
 				<span>上下架</span>
 			</el-menu-item>
 			
-			<el-submenu index="3" v-if="$store.getters.isAdmin">
+			<el-submenu index="3" v-if="$store.getters.isSuperAdmin">
 				<template slot="title">
 					<i class="el-icon-setting"></i>
 					<span>Setting</span>

@@ -5,6 +5,7 @@
 			<!-- 头部区域 -->
 			<div class="header-section">
 				<div>
+					<el-button @click="goback">《 Go Back</el-button>
 					<h1>用户管理</h1>
 					<!-- <p class="description">管理平台所有用户账户和权限</p> -->
 				</div>
@@ -25,6 +26,7 @@
 					</el-col>
 					<el-col :span="8">
 						<el-select v-model="statusFilter" placeholder="用户类型" clearable style="width: 100%">
+							<el-option label="全部" value="all"></el-option>
 							<el-option label="管理员" value="admin"></el-option>
 							<el-option label="普通用户" value="normal"></el-option>
 						</el-select>
@@ -34,7 +36,7 @@
 							<el-button type="info" plain @click="resetSearch" style="margin-right: 10px">
 								重置
 							</el-button>
-							<el-button type="primary" @click="fetchUsers">
+							<el-button type="primary" @click="searchUsers">
 								搜索
 							</el-button>
 						</div>
@@ -43,7 +45,7 @@
 			</div>
 
 			<!-- 操作区 -->
-			<div class="table-actions">
+			<!-- <div class="table-actions">
 				<el-button-group>
 					<el-button size="small" :type="selectedRows.length > 0 ? 'warning' : 'info'"
 						:disabled="selectedRows.length === 0" @click="batchDelete">
@@ -61,13 +63,13 @@
 				<span v-if="selectedRows.length > 0" style="margin-left: 15px">
 					已选择 <span class="custom-badge">{{ selectedRows.length }}</span> 个用户
 				</span>
-			</div>
+			</div> -->
 
 			<!-- 用户表格 -->
 			<el-table :data="filteredUsers" v-loading="loading" element-loading-text="加载用户数据中..." border stripe
 				@selection-change="handleSelectionChange" style="width: 100%" row-key="id">
 
-				<el-table-column type="selection" width="55" align="center"></el-table-column>
+				<!-- <el-table-column type="selection" width="55" align="center"></el-table-column> -->
 
 				<el-table-column prop="id" label="用户ID" sortable width="120">
 					<template slot-scope="{row}">
@@ -86,7 +88,7 @@
 				<el-table-column prop="created_at" label="注册时间" sortable width="180">
 				</el-table-column>
 
-				<el-table-column prop="isAdmin" label="管理员权限" sortable width="140" align="center">
+				<el-table-column prop="isAdmin" label="管理员权限"  width="140" align="center">
 					<template slot-scope="{row}">
 						<el-tag class="status-tag" :class="row.is_admin>0 ?'normal-user-tag':'admin-tag'"
 							@click="toggleAdminStatus(row)" size="medium">
@@ -112,12 +114,12 @@
 			</el-table>
 
 			<!-- 分页控制 -->
-			<div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+			<!-- <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
 				<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
 					:current-page="pagination.currentPage" :page-sizes="[10, 20, 50]" :page-size="pagination.pageSize"
 					layout="total, sizes, prev, pager, next, jumper" :total="pagination.total" background>
 				</el-pagination>
-			</div>
+			</div> -->
 		</div>
 
 		<!-- 创建用户对话框 -->
@@ -241,7 +243,7 @@
 				filteredUsers: [],
 				loading: false,
 				searchKeyword: '',
-				statusFilter: '',
+				statusFilter: 'all',
 				selectedRows: [],
 				createDialogVisible: false,
 				passwordDialogVisible: false,
@@ -387,16 +389,22 @@
 
 			// 切换管理员状态
 			toggleAdminStatus(user) {
-				const action = user.isAdmin ? '取消管理员权限' : '授予管理员权限';
+				const action = user.is_admin ? '取消管理员权限' : '授予管理员权限';
 
-				this.$confirm(`确认要${action}用户 "${user.username}" 吗？`, '提示', {
+				this.$confirm(`确认要${action}用户 "${user.name}" 吗？`, '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
 					// 在实际应用中，这里应该发送API请求更新权限
-					user.isAdmin = !user.isAdmin;
-					this.$message.success(`${action}成功`);
+					axios.post('authorizeAdmin',{id:user.id}).then((e)=>{
+						if(e.ret == 0){
+							this.$message.success(e.message);
+						}else
+							this.$message.error(e.error);
+						user.is_admin = user.is_admin==0?1:0;
+					})
+					
 				}).catch(() => {});
 			},
 
@@ -440,20 +448,21 @@
 
 			// 删除用户
 			handleDelete(user) {
-				this.$confirm(`确认要删除用户 "${user.username}" 吗？此操作不可恢复！`, '警告', {
+				this.$confirm(`确认要删除用户 "${user.name}" 吗？此操作不可恢复！`, '警告', {
 					confirmButtonText: '删除',
 					cancelButtonText: '取消',
 					type: 'error'
 				}).then(() => {
-					// 实际应用中应调用API删除
-					const index = this.users.findIndex(u => u.id === user.id);
-					if (index !== -1) {
-						this.users.splice(index, 1);
-						this.filteredUsers = [...this.users];
-
-						this.$message.success('用户删除成功');
-						this.pagination.total = this.users.length;
-					}
+					axios.post('removeUser',{id:user.id}).then(e=>{
+						if(e.ret == 0){
+							const index = this.filteredUsers.findIndex(u => u.id === user.id);
+							if (index !== -1) {
+								this.filteredUsers.splice(index, 1);
+								this.$message.success('用户删除成功');
+							}
+						}else
+							this.$message.error(e.error)
+					})
 				}).catch(() => {});
 			},
 
@@ -495,15 +504,23 @@
 			// 	const fmtstr = date.toDateString("yyyy-MM-dd")
 			// 	return fmtstr
 			// },
-
+			searchUsers(){
+				this.loading = true;
+				axios.post('searchUsers',{
+					query:this.searchKeyword,
+					role:this.statusFilter
+				}).then((e)=>{
+					this.filteredUsers = e.users;
+					this.loading = false;
+				}).catch((e)=>{
+					this.loading = false;
+				})
+			},
 			// 重置搜索条件
 			resetSearch() {
-				axios.get('getAllUsers').then((e)=>{
-					
-				})
-				// this.searchKeyword = '';
-				// this.statusFilter = '';
-				// this.fetchUsers();
+				this.searchKeyword = '';
+				this.statusFilter = '';
+				this.fetchUsers();
 			},
 
 			// 分页 - 每页条数变化
@@ -549,6 +566,11 @@
 			// 		// 保持响应式更新
 			// 	}
 			// }
+			goback(){
+				this.$router.replace({
+					path:"/"
+				});
+			}
 		},
 		computed: {
 			// 实际应用中，过滤应该在后端完成，这里为了演示在前端处理

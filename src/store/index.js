@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import router from "../router";
+import axios from "../js/request.js";
 
 Vue.use(Vuex);
 
@@ -10,18 +11,21 @@ export default new Vuex.Store({
 		tempPageAData: null,
 		// 存储上一个路由信息
 		previousRoute: null,
-		userinfo:JSON.parse(localStorage.getItem("USER"))
+		userinfo: null //JSON.parse(localStorage.getItem("USER"))
 	},
 	mutations: {
+		SET_USER_INFO(state, payload) {
+			state.userinfo = payload
+		},
 		//退货列表数据保持
 		setTempPageAData(state, data) {
 			state.tempPageAData = JSON.parse(JSON.stringify(data));
 		},
 		//修改后离线展示
-		setModifiedData(state,data){
+		setModifiedData(state, data) {
 			let list = state.tempPageAData.tableData;
-			let index = list.findIndex(item=>item.id===data.id);
-			if(index != -1){
+			let index = list.findIndex(item => item.id === data.id);
+			if (index != -1) {
 				list[index] = data
 			}
 		},
@@ -32,26 +36,42 @@ export default new Vuex.Store({
 			state.previousRoute = route;
 		},
 		//userinfo
-		login(state,data){
+		login(state, data) {
 			state.userinfo = JSON.parse(JSON.stringify(data));
-			localStorage.setItem("USER",JSON.stringify(data));
+			// localStorage.setItem("USER", JSON.stringify(data));
 			router.replace({
-				path:"/"
+				path: "/"
 			})
 		},
-		logout(state){
+		logout(state) {
 			state.userinfo = null;
-			localStorage.removeItem("USER");
+			localStorage.removeItem("api_token");
 			router.replace({
-				path:"/login"
+				path: "/login"
 			})
 		}
 	},
-	actions: {},
+	actions: {
+		async fetchUserInfo({
+			commit
+		}) {
+			try {
+				const data = await axios.get('getUser')
+				commit('SET_USER_INFO', data.user)
+				return data // 返回数据以便后续处理
+			} catch (error) {
+				console.error('获取用户信息失败', error)
+				throw error // 抛出错误供调用方处理
+			}
+		}
+	},
 	modules: {},
-	getters:{
-		isAdmin: state =>{
-			return state.userinfo.is_admin;
+	getters: {
+		isAdmin: state => {
+			return state.userinfo.is_admin == 1;
+		},
+		isSuperAdmin: state => {
+			return state.userinfo.is_admin == 2;
 		}
 	}
 });
