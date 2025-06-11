@@ -68,7 +68,7 @@ export default new Vuex.Store({
 	modules: {},
 	getters: {
 		isAdmin: state => {
-			return state.userinfo.is_admin == 1;
+			return state.userinfo.is_admin > 0;
 		},
 		isSuperAdmin: state => {
 			return state.userinfo.is_admin == 2;

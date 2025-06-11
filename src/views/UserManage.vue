@@ -519,7 +519,7 @@
 			// 重置搜索条件
 			resetSearch() {
 				this.searchKeyword = '';
-				this.statusFilter = '';
+				this.statusFilter = 'all';
 				this.fetchUsers();
 			},
 

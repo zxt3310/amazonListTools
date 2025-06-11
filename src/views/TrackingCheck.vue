@@ -244,11 +244,16 @@
 							}
 						]
 					}]
-				}
+				},
+				//中断请求
+				cancelToken:false
 			};
 		},
 		created() {
 			this.getCATrakcingInMonth();
+		},
+		beforeDestroy() {
+			this.cancelToken = true;
 		},
 		methods: {
 			getInitData() {
@@ -281,7 +286,7 @@
 					return;
 				}
 				let key = this.searchKey;
-				if(key == "date"){
+				if (key == "date") {
 					this.loading = true;
 					axios
 						.post("searchtrackings", {
@@ -293,9 +298,9 @@
 							this.loading = false;
 						});
 				}
-				if(key == "tracker"){
+				if (key == "tracker") {
 					this.searchSingleTrack(this.searchParam);
-				}				
+				}
 			},
 
 			delay(ms) {
@@ -311,7 +316,7 @@
 				for (let index = 0; index < end; index++) {
 					let order = that.tableData[index];
 					//忽略已经delivered
-					if(order.ca_tag == 2){
+					if (order.ca_tag == 2) {
 						continue;
 					}
 					let res;
@@ -347,7 +352,10 @@
 					order.last_description = activity[0].status.description;
 					that.tableData[index] = order;
 					this.btnTilte = `进度：${index + 1} / ${end}`;
-					await this.delay(2000);
+					if(this.cancelToken){
+						return;
+					}
+					await this.delay(1000);
 				}
 				this.searching = false;
 				this.btnTilte = "点击开始";
