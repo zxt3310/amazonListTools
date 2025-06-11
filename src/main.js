@@ -5,7 +5,10 @@ import store from "./store";
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import MyNavi from "./components/Navi.vue";
+import EchoInstance from "./js/bootstrap.js";
 
+
+Vue.prototype.$echo = EchoInstance;
 Vue.config.silent = true; // 关闭所有Vue日志和警告（生产环境默认启用）
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
