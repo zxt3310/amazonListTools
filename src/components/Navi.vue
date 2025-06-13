@@ -39,6 +39,19 @@
 				</el-menu-item>
 			</el-submenu>
 			
+			<div style="position: absolute; right: 80px; top: 50%; transform: translateY(-50%);">
+				<el-badge :value="notifications.length==0?null:notifications.length" class="badge-item">
+					<el-popover placement="bottom-end" trigger="hover" width="500">
+						<el-table :data="notifications" stripe :show-header="false" @row-click="notify_click">
+							<el-table-column prop="type" width="120px" show-overflow-tooltip></el-table-column>
+							<el-table-column prop="message" with="180px" show-overflow-tooltip></el-table-column>
+						</el-table>
+						<el-button slot="reference" style="font-size: 20px; color: white;" type="text" icon="el-icon-message-solid"></el-button>
+					</el-popover>
+					
+				</el-badge>
+			</div>
+			
 			<div style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%);">
 				<el-button style="font-size: 20px; color: white;" type="text" @click="show=true"
 					icon="el-icon-s-operation"></el-button>
@@ -63,7 +76,8 @@
 		data() {
 			return {
 				show: false,
-				user: this.$store.state.userinfo
+				user: this.$store.state.userinfo,
+				countOfNotification:null
 				// activeIndex: '1',
 			};
 		},
@@ -73,6 +87,18 @@
 				default: "2"
 			}
 		},
+		computed:{
+			notifications(){
+				return this.$store.state.notifications;
+			}
+		},
+		// watch:{
+		// 	notifications(newValue,oldValue){
+		// 		if(oldValue != newValue){
+		// 			this.countOfNotification = newValue.length
+		// 		}
+		// 	}
+		// },
 		methods: {
 			handleSelect(key, keyPath) {
 				let curPath = this.$router.history.current.path;
@@ -97,6 +123,11 @@
 					path: routerPath[key - 1]
 				});
 			},
+			notify_click(row, column, event){
+				this.$router.replace({
+					path:row.path
+				})
+			},
 			logout() {
 				this.$store.commit("logout")
 			}
@@ -105,4 +136,8 @@
 </script>
 
 <style>
+	.badge-item {
+	  /* margin-top: 20px !important;
+	  margin-right: 40px !important; */
+	}
 </style>

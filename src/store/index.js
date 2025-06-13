@@ -11,7 +11,9 @@ export default new Vuex.Store({
 		tempPageAData: null,
 		// 存储上一个路由信息
 		previousRoute: null,
-		userinfo: null //JSON.parse(localStorage.getItem("USER"))
+		userinfo: null, //JSON.parse(localStorage.getItem("USER"))
+		//通知
+		notifications:[]
 	},
 	mutations: {
 		SET_USER_INFO(state, payload) {
@@ -49,6 +51,11 @@ export default new Vuex.Store({
 			router.replace({
 				path: "/login"
 			})
+		},
+		recvNotif(state,data){
+			let temp = state.notifications;
+			temp.push(data);
+			state.notifications = [...temp]
 		}
 	},
 	actions: {

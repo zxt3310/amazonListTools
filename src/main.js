@@ -6,19 +6,33 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import MyNavi from "./components/Navi.vue";
 import EchoInstance from "./js/bootstrap.js";
-import VueIziToast from 'vue-izitoast';
+// import VueIziToast from 'vue-izitoast';
+import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-// 默认配置（可选）
-const options = {
+iziToast.settings({
   position: 'topRight',
   timeout: 5000,
+  resetOnHover: true,
   progressBar: true,
-  transitionIn: 'fadeInUp',
-};
-Vue.use(VueIziToast, options);
+  transitionIn: 'fadeInLeft',
+  transitionOut: 'fadeOutRight',
+  displayMode: 0,
+  layout:2,
+  pauseOnHover:true
+});
+
+// // 默认配置（可选）
+// const options = {
+//   position: 'topRight',
+//   timeout: 5000,
+//   progressBar: true,
+//   transitionIn: 'fadeInUp',
+// };
+// Vue.use(VueIziToast, options);
 
 Vue.prototype.$echo = EchoInstance;
+Vue.prototype.$iziToast = iziToast;
 Vue.config.silent = true; // 关闭所有Vue日志和警告（生产环境默认启用）
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
