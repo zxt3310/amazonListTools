@@ -49,9 +49,9 @@
 							</div>
 						</template>
 					</el-table>
-					<el-pagination style="margin-top: 5px;" v-if="searchParam == ''" background @current-change="handleCurrentChange"
-						@size-change="handleCurrentChange" :page-size.sync="page.persize"
-						:page-sizes="[100, 250, 500, 1000]" :current-page.sync="page.cur"
+					<el-pagination style="margin-top: 5px;" v-if="searchParam == ''" background
+						@current-change="handleCurrentChange" @size-change="handleCurrentChange"
+						:page-size.sync="page.persize" :page-sizes="[100, 250, 500, 1000]" :current-page.sync="page.cur"
 						layout="prev, pager, next, jumper, sizes" :total="page.total">
 					</el-pagination>
 				</el-main>
@@ -71,6 +71,21 @@
 				<el-button type="primary" @click="registSNtoCode" :loading="registBtnDisable">确 定</el-button>
 			</span>
 		</el-dialog>
+		<el-dialog :title="rmSnCode.code" :visible.sync="rmDialogShow" width="30%">
+			<div class="sn-rm-style" v-for="(sn,index) in rmSnCode.sns" :key="index">
+				<el-row type="flex" align="middle" justify="center">
+					<el-col :span="16">
+						<span>{{sn.sn}}</span>
+					</el-col>
+					<el-col :span="8">
+						<el-button size="small" type="danger" @click="snRemove(sn,index)">注销SN</el-button>
+					</el-col>
+				</el-row>
+			</div>
+			<span slot="footer" class="dialog-footer">
+				<el-button @click="rmDialogShow = false">取 消</el-button>
+			</span>
+		</el-dialog>
 		<transition name="menu-fade">
 			<div v-show="menu.visible" class="custom-context-menu" :style="menuPosition">
 				<div class="menu-header">
@@ -86,10 +101,13 @@
 				<div class="menu-divider"></div>
 
 				<div class="menu-item" @click="handleEdit">
-					<i class="el-icon-edit"></i>
+					<i class="el-icon-circle-plus-outline"></i>
 					<span>注册SN</span>
 				</div>
-
+				<div v-show="menu.currentRow.sns.length>0" class="menu-item" @click="handleRemove">
+					<i class="el-icon-remove-outline"></i>
+					<span>注销SN</span>
+				</div>
 				<div v-if="$store.getters.isAdmin" class="menu-item danger" @click="handleDelete">
 					<i class="el-icon-delete"></i>
 					<span>删除Code</span>
@@ -140,7 +158,9 @@
 				RegistDialogShow: false,
 				RegistCode: "",
 				registSN: "",
-				registBtnDisable: false
+				registBtnDisable: false,
+				rmDialogShow: false,
+				rmSnCode: {}
 			};
 		},
 		computed: {
@@ -168,7 +188,7 @@
 				let sns = row.sns
 				let sns_str = ""
 				for (let sn of sns) {
-					sns_str += `<${sn}>   `
+					sns_str += `<${sn.sn}>   `
 				}
 				return sns_str
 			},
@@ -235,6 +255,27 @@
 					this.registBtnDisable = false;
 					this.RegistDialogShow = false;
 				})
+			},
+			snRemove(sn, index) {
+				this.$confirm("此操作将注销SN, 是否继续?", "警告", {
+						confirmButtonText: "注销",
+						cancelButtonText: "取消",
+						type: "warning"
+					})
+					.then(() => {
+						axios
+							.post("removeSn", {
+								code_id: this.menu.currentRow.id,
+								sn_id: sn.id
+							})
+							.then(e => {
+								let sns = this.rmSnCode.sns;
+								sns.splice(index, 1);
+							})
+							.catch(e => {
+								this.$message(e.message);
+							});
+					})
 			},
 			searchBtnText(e) {
 				var text = "";
@@ -345,6 +386,11 @@
 			handleEdit() {
 				this.RegistCode = this.menu.currentRow
 				this.RegistDialogShow = true
+				this.closeMenu();
+			},
+			handleRemove() {
+				this.rmSnCode = this.menu.currentRow
+				this.rmDialogShow = true
 				this.closeMenu();
 			},
 			handleDelete() {
@@ -523,5 +569,12 @@
 
 	.table_text {
 		font-size: 16px !important;
+	}
+
+	.sn-rm-style {
+		padding: 8px;
+		margin-bottom: 8px;
+		border-radius: 5px;
+		box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 	}
 </style>
