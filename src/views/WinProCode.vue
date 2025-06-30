@@ -104,7 +104,7 @@
 					<i class="el-icon-circle-plus-outline"></i>
 					<span>注册SN</span>
 				</div>
-				<div v-show="menu.currentRow.sns.length>0" class="menu-item" @click="handleRemove">
+				<div v-show="menu.currentRow && menu.currentRow.sns.length>0" class="menu-item" @click="handleRemove">
 					<i class="el-icon-remove-outline"></i>
 					<span>注销SN</span>
 				</div>
