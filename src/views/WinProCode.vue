@@ -37,7 +37,7 @@
 						<el-table-column label="操作" width="150">
 							<template slot-scope="scope">
 								<el-button type="primary" @click="handleEditByTable(scope.$index, scope.row)">
-									注册SN</el-button>
+									绑定SN</el-button>
 								<!-- <el-button size="mini" type="danger"
 									@click="handleDeleteByTable(scope.$index, scope.row)">
 									Del</el-button> -->
@@ -78,7 +78,7 @@
 						<span>{{sn.sn}}</span>
 					</el-col>
 					<el-col :span="8">
-						<el-button size="small" type="danger" @click="snRemove(sn,index)">注销SN</el-button>
+						<el-button size="small" type="danger" @click="snRemove(sn,index)">解绑SN</el-button>
 					</el-col>
 				</el-row>
 			</div>
@@ -102,11 +102,11 @@
 
 				<div class="menu-item" @click="handleEdit">
 					<i class="el-icon-circle-plus-outline"></i>
-					<span>注册SN</span>
+					<span>绑定SN</span>
 				</div>
 				<div v-show="menu.currentRow && menu.currentRow.sns.length>0" class="menu-item" @click="handleRemove">
 					<i class="el-icon-remove-outline"></i>
-					<span>注销SN</span>
+					<span>解绑SN</span>
 				</div>
 				<div v-if="$store.getters.isAdmin" class="menu-item danger" @click="handleDelete">
 					<i class="el-icon-delete"></i>
