@@ -49,6 +49,11 @@
 							</div>
 						</template>
 					</el-table>
+					<el-pagination style="margin-top: 5px;" v-if="searchParam == ''" background @current-change="handleCurrentChange"
+						@size-change="handleCurrentChange" :page-size.sync="page.persize"
+						:page-sizes="[100, 250, 500, 1000]" :current-page.sync="page.cur"
+						layout="prev, pager, next, jumper, sizes" :total="page.total">
+					</el-pagination>
 				</el-main>
 			</el-container>
 		</div>
@@ -107,7 +112,7 @@
 				//搜索条件
 				searchParam: "",
 				//页面数据
-				table_max_height: window.innerHeight - 150,
+				table_max_height: window.innerHeight - 180,
 				loading: false,
 				queryData: {
 					upc: "",
@@ -119,6 +124,11 @@
 					stores: []
 				},
 				AddDialogVisible: false,
+				page: {
+					cur: 1,
+					total: 0,
+					persize: 100
+				},
 				menu: {
 					visible: false,
 					left: 0,
@@ -166,6 +176,20 @@
 				this.loading = true;
 				axios
 					.get("getActiveCodes")
+					.then(e => {
+						this.tableData = e.data;
+						this.page.total = e.total;
+						this.loading = false;
+					})
+					.catch(e => {
+						console.log(e);
+						this.loading = false;
+					});
+			},
+			handleCurrentChange(curpage) {
+				this.loading = true;
+				axios
+					.get(`getActiveCodes?page=${this.page.cur}&per_page=${this.page.persize}`)
 					.then(e => {
 						this.tableData = e.data;
 						this.loading = false;
