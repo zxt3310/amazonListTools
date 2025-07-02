@@ -42,6 +42,8 @@
 				this.joinChannel()
 				console.log("成功加入频道")
 			}
+			
+			this.$store.dispatch("fetchMessage");
 		},
 		created() {
 			document.title = "WTOD Work Flow"
@@ -51,7 +53,8 @@
 				this.$echo.channel(`notification.${this.$store.state.userinfo.id}`)
 					.listen('.new-notification', (e) => { // 注意事件名前加点号		
 						this.showNotification(e.message, e.type, e.path)
-						this.$store.commit("recvNotif",e);
+						// this.$store.commit("recvNotif",e);
+						this.$store.dispatch("fetchMessage");
 					});
 			},
 			requestNotificationPermission() {

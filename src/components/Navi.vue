@@ -27,7 +27,7 @@
 				<i class="el-icon-sold-out"></i>
 				<span>上下架</span>
 			</el-menu-item>
-			
+
 			<el-submenu index="3" v-if="$store.getters.isSuperAdmin">
 				<template slot="title">
 					<i class="el-icon-setting"></i>
@@ -38,20 +38,33 @@
 					<span>User Manage</span>
 				</el-menu-item>
 			</el-submenu>
-			
+
 			<div style="position: absolute; right: 80px; top: 50%; transform: translateY(-50%);">
-				<el-badge :value="notifications.length==0?null:notifications.length" class="badge-item">
+				<el-badge :value="dots==0?null:dots" class="badge-item">
 					<el-popover placement="bottom-end" trigger="hover" width="500">
 						<el-table :data="notifications" stripe :show-header="false" @row-click="notify_click">
 							<el-table-column prop="type" width="120px" show-overflow-tooltip></el-table-column>
-							<el-table-column prop="message" with="180px" show-overflow-tooltip></el-table-column>
+							<el-table-column prop="message" with="220px" show-overflow-tooltip></el-table-column>
+							<el-table-column>
+								<template slot-scope="scope">
+									<el-badge is-dot :hidden="scope.row.is_read"
+										style="margin-top: 10px;margin-right: 40px;">
+										<el-button size="mini" v-if="!scope.row.is_read"
+											@click="handleReaded(scope.$index, scope.row)">
+											Readed</el-button>
+									</el-badge>
+									<el-button style="color: red; font-size: 18px;" type="text" icon="el-icon-delete"
+										@click="handleDelete(scope.$index, scope.row)"></el-button>
+								</template>
+							</el-table-column>
 						</el-table>
-						<el-button slot="reference" style="font-size: 20px; color: white;" type="text" icon="el-icon-message-solid"></el-button>
+						<el-button slot="reference" style="font-size: 20px; color: white;" type="text"
+							icon="el-icon-message-solid"></el-button>
 					</el-popover>
-					
+
 				</el-badge>
 			</div>
-			
+
 			<div style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%);">
 				<el-button style="font-size: 20px; color: white;" type="text" @click="show=true"
 					icon="el-icon-s-operation"></el-button>
@@ -71,13 +84,14 @@
 </template>
 
 <script>
+	import axios from '../js/request.js';
 	export default {
 		name: 'MyNavi',
 		data() {
 			return {
 				show: false,
 				user: this.$store.state.userinfo,
-				countOfNotification:null
+				countOfNotification: null
 				// activeIndex: '1',
 			};
 		},
@@ -87,9 +101,14 @@
 				default: "2"
 			}
 		},
-		computed:{
-			notifications(){
+		computed: {
+			notifications() {
 				return this.$store.state.notifications;
+			},
+			dots() {
+				let items = this.notifications;
+				let unreads = items.filter(item => item.is_read == false)
+				return unreads.length;
 			}
 		},
 		// watch:{
@@ -123,13 +142,31 @@
 					path: routerPath[key - 1]
 				});
 			},
-			notify_click(row, column, event){
+			notify_click(row, column, event) {
 				this.$router.replace({
-					path:row.path
+					path: row.path
 				})
 			},
 			logout() {
 				this.$store.commit("logout")
+			},
+			handleReaded(index, row) {
+				axios.post("readMessage", {
+					id: row.id
+				}).then((e) => {
+					if (e.ret == 0) {
+						this.$store.dispatch("fetchMessage")
+					}
+				})
+			},
+			handleDelete(index,row){
+				axios.post("delMessage",{
+					id: row.id
+				}).then((e)=>{
+					if (e.ret == 0) {
+						this.$store.dispatch("fetchMessage")
+					}
+				})
 			}
 		}
 	}
@@ -137,7 +174,7 @@
 
 <style>
 	.badge-item {
-	  /* margin-top: 20px !important;
+		/* margin-top: 20px !important;
 	  margin-right: 40px !important; */
 	}
 </style>

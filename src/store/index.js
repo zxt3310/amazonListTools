@@ -53,9 +53,7 @@ export default new Vuex.Store({
 			})
 		},
 		recvNotif(state,data){
-			let temp = state.notifications;
-			temp.push(data);
-			state.notifications = [...temp]
+			state.notifications = [...data]
 		}
 	},
 	actions: {
@@ -68,6 +66,17 @@ export default new Vuex.Store({
 				return data // 返回数据以便后续处理
 			} catch (error) {
 				console.error('获取用户信息失败', error)
+				throw error // 抛出错误供调用方处理
+			}
+		},
+		async fetchMessage({
+			commit
+		}){
+			try{
+				const data = await axios.get("getMessages")
+				commit('recvNotif', data.data)
+			} catch (error) {
+				console.error('获取消息失败', error)
 				throw error // 抛出错误供调用方处理
 			}
 		}
