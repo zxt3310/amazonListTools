@@ -61,7 +61,6 @@
 						<el-button slot="reference" style="font-size: 20px; color: white;" type="text"
 							icon="el-icon-message-solid"></el-button>
 					</el-popover>
-
 				</el-badge>
 			</div>
 

@@ -39,10 +39,13 @@
 										start-placeholder="开始日期" end-placeholder="结束日期"
 										value-format="yyyy-MM-dd HH:mm:ss">
 									</el-date-picker>
-
-									<el-button type="primary" @click="searchRecord">
+									<el-checkbox border v-model="onlyCaTrans">只看CA转运</el-checkbox>
+									<el-button style="margin-left: 50px;" type="primary" @click="searchRecord">
 										搜索 <i class="el-icon-search"></i>
 									</el-button>
+
+									<el-button v-if="onlyCaTrans" style="margin-left: 30px; text-decoration: underline;"
+										type="text" @click="exporCaExcel">CA转运清单 导出EXCEL</el-button>
 								</div>
 								<div>
 									<el-button type="primary" circle="" @click="collesp"><i
@@ -110,7 +113,8 @@
 												<el-button :disabled="activeStatus!='all'" size="mini" type="primary"
 													@click="handleEdit(scope.$index, scope.row)">
 													编辑</el-button>
-												<el-button v-if="$store.getters.isAdmin" :disabled="activeStatus!='all'" size="mini" type="danger"
+												<el-button v-if="$store.getters.isAdmin" :disabled="activeStatus!='all'"
+													size="mini" type="danger"
 													@click="handleDelete(scope.$index, scope.row)">
 													删除</el-button>
 											</template>
@@ -289,7 +293,10 @@
 	import moment from "moment-timezone";
 	import axios from "../js/request.js";
 	import axiosEx from "axios";
-	import { SellerOption } from "../js/defaultRtWarObj.js";
+	import * as XLSX from 'xlsx'
+	import {
+		SellerOption
+	} from "../js/defaultRtWarObj.js";
 	// import VueBarcode from "vue-barcode";
 	export default {
 		// components: {
@@ -365,7 +372,8 @@
 				centerDialogVisible: false,
 				//是否触发搜索
 				isSearched: false,
-				sellerOptions:SellerOption
+				sellerOptions: SellerOption,
+				onlyCaTrans: false
 			};
 		},
 		created() {
@@ -459,7 +467,8 @@
 				axios
 					.post("searchMissions", {
 						type: this.searchKey,
-						param: this.searchParam
+						param: this.searchParam,
+						"only_ca": this.onlyCaTrans
 					})
 					.then(res => {
 						this.tableData = res.data;
@@ -487,7 +496,7 @@
 			addTracking() {
 				this.missionData.trackings.push("")
 			},
-			querySellerSearch(query,cb){
+			querySellerSearch(query, cb) {
 				let res = [];
 				for (let seller of this.sellerOptions) {
 					res.push({
@@ -945,7 +954,7 @@
 						asin: asinMatch ? asinMatch[1] : "未匹配",
 						cnt: itemCountMatch ? itemCountMatch[1] : "未匹配",
 						orderid: orderNumberMatch ? orderNumberMatch[0] : "未匹配",
-						seller: storeMatch? storeMatch[1] : "未匹配",
+						seller: storeMatch ? storeMatch[1] : "未匹配",
 						tracking: upsMatch ? upsMatch[0] : (uspsMatch ? uspsMatch[0] : "未匹配"),
 						ram: ram,
 						system: system,
@@ -1005,6 +1014,31 @@
 					}
 				}
 			},
+			exporCaExcel() {
+				let data = this.tableData;
+				let exportObj = {}
+				let exportData = [['upc','qty']]
+				for (let mission of data) {
+					let upc = mission.upc
+					if (!exportObj[upc]) {
+						exportObj[upc] = 0
+					}
+					exportObj[upc] = exportObj[upc] + 1;
+				}
+				for (let item in exportObj) {
+					exportData.push([item,exportObj[item]])
+				}
+				
+				// console.log(exportData)
+				
+				const wb = XLSX.utils.book_new()
+				// 创建工作表
+				const ws = XLSX.utils.aoa_to_sheet(exportData)
+				// 将工作表添加到工作簿
+				XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+				// 导出文件
+				XLSX.writeFile(wb, '导出数据.xlsx')
+			}
 		}
 	};
 </script>
