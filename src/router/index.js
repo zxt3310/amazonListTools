@@ -16,6 +16,7 @@ import store from "../store";
 import InventoryAjustment from "../views/InventoryAjustment.vue";
 import WinProCode from "../views/WinProCode.vue";
 import UserManage from "../views/UserManage.vue";
+import AMZInvoiceCreator from "../views/AMZInvoiceCreator.vue";
 
 Vue.use(VueRouter);
 
@@ -100,6 +101,11 @@ const routes = [
 	  path:"/user",
 	  name:"User Manage",
 	  component:UserManage
+  },
+  {
+  	  path:"/invoice",
+  	  name:"AMZ Invoice Creator",
+  	  component:AMZInvoiceCreator
   }
 ];
 

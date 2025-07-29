@@ -22,6 +22,7 @@
 				<el-menu-item index="8">UPC 获取</el-menu-item>
 				<el-menu-item index="9">UPC 计算</el-menu-item>
 				<el-menu-item index="10">Pro Code</el-menu-item>
+				<el-menu-item index="12">AMZ Invoice</el-menu-item>
 			</el-submenu>
 			<el-menu-item index="7">
 				<i class="el-icon-sold-out"></i>
@@ -131,7 +132,8 @@
 					"/UPC",
 					"/CaculateUPC",
 					"/procode",
-					"/user"
+					"/user",
+					"/invoice"
 				]
 				if (curPath === routerPath[key - 1]) {
 					return
