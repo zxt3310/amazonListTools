@@ -24,11 +24,20 @@
 				<el-menu-item index="10">Pro Code</el-menu-item>
 				<el-menu-item index="12">AMZ Invoice</el-menu-item>
 			</el-submenu>
-			<el-menu-item index="7">
-				<i class="el-icon-sold-out"></i>
-				<span>上下架</span>
-			</el-menu-item>
-
+			<el-submenu index="3">
+				<template slot="title">
+					<i class="el-icon-box"></i>
+					<span>Inventory</span>
+				</template>
+				<el-menu-item index="7">
+					<i class="el-icon-sold-out"></i>
+					<span>上下架指令发布</span>
+				</el-menu-item>
+				<el-menu-item index="13">
+					<i class="el-icon-sold-out"></i>
+					<span>库存修改文件导出</span>
+				</el-menu-item>
+			</el-submenu>
 			<el-submenu index="3" v-if="$store.getters.isSuperAdmin">
 				<template slot="title">
 					<i class="el-icon-setting"></i>
@@ -133,7 +142,8 @@
 					"/CaculateUPC",
 					"/procode",
 					"/user",
-					"/invoice"
+					"/invoice",
+					"/inventory-modify-output"
 				]
 				if (curPath === routerPath[key - 1]) {
 					return

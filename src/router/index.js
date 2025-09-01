@@ -17,6 +17,7 @@ import InventoryAjustment from "../views/InventoryAjustment.vue";
 import WinProCode from "../views/WinProCode.vue";
 import UserManage from "../views/UserManage.vue";
 import AMZInvoiceCreator from "../views/AMZInvoiceCreator.vue";
+import InventoryModifyOut from "../views/InventoryModifyOut.vue";
 
 Vue.use(VueRouter);
 
@@ -106,6 +107,11 @@ const routes = [
   	  path:"/invoice",
   	  name:"AMZ Invoice Creator",
   	  component:AMZInvoiceCreator
+  },
+  {
+  	  path:"/inventory-modify-output",
+  	  name:"InventoryOut",
+  	  component:InventoryModifyOut
   }
 ];
 
