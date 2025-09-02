@@ -210,6 +210,7 @@
 				this.finalData = [...this.tempData]
 			},
 			pushToResult() {
+				if(this.serchData.length==0) return;
 				this.tempData = [...this.finalData];
 				this.serchData.forEach(item => {
 					let temp = {...item}
