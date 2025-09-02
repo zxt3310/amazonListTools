@@ -176,7 +176,6 @@
 			},
 			clearSerchresult() {
 				this.serchData = [];
-				this.tempData = [];
 				this.priceFlow = "";
 				this.priceFlowDisable = false;
 			},
