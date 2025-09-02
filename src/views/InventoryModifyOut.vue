@@ -218,7 +218,7 @@
 					this.finalData.push(temp);
 				})
 				this.districtFlag +=1;
-				console.log(this.finalData)
+				this.clearSerchresult();
 			},
 			outPutText() {
 				if (this.finalData.length == 0) return;
