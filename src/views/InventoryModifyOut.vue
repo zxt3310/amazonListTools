@@ -3,27 +3,47 @@
 		<my-navi activeIndex="13"></my-navi>
 		<el-container>
 			<el-header>
-				<el-input style="width: 80%;" v-model="searchTerm" @keypress.enter.native="performSearch"></el-input>
+				<el-upload :on-change="loadFile" :before-upload="fileCheck" :show-file-list='false' accept=".txt">
+					<el-button slot="trigger" size="small" type="primary">上传库存报告</el-button>
+					<el-label style="margin-left:10px;">{{filename}}</el-label>
+				</el-upload>
+				<el-input style="width: 70%; margin-left:10px" v-model="searchTerm"
+					@keypress.enter.native="performSearch"></el-input>
 				<el-button style="margin-left: 20px; width: 5%;" type="primary" @click="performSearch">搜索</el-button>
 			</el-header>
 			<el-main>
 				<el-row type="flex" justify="space-around">
 					<el-col :span="11">
-						<el-row type="flex" justify="start" style="padding-bottom: 20px;">
-							<el-button @click="clearSerchresult">清空</el-button>
-							<el-button style="margin-left: 10px;" @click="outOfStock()">下架</el-button>
-							<el-button style="margin-left: 10px;" @click="outOfStock(1)">保留1</el-button>
-							<el-input v-model="priceFlow" type="number" style="width: 20%; margin-left: 10px;"
-								placeholder="价格浮动" @keypress.enter.native="priceFlowAction"></el-input>
-							<el-button :disabled="priceFlowDisable" type="primary"
-								@click="priceFlowAction">调价</el-button>
-							<el-button style="margin-left: 10px;" @click="pushToResult">加入结果队列</el-button>
+						<el-row type="flex" justify="space-between" style="padding-bottom: 20px;">
+							<div>
+								<el-button @click="clearSerchresult">清空</el-button>
+								<el-button style="margin-left: 10px;" @click="outOfStock()">下架</el-button>
+								<el-button style="margin-left: 10px;" @click="outOfStock(1)">保留1</el-button>
+								<el-input v-model="priceFlow" type="number" style="width: 30%; margin-left: 10px;"
+									placeholder="价格浮动" @keypress.enter.native="priceFlowAction"></el-input>
+								<el-button :disabled="priceFlowDisable" type="primary"
+									@click="priceFlowAction">调价</el-button>
+							</div>
+							<div>
+								<el-button style="margin-left: 10px;" @click="pushToResult">加入结果队列>></el-button>
+							</div>
 						</el-row>
 						<el-row>
 							<el-table :data="serchData">
-								<el-table-column header-align="center" prop="sku" label="SKU"></el-table-column>
+								<el-table-column prop="sku" label="SKU"></el-table-column>
 								<el-table-column prop="price" label="价格" width="200"></el-table-column>
-								<el-table-column prop="quantity" label="数量" width="200"></el-table-column>
+								<el-table-column label="数量" width="200">
+									<template slot-scope="scope">
+										<el-input v-model="scope.row.quantity"></el-input>
+									</template>
+								</el-table-column>
+								<el-table-column label="操作" width="150">
+									<template slot-scope="scope">
+										<el-button size="mini" type="danger"
+											@click="searchDataDeleteHandle(scope.$index, scope.row)">
+											删除</el-button>
+									</template>
+								</el-table-column>
 							</el-table>
 						</el-row>
 					</el-col>
@@ -33,10 +53,17 @@
 							<el-button type="primary" @click="outPutText">导出TXT</el-button>
 						</el-row>
 						<el-row>
-							<el-table :data="finalData">
-								<el-table-column header-align="center" prop="sku" label="SKU"></el-table-column>
+							<el-table :data="finalData" :row-style="markDistrict">
+								<el-table-column prop="sku" label="SKU"></el-table-column>
 								<el-table-column prop="price" label="价格" width="200"></el-table-column>
 								<el-table-column prop="quantity" label="数量" width="200"></el-table-column>
+								<el-table-column label="操作" width="150">
+									<template slot-scope="scope">
+										<el-button size="mini" type="danger"
+											@click="finalDataDeleteHandle(scope.$index, scope.row)">
+											删除</el-button>
+									</template>
+								</el-table-column>
 							</el-table>
 						</el-row>
 					</el-col>
@@ -57,20 +84,38 @@
 				tempData: [],
 				finalData: [],
 				priceFlow: "",
-				priceFlowDisable: false
+				priceFlowDisable: false,
+				filename: "",
+				//分区flag
+				districtFlag:0
 			}
 		},
-		created() {
-
-		},
-		mounted() {
-			this.loadingFile()
-		},
 		methods: {
-			loadingFile() {
-				fetch("COU_US.txt").then(response => response.text()).then(data => {
-					this.fileContent = data
-				})
+			loadFile(file) {
+				const isText = file.type === 'text/plain' || file.name.endsWith('.txt');
+				if (!isText) return;
+				this.filename = file.raw.name
+				this.readFileContent(file)
+			},
+			fileCheck(file) {
+				const isText = file.type === 'text/plain' || file.name.endsWith('.txt');
+				if (!isText) {
+					this.$message.error('只能上传文本文件 (.txt)');
+				}
+				return false;
+			},
+			readFileContent(file) {
+				const reader = new FileReader();
+
+				reader.onload = (e) => {
+					this.fileContent = e.target.result;
+					this.$message.success('文件内容已加载');
+				};
+
+				reader.onerror = () => {
+					this.$message.error('文件读取失败');
+				};
+				reader.readAsText(file.raw);
 			},
 			parseLine(line) {
 				const parts = line.split('\t');
@@ -107,6 +152,12 @@
 			},
 			performSearch() {
 				if (!this.fileContent || !this.searchTerm) {
+					this.$message({
+						duration: 5000,
+						type: "error",
+						message: "未加载库存报告或未填写搜索词",
+						customClass: 'big-font-size'
+					})
 					return;
 				}
 
@@ -154,13 +205,20 @@
 				this.serchData = newAry;
 			},
 			pushBack() {
+				if(this.finalData.length != this.tempData.length){
+					this.districtFlag -= 1;
+				}
 				this.finalData = [...this.tempData]
 			},
 			pushToResult() {
 				this.tempData = [...this.finalData];
 				this.serchData.forEach(item => {
-					this.finalData.push(item)
+					let temp = {...item}
+					temp.flag = parseInt(this.districtFlag.toString());
+					this.finalData.push(temp);
 				})
+				this.districtFlag +=1;
+				console.log(this.finalData)
 			},
 			outPutText() {
 				if (this.finalData.length == 0) return;
@@ -170,7 +228,7 @@
 					let sku_str = item.sku + "\t";
 					let price_str = item.price + "\t";
 					let minprice_str = (parseFloat(item.price) / 2).toString() + "\t";
-					let maxprice_str = (parseFloat(item.price) + 400).toString() + "\t";
+					let maxprice_str = (parseFloat(item.price) + 1000).toString() + "\t";
 					let qty_str = item.quantity + "\t";
 					let block_str = "\t\t\n"
 					context += sku_str + price_str + minprice_str + maxprice_str + qty_str + block_str
@@ -191,10 +249,33 @@
 
 				// 触发下载
 				link.click();
+			},
+			searchDataDeleteHandle(index, row){
+				this.serchData.splice(index,1);
+			},
+			finalDataDeleteHandle(index, row){
+				this.finalData.splice(index,1);
+				if(this.finalData.length == this.tempData.length){
+					this.districtFlag -= 1;
+				}
+			},
+			markDistrict({
+				row,index
+			}){
+				let style = {};
+				if(row.flag % 2 ==0){
+					style.backgroundColor = "white"
+				}else{
+					style.backgroundColor = "#dddddd"
+				}
+				return style;
 			}
 		}
 	}
 </script>
 
 <style>
+	.big-font-size {
+		font-size: 30px !important;
+	}
 </style>
