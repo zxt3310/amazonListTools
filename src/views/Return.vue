@@ -615,6 +615,11 @@
 			},
 			// 过滤逻辑
 			filterMethod(value, row, column) {
+				
+				if(column.label === "Store"){
+					return row[column.property] && row[column.property].replace(/\s/g, "").toLowerCase() === value.replace(/\s/g, "").toLowerCase();
+				}
+				
 				return row[column.property] === value;
 			},
 

@@ -470,7 +470,10 @@
 			},
 			// 通用过滤逻辑
 			filterMethod(value, row, column) {
-				return row[column.property] === value;
+				// if(column.label === "Store"){
+					return row[column.property] && row[column.property].replace(/\s/g, "").toLowerCase() === value.replace(/\s/g, "").toLowerCase();
+				// }
+				// return row[column.property] === value;
 			},
 			// 订单号过滤所及
 			OrderIDfilterMethod(value, row, column) {
