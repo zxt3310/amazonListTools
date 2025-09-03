@@ -4,7 +4,7 @@
 		<el-container>
 			<el-header>
 				<el-upload :on-change="loadFile" :before-upload="fileCheck" :show-file-list='false' accept=".txt">
-					<el-button slot="trigger" size="small" type="primary">上传库存报告</el-button>
+					<el-button slot="trigger" size="small" type="primary">加载库存报告</el-button>
 					<el-label style="margin-left:10px;">{{filename}}</el-label>
 				</el-upload>
 				<el-input style="width: 70%; margin-left:10px" v-model="searchTerm"
@@ -87,7 +87,7 @@
 				priceFlowDisable: false,
 				filename: "",
 				//分区flag
-				districtFlag:0
+				districtFlag: 0
 			}
 		},
 		methods: {
@@ -204,20 +204,22 @@
 				this.serchData = newAry;
 			},
 			pushBack() {
-				if(this.finalData.length != this.tempData.length){
+				if (this.finalData.length != this.tempData.length) {
 					this.districtFlag -= 1;
 				}
 				this.finalData = [...this.tempData]
 			},
 			pushToResult() {
-				if(this.serchData.length==0) return;
+				if (this.serchData.length == 0) return;
 				this.tempData = [...this.finalData];
 				this.serchData.forEach(item => {
-					let temp = {...item}
+					let temp = {
+						...item
+					}
 					temp.flag = parseInt(this.districtFlag.toString());
 					this.finalData.push(temp);
 				})
-				this.districtFlag +=1;
+				this.districtFlag += 1;
 				this.clearSerchresult();
 			},
 			outPutText() {
@@ -250,22 +252,23 @@
 				// 触发下载
 				link.click();
 			},
-			searchDataDeleteHandle(index, row){
-				this.serchData.splice(index,1);
+			searchDataDeleteHandle(index, row) {
+				this.serchData.splice(index, 1);
 			},
-			finalDataDeleteHandle(index, row){
-				this.finalData.splice(index,1);
-				if(this.finalData.length == this.tempData.length){
+			finalDataDeleteHandle(index, row) {
+				this.finalData.splice(index, 1);
+				if (this.finalData.length == this.tempData.length) {
 					this.districtFlag -= 1;
 				}
 			},
 			markDistrict({
-				row,index
-			}){
+				row,
+				index
+			}) {
 				let style = {};
-				if(row.flag % 2 ==0){
+				if (row.flag % 2 == 0) {
 					style.backgroundColor = "white"
-				}else{
+				} else {
 					style.backgroundColor = "#dddddd"
 				}
 				return style;
