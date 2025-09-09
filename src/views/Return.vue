@@ -90,6 +90,8 @@
 						</el-table-column>
 						<el-table-column prop="created_at" label="Processed On" width="120" :formatter="dateformat">
 						</el-table-column>
+						<el-table-column prop="refund_rate" label="Refund" width="80" :formatter="rateformat">
+						</el-table-column>
 						<el-table-column prop="brand" label="Brand" width="100" :filter-method="filterMethod">
 						</el-table-column>
 						<el-table-column prop="model" label="Model" width="400">
@@ -432,6 +434,13 @@
 				} else {
 					return "";
 				}
+			},
+			rateformat(ow, column, cellValue, index){
+					if (cellValue) {
+						return (cellValue*100).toString()+'%';
+					} else {
+						return "";
+					}
 			},
 			searchBtnText(e) {
 				var text = "";
