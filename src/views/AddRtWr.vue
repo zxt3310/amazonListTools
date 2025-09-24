@@ -293,8 +293,8 @@
 					</el-card>
 				</div>
 				<el-card style="margin-top: 20px;">
-					<el-row>
-						<el-col :span="16">
+					<el-row type="flex" justify="space-between">
+						<el-col :span="12">
 							<el-row>
 								<el-col :span="5">
 									<el-form-item label="Decision:" prop="decision">
@@ -320,6 +320,14 @@
 									@click="checkout">{{
                     queryData.is_check_out ? "Is Checked Out" : "Check Out"
                   }}</el-button>
+							</el-form-item>
+						</el-col>
+						<el-col v-if="warrantyAccess && $store.getters.isAdmin" :span="4">
+							<el-form-item label="In Stock">
+								<el-button :disabled="!queryData.is_check_out" style="width: 150px;" type="warning"
+									@click="instock">{{
+						  queryData.is_check_out ? "In Stock" : "Is Instock"
+						}}</el-button>
 							</el-form-item>
 						</el-col>
 						<el-col v-if="warrantyAccess" :span="4">
@@ -420,11 +428,13 @@
 		},
 		mounted() {
 			// 直接操作 DOM 移除禁用属性
-			this.$nextTick(() => {
-				const btn = this.$refs.downloadBtn.$el;
-				btn.disabled = false;
-				btn.classList.remove('is-disabled');
-			});
+			if (this.isReadOnly) {
+				this.$nextTick(() => {
+					const btn = this.$refs.downloadBtn.$el;
+					btn.disabled = false;
+					btn.classList.remove('is-disabled');
+				});
+			}
 		},
 		beforeDestroy() {
 			if (this.isReadOnly) {
@@ -527,27 +537,29 @@
 					})
 					.catch(() => {});
 			},
+			//取消出库
+			instock(){
+				this.$confirm("点击前请确认此退货需要重置check out状态", "提示", {
+						confirmButtonText: "In Stock",
+						cancelButtonText: "取消",
+						type: "warning"
+					})
+					.then(() => {
+						axios
+							.post("stockin", {
+								id: this.queryData.id
+							})
+							.then(e => {
+								this.queryData.is_check_out = false;
+								this.$message("Instock successed");
+								//自动触发一次提交
+								this.submitQueryData();
+							});
+					})
+					.catch(() => {});
+			},
 			//退款
 			refund() {
-				// this.$confirm("点击前请确认此退货已退款", "提示", {
-				// 		confirmButtonText: "Refunded",
-				// 		cancelButtonText: "取消",
-				// 		type: "warning"
-				// 	})
-				// 	.then(() => {
-				// 		axios
-				// 			.post("refund", {
-				// 				id: this.queryData.id
-				// 			})
-				// 			.then(e => {
-				// 				this.queryData.is_refunded = true;
-				// 				this.$message("refund successed");
-				// 				//自动触发一次提交
-				// 				this.submitQueryData();
-				// 			});
-				// 	})
-				// 	.catch(() => {});
-
 				this.$prompt('请输入扣款比例', '操作确认', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
@@ -595,7 +607,7 @@
 						})
 						.then(e => {
 							this.queryData.is_refunded = true;
-							this.queryData.refund_rate = value/100
+							this.queryData.refund_rate = value / 100
 							this.$message("refund successed");
 							//自动触发一次提交
 							this.submitQueryData();
@@ -692,79 +704,6 @@
 					throw error;
 				}
 			},
-
-
-			// 使用JSZip的终极解决方案（不压缩）
-			// async downloadPictures() {
-			//   if (this.picslist.length === 0) {
-			//     this.$message({
-			//       message: "No photos available",
-			//       type: "error"
-			//     });
-			//     return;
-			//   }
-
-			//   try {
-			//     const zip = new JSZip();
-
-			//     // 创建根文件夹
-			//     const rootFolder = zip.folder(this.queryData.rt_id);
-
-			//     // 处理所有文件
-			//     for (const file of this.picslist) {
-			//       await this.addFileToZip(rootFolder, file);
-			//     }
-
-			//     // 生成ZIP文件（不压缩）
-			//     const blob = await zip.generateAsync({
-			//       type: 'blob',
-			//       compression: 'STORE', // 不压缩
-			//       platform: 'UNIX', // 保持文件权限
-			//       streamFiles: true // 流式处理大文件
-			//     });
-
-			//     // 触发下载
-			//     saveAs(blob, `${this.queryData.rt_id}.zip`);
-			//   } catch (error) {
-			//     console.error("打包失败:", error);
-			//     this.$message({
-			//       message: "打包失败: " + error.message,
-			//       type: "error"
-			//     });
-			//   }
-			// },
-
-			// async addFileToZip(zipFolder, file) {
-			//   try {
-			//     // 获取文件数据
-			//     const response = await fetch(file.url);
-			//     if (!response.ok) {
-			//       throw new Error(`HTTP ${response.status} - ${file.url}`);
-			//     }
-
-			//     // 处理可能的文件名路径
-			//     const fileName = this.extractFileName(file.name);
-
-			//     // 添加文件（不压缩）
-			//     zipFolder.file(fileName, await response.blob(), {
-			//       binary: true,
-			//       compression: 'STORE'
-			//     });
-
-			//     return true;
-			//   } catch (error) {
-			//     console.error(`文件添加失败: ${file.name}`, error);
-			//     throw error;
-			//   }
-			// },
-
-			// // 提取文件名（处理路径）
-			// extractFileName(fullPath) {
-			//   // 如果包含路径，只取文件名部分
-			//   return fullPath.includes('/') 
-			//     ? fullPath.split('/').pop() 
-			//     : fullPath;
-			// },
 			autofill() {
 				let content = this.autofillStr
 				if (content == "") {
