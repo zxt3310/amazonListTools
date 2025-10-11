@@ -18,7 +18,7 @@ import WinProCode from "../views/WinProCode.vue";
 import UserManage from "../views/UserManage.vue";
 import AMZInvoiceCreator from "../views/AMZInvoiceCreator.vue";
 import InventoryModifyOut from "../views/InventoryModifyOut.vue";
-
+import CaTransHelper from "../views/CaTransHelper.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -112,6 +112,11 @@ const routes = [
   	  path:"/inventory-modify-output",
   	  name:"InventoryOut",
   	  component:InventoryModifyOut
+  },
+  {
+	  path:"/ca-trans-helper",
+	  name:"CaTransHelper",
+	  component:CaTransHelper
   }
 ];
 

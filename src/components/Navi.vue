@@ -38,7 +38,7 @@
 					<span>库存修改文件导出</span>
 				</el-menu-item>
 			</el-submenu>
-			<el-submenu index="3" v-if="$store.getters.isSuperAdmin">
+			<el-submenu index="4" v-if="$store.getters.isSuperAdmin">
 				<template slot="title">
 					<i class="el-icon-setting"></i>
 					<span>Setting</span>
@@ -46,6 +46,16 @@
 				<el-menu-item index="11">
 					<i class="el-icon-s-custom"></i>
 					<span>User Manage</span>
+				</el-menu-item>
+			</el-submenu>
+			<el-submenu index="5">
+				<template slot="title">
+					<i class="el-icon-s-tools"></i>
+					<span>Tools</span>
+				</template>
+				<el-menu-item index="14">
+					<i class="el-icon-guide"></i>
+					<span>Ca Trans Helper</span>
 				</el-menu-item>
 			</el-submenu>
 
@@ -143,7 +153,8 @@
 					"/procode",
 					"/user",
 					"/invoice",
-					"/inventory-modify-output"
+					"/inventory-modify-output",
+					"/ca-trans-helper"
 				]
 				if (curPath === routerPath[key - 1]) {
 					return
