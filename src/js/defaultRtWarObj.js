@@ -31,7 +31,7 @@ export const InitQuery = {
 }
 
 export const DecisionOption = [
-	"Sell as new", "Used: Good", "Repair needed", "Junk for parts", "Pending Decision"
+	"Sell as new", "Used: Good", "Repair needed", "Junk for parts", "Pending Decision", "Customer Warranty", "Customer damage"
 ]
 
 export const BrandOption = [

@@ -613,7 +613,7 @@
 						break;
 					}
 				}
-				if (!row.is_refunded) {
+				if (!row.is_refunded && !row.rt_lpn) {
 					style.color = "#ff8d22";
 				}
 				return style;

@@ -623,6 +623,9 @@
 			submitQueryData() {
 				this.loading = true;
 				let data = this.queryData;
+				if(this.queryData.decision>5){
+					this.queryData.is_need_war = true
+				}
 				axios
 					.post("createReturn", data)
 					.then(e => {
