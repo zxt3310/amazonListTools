@@ -184,7 +184,9 @@ export default {
           }
           return (
             value.toUpperCase().includes(" 701-") ||
+            value.toUpperCase().includes("：701-") ||
             value.toUpperCase().includes(" 702-") ||
+            value.toUpperCase().includes("：702-") ||
             value.toUpperCase().includes("BBY") ||
             value.toUpperCase().includes("CHILL AU") ||
             value.toUpperCase().includes("ONT_AU")
@@ -206,7 +208,7 @@ export default {
             UPC: key,
             ItemName: infoObj
               ? infoObj.name
-              : "无有效库存，请移步至楼兰查询 Out of stock",
+              : "无有效库存(没货了)，请移步至楼兰查询 Out of stock",
             Model: infoObj ? infoObj.model : "",
             Qty: obj[key]
           };
