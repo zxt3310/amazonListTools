@@ -538,7 +538,7 @@
 					.catch(() => {});
 			},
 			//取消出库
-			instock(){
+			instock() {
 				this.$confirm("点击前请确认此退货需要重置check out状态", "提示", {
 						confirmButtonText: "In Stock",
 						cancelButtonText: "取消",
@@ -623,11 +623,28 @@
 			submitQueryData() {
 				this.loading = true;
 				let data = this.queryData;
-				if(this.queryData.decision>5){
+
+				if (this.queryData.decision > 5) {
 					this.queryData.is_need_war = true
 				}
-				axios
-					.post("createReturn", data)
+				if (data.rt_qty >= 10) {
+					this.$confirm("检测到退货数量大于10，是否继续？", "Warnning", {
+						confirmButtonText: "提交",
+						cancelButtonText: "取消",
+						type: "warning"
+					}).then(() => {
+						this.requestSubmit(data)
+					}).catch(() => {
+						this.loading = false;
+					})
+				} else {
+					this.requestSubmit(data)
+				}
+
+			},
+			//提交request
+			requestSubmit(data) {
+				axios.post("createReturn", data)
 					.then(e => {
 						this.loading = false;
 						if (!this.warrantyAccess) {
