@@ -50,6 +50,7 @@
             <el-table-column label="UPC" prop="UPC" width="180px" />
             <el-table-column label="Qty" prop="Qty" width="50px" />
             <el-table-column label="Model" prop="Model" width="250px" />
+			<el-table-column label="Avg Cost" prop="Price" width="100px"/>
             <el-table-column label="Product Name" prop="ItemName" />
           </el-table>
         </el-row>
@@ -160,9 +161,11 @@ export default {
           let upc = item.Barcode;
           let name = item["Product Name"];
           let model = item.Model;
+		  let price = item["Avg $Price"]
           json_obj[upc] = {
             name: name,
-            model: model
+            model: model,
+			price: price
           };
         }
 
@@ -210,6 +213,7 @@ export default {
               ? infoObj.name
               : "无有效库存(没货了)，请移步至楼兰查询 Out of stock",
             Model: infoObj ? infoObj.model : "",
+			Price: infoObj ? infoObj.price : "",
             Qty: obj[key]
           };
           array.push(item);
@@ -222,10 +226,10 @@ export default {
     },
     exporCaExcel() {
       let data = this.tableData;
-      let exportData = ["UPC", "Qty", "Model", "Product Name"];
+      let exportData = ["UPC", "Qty", "Model" , "Avg Cost", "Product Name"];
       let exportAry = [exportData];
       for (let item of data) {
-        exportAry.push([item.UPC, item.Qty, item.Model, item.ItemName]);
+        exportAry.push([item.UPC, item.Qty, item.Model, item.Price, item.ItemName]);
       }
       const wb = XLSX.utils.book_new();
       // 创建工作表
@@ -244,7 +248,8 @@ export default {
       ws["!cols"][0] = { wch: 20 };
       ws["!cols"][1] = { wch: 10 };
       ws["!cols"][2] = { wch: 25 };
-      ws["!cols"][3] = { wch: 200 };
+	  ws["!cols"][3] = { wch: 10 };
+      ws["!cols"][4] = { wch: 200 };
 
       // 设置斑马线背景色（例如：奇偶行不同颜色）
       for (let R = range.s.r; R <= range.e.r; ++R) {
