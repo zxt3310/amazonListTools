@@ -4,11 +4,16 @@
 		<div style="text-align: left; margin:0 5%">
 			<el-card v-if="!warrantyAccess">
 				<div class="title_card" slot="header">
-					<span>Auto Fill</span>
-					<el-button style="margin-left: 50px;" type="primary" @click="autofill">Click to Fill</el-button>
+					<span>AI Auto Fill</span>
+					<el-button style="margin-left: 50px;" type="primary" :loading="autoFillLoading"
+						@click="autofill">Click to Fill</el-button>
 				</div>
-				<el-input type="textarea" v-model="autofillStr" :autosize="{minRows: 6, maxRows: 6}"
-					placeholder="Paste return email here"></el-input>
+				<div v-loading="autoFillLoading" element-loading-text="AI 识别中" element-loading-spinner="el-icon-loading"
+					element-loading-background="rgba(0, 0, 0, 0.8)">
+					<el-input type="textarea" v-model="autofillStr" :autosize="{minRows: 6, maxRows: 6}"
+						placeholder="Paste return email here"></el-input>
+				</div>
+
 			</el-card>
 			<span style="font-size: 20px;">Return ID:
 				{{ queryData.rt_id ? queryData.rt_id : "Generate after submit" }}</span>
@@ -384,7 +389,8 @@
 				picslist: [],
 				upPicLoading: false,
 				loading: false,
-				autofillStr: ""
+				autofillStr: "",
+				autoFillLoading: false
 			};
 		},
 		created() {
@@ -729,50 +735,64 @@
 				if (content == "") {
 					return
 				}
-				const patterns = {
-					order_id: /Order ID:\s*([A-Z0-9-]+)/,
-					asin: /ASIN[\s\S]*?\n([A-Z0-9]{10})/,
-					rt_track: /Tracking ID:\s*([A-Z0-9]+)/,
-					model: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
-					rt_qty: /Return Quantity[\s\S]*?\n(\d+)/,
-					rt_dt: /Return Request Date:\s*(\d{4}-\d{2}-\d{2})/,
-					reason: /Return Reason[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
-					cmt: /Customer’s Comment[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
-					cur_config: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/
-				};
+				this.autoFillLoading = true;
+				axios.post('deepseekTest', {
+					message: content
+				}).then((e) => {
+					this.autoFillLoading = false;
+					if (e.ret == 0) {
+						Object.assign(this.queryData, e.data);
+						this.$message({
+							message: "识别成功",
+							type: "success"
+						})
+					} else {
+						const patterns = {
+							order_id: /Order ID:\s*([A-Z0-9-]+)/,
+							asin: /ASIN[\s\S]*?\n([A-Z0-9]{10})/,
+							rt_track: /Tracking ID:\s*([A-Z0-9]+)/,
+							model: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
+							rt_qty: /Return Quantity[\s\S]*?\n(\d+)/,
+							rt_dt: /Return Request Date:\s*(\d{4}-\d{2}-\d{2})/,
+							reason: /Return Reason[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
+							cmt: /Customer’s Comment[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/,
+							cur_config: /Sku[\s\S]+?(?:\n[^\n]*){9}\n([^\n]+)/
+						};
 
-				const result = {};
+						const result = {};
 
-				for (const [key, regex] of Object.entries(patterns)) {
-					const match = content.match(regex);
-					result[key] = match ? match[1].trim() : "";
-				}
-
-				result.rt_reason = `${result.reason} ${result.cmt}`;
-
-				if (result.model) {
-					let sku_split = result.model.split("-");
-					for (let item of sku_split) {
-						if (this.brands.includes(item)) {
-							result.brand = item
+						for (const [key, regex] of Object.entries(patterns)) {
+							const match = content.match(regex);
+							result[key] = match ? match[1].trim() : "";
 						}
-						if (item.length > 2 && this.seller.includes(item.slice(0, 3))) {
-							result.seller = item.slice(0, 3)
+
+						result.rt_reason = `${result.reason} ${result.cmt}`;
+
+						if (result.model) {
+							let sku_split = result.model.split("-");
+							for (let item of sku_split) {
+								if (this.brands.includes(item)) {
+									result.brand = item
+								}
+								if (item.length > 2 && this.seller.includes(item.slice(0, 3))) {
+									result.seller = item.slice(0, 3)
+								}
+							}
+
+							//检查有效性
+							// let brand = sku_split[1];
+							// if(this.brands.includes()){
+							// 	result.brand = brand
+							// }					
+							// let seller = sku_split[0].slice(0,3);
+							// if(this.seller.includes(seller)){
+							// 	result.seller = seller
+							// }
 						}
+
+						Object.assign(this.queryData, result);
 					}
-
-					//检查有效性
-					// let brand = sku_split[1];
-					// if(this.brands.includes()){
-					// 	result.brand = brand
-					// }					
-					// let seller = sku_split[0].slice(0,3);
-					// if(this.seller.includes(seller)){
-					// 	result.seller = seller
-					// }
-				}
-
-				Object.assign(this.queryData, result);
+				})
 			}
 		}
 	};
