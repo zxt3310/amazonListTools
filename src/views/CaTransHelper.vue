@@ -7,7 +7,7 @@
           :on-change="loadFile"
           :before-upload="fileCheck"
           :show-file-list="false"
-          accept=".xlsx, .xls, .csv"
+          accept=".xlsx, .csv, .xlsm"
         >
           <el-button slot="trigger" size="small" type="primary"
             >加载楼兰 Inventory Summary 表</el-button
@@ -48,7 +48,9 @@
         <el-row>
           <el-table :data="tableData">
             <el-table-column label="UPC" prop="UPC" width="180px" />
-            <el-table-column label="Qty" prop="Qty" width="50px" />
+            <el-table-column label="Check Out" prop="Qty" width="150px" />
+			<el-table-column label="US Inventory" prop="remain_US" width="150px" />
+			<el-table-column label="CA Inventory" prop="remain_CA" width="150px" />
             <el-table-column label="Model" prop="Model" width="250px" />
 			<el-table-column label="Avg Cost" prop="Price" width="100px"/>
             <el-table-column label="Product Name" prop="ItemName" />
@@ -90,7 +92,7 @@ export default {
       ];
       const isText =
         validTypes.includes(file.type) ||
-        ["xls", "xlsx", "csv"].includes(extension);
+        ["xls", "xlsx", "csv", "xlsm"].includes(extension);
       if (!isText) {
         this.$message.error("只能上传Excel文件");
       }
@@ -109,7 +111,7 @@ export default {
       ];
       const isText =
         validTypes.includes(file.type) ||
-        ["xls", "xlsx", "csv"].includes(extension);
+        ["xls", "xlsx", "csv", "xlsm"].includes(extension);
       if (!isText) return;
       this.filename = file.raw.name;
       this.readFileContent(file);
@@ -150,23 +152,29 @@ export default {
       const worksheet = workbook.Sheets[selectedSheet];
 
       // 将工作表转换为JSON
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-        header: 1
-      });
       let json_data = XLSX.utils.sheet_to_json(worksheet);
-
+	  // console.log(json_data)
       if (filename.includes("Inventory")) {
         let json_obj = {};
         for (let item of json_data) {
           let upc = item.Barcode;
           let name = item["Product Name"];
           let model = item.Model;
-		  let price = item["Avg $Price"]
-          json_obj[upc] = {
+		  let price = item["Avg $Price"];
+		  let remain = item["QTY"];
+		  let location = item["Warehouse"];
+          let obj_temp = {
             name: name,
             model: model,
 			price: price
           };
+		  json_obj[upc] = {...json_obj[upc], ...obj_temp};
+		  if(location=="CA"){
+				json_obj[upc].remain_CA = this.locationIdentify(location,remain,"CA")	
+			}
+		  else if(location=="US"){
+			  json_obj[upc]["remain_US"] = this.locationIdentify(location,remain,"US")
+		  }			
         }
 
         let data = {
@@ -177,6 +185,7 @@ export default {
         this.jsonData = json_obj;
         localStorage.setItem("LOULAN_INVENTORY", JSON.stringify(data));
         this.$message.success("更新成功");
+		console.log(data)
       }
 
       if (filename.includes("Check Out")) {
@@ -214,7 +223,9 @@ export default {
               : "无有效库存(没货了)，请移步至楼兰查询 Out of stock",
             Model: infoObj ? infoObj.model : "",
 			Price: infoObj ? infoObj.price : "",
-            Qty: obj[key]
+            Qty: obj[key],
+			remain_US: infoObj && infoObj.remain_US? infoObj.remain_US:0,
+			remain_CA: infoObj && infoObj.remain_CA? infoObj.remain_CA :0
           };
           array.push(item);
         }
@@ -224,12 +235,24 @@ export default {
         this.tableData = array;
       }
     },
+	
+	locationIdentify(locStr,qty,target){
+		switch (locStr){
+			case "CA":
+				return target=="CA"?qty:0
+			case "US":
+				return target=="US"?qty:0
+			default:
+				return 0
+		}
+	},
+	
     exporCaExcel() {
       let data = this.tableData;
-      let exportData = ["UPC", "Qty", "Model" , "Avg Cost", "Product Name"];
+      let exportData = ["UPC", "Check Out", "US Inventory", "CA Inventory", "Model" , "Avg Cost", "Product Name"];
       let exportAry = [exportData];
       for (let item of data) {
-        exportAry.push([item.UPC, item.Qty, item.Model, item.Price, item.ItemName]);
+        exportAry.push([item.UPC, item.Qty, item.remain_US, item.remain_CA, item.Model, item.Price, item.ItemName]);
       }
       const wb = XLSX.utils.book_new();
       // 创建工作表
@@ -247,9 +270,11 @@ export default {
       ws["!rows"][0] = { hpt: 20, hpx: 20 }; // 设置表头行高
       ws["!cols"][0] = { wch: 20 };
       ws["!cols"][1] = { wch: 10 };
-      ws["!cols"][2] = { wch: 25 };
+	  ws["!cols"][2] = { wch: 10 };
 	  ws["!cols"][3] = { wch: 10 };
-      ws["!cols"][4] = { wch: 200 };
+      ws["!cols"][4] = { wch: 25 };
+	  ws["!cols"][5] = { wch: 10 };
+      ws["!cols"][6] = { wch: 200 };
 
       // 设置斑马线背景色（例如：奇偶行不同颜色）
       for (let R = range.s.r; R <= range.e.r; ++R) {
