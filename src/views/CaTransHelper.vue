@@ -46,7 +46,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-table :data="tableData">
+          <el-table :data="tableData" :cell-style="tableCellStyle">
             <el-table-column label="UPC" prop="UPC" width="180px" />
             <el-table-column label="Check Out" prop="Qty" width="150px" />
 			<el-table-column label="US Inventory" prop="remain_US" width="150px" />
@@ -79,6 +79,23 @@ export default {
   },
   mounted() {},
   methods: {
+	tableCellStyle(cell){
+		if(cell.column.property === "remain_US"){
+			if(cell.row.remain_US <= 5)
+			{
+				return {
+					color:"red"
+				}
+			}
+			else{
+				return{
+					color:"green"
+				}
+			}
+		}
+		
+	},
+	
     fileCheck(file) {
       const extension = file.name
         .split(".")
@@ -232,6 +249,9 @@ export default {
         array.sort((a, b) => {
           return b.Qty - a.Qty;
         });
+		array = array.filter(e=>{
+			return e.remain_US>0
+		})
         this.tableData = array;
       }
     },
