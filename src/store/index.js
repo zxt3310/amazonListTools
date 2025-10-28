@@ -13,12 +13,18 @@ export default new Vuex.Store({
 		previousRoute: null,
 		userinfo: null, //JSON.parse(localStorage.getItem("USER"))
 		//通知
-		notifications:[]
+		notifications:[],
+		scrollPosition:null
 	},
 	mutations: {
 		SET_USER_INFO(state, payload) {
 			state.userinfo = payload
 		},
+		//列表滚动保持
+		setScrollPosition(state,data){
+			state.scrollPosition = data
+		},
+		
 		//退货列表数据保持
 		setTempPageAData(state, data) {
 			state.tempPageAData = JSON.parse(JSON.stringify(data));

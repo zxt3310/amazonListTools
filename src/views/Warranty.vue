@@ -76,12 +76,20 @@
 						</div>
 					</div>
 					<el-table ref="dataTable" @cell-click="cellClickCopy" @row-dblclick="rowClickRead"
-						:height="table_max_height" v-loading="loading" :data="tableData" :row-style="markRefundedRows">
-						<el-table-column prop="rt_id" label="ID" width="100">
-						</el-table-column>
-						<el-table-column prop="created_at" label="Processed On" width="120" :formatter="dateformat">
+						@row-contextmenu="handleContextMenu" :height="table_max_height" v-loading="loading"
+						:data="tableData" :cell-style="cellStyleHandler">
+						<el-table-column prop="rt_id" label="ID" width="80">
 						</el-table-column>
 						<el-table-column prop="brand" label="Brand" width="90">
+						</el-table-column>
+						<el-table-column prop="war_cmt" label="Warranty Comments" width="200">
+							<template slot-scope="scope">
+								<el-tooltip :content="scope.row.war_cmt">
+									<div class="no-wrap">{{ scope.row.war_cmt }}</div>
+								</el-tooltip>
+							</template>
+						</el-table-column>
+						<el-table-column prop="war_expire_dt" label="Expire On" width="100" :formatter="dateformat">
 						</el-table-column>
 						<el-table-column prop="model" label="Model" width="200">
 							<template slot-scope="scope">
@@ -100,8 +108,7 @@
 						</el-table-column>
 						<el-table-column prop="seller" label="Store" width="90" :filter-method="filterMethod">
 						</el-table-column>
-						<el-table-column prop="war_expire_dt" label="Expire On" width="100" :formatter="dateformat">
-						</el-table-column>
+
 						<el-table-column align="center" prop="war_opr" label="Warranty Operator" width="160"
 							:filter-method="filterMethod">
 						</el-table-column>
@@ -118,12 +125,7 @@
 						</el-table-column>
 						<el-table-column prop="war_def" label="Defects" width="180" :filter-method="filterMethod">
 						</el-table-column>
-						<el-table-column prop="war_cmt" label="Warranty Comments" width="200">
-							<template slot-scope="scope">
-								<el-tooltip :content="scope.row.war_cmt">
-									<div class="no-wrap">{{ scope.row.war_cmt }}</div>
-								</el-tooltip>
-							</template>
+						<el-table-column prop="created_at" label="Processed On" width="120" :formatter="dateformat">
 						</el-table-column>
 						<el-table-column align="center" prop="is_check_out" label="Checked Out" width="120" :filters="[
 						  { text: 'Yes', value: true },
@@ -149,6 +151,20 @@
 				</el-main>
 			</el-container>
 		</div>
+		<transition name="menu-fade">
+			<div v-show="menu.visible" class="custom-context-menu" :style="menuPosition">
+				<div class="menu-header">
+					<span class="menu-title">操作菜单</span>
+					<el-button type="text" icon="el-icon-close" class="close-btn" @click="closeMenu"></el-button>
+				</div>
+				<div class="menu-divider"></div>
+
+				<div class="menu-item" @click="handleEditByMenu">
+					<i class="el-icon-edit"></i>
+					<span>编辑条目</span>
+				</div>
+			</div>
+		</transition>
 	</div>
 </template>
 
@@ -159,7 +175,9 @@
 		DefectsOption,
 		SellerOption
 	} from "../js/defaultRtWarObj.js";
-
+	import {
+		calculateDayDifference
+	} from "../js/Dateformat.js";
 	export default {
 		data() {
 			return {
@@ -181,7 +199,14 @@
 					operator: "",
 					repairMethod: "",
 					defects: ""
-				}
+				},
+				menu: {
+					visible: false,
+					left: 0,
+					top: 0,
+					currentRow: null
+				},
+				selectedRowIndex: null
 			};
 		},
 		created() {
@@ -202,9 +227,24 @@
 			}
 			next();
 		},
+		computed: {
+			menuPosition() {
+				return {
+					left: this.adjustX(this.menu.left) + "px",
+					top: this.adjustY(this.menu.top) + "px"
+				};
+			}
+		},
 		mounted() {
+			document.addEventListener("click", this.closeMenu);
+			// document.addEventListener('contextmenu', this.closeMenu);
+
 			//回退后筛选保持数据
 			this.filter();
+		},
+		beforeDestroy() {
+			document.removeEventListener("click", this.closeMenu);
+			// document.removeEventListener('contextmenu', this.closeMenu);
 		},
 		methods: {
 			activeFilterChange(prop, value) {
@@ -223,12 +263,12 @@
 			filter() {
 				let filterOption = this.filters;
 				this.activeFilterChange(
-					"is_check_out", 
+					"is_check_out",
 					filterOption.is_check_out ? [false] : [],
 				);
 				this.activeFilterChange(
 					"seller",
-					filterOption.seller === "" ? [] : [filterOption.seller]
+					filterOption.seller === "" ? [] : [filterOption.seller == "无店铺" ? null : filterOption.seller]
 				);
 				this.activeFilterChange(
 					"war_opr",
@@ -420,6 +460,59 @@
 			},
 			filterMethod(value, row, column) {
 				return row[column.property] === value;
+			},
+			handleContextMenu(row, _, event) {
+				event.preventDefault();
+				this.menu = {
+					visible: true,
+					left: event.clientX,
+					top: event.clientY,
+					currentRow: row
+				};
+			},
+			adjustX(x) {
+				const menuWidth = 200;
+				const windowWidth = document.documentElement.clientWidth;
+				return x + menuWidth > windowWidth ? x - menuWidth : x;
+			},
+			adjustY(y) {
+				const menuHeight = 210;
+				const windowHeight = document.documentElement.clientHeight;
+				return y + menuHeight > windowHeight ? y - menuHeight : y;
+			},
+			closeMenu() {
+				// console.log("关上了")
+				this.menu.visible = false;
+			},
+			handleEditByMenu() {
+				this.closeMenu();
+				this.$router.push({
+					path: "/addreturn",
+					query: {
+						data: JSON.stringify(this.menu.currentRow)
+					}
+				});
+			},
+			cellStyleHandler(item) {
+				if (item.column.label === "Expire On") {
+					let expire = item.row.war_expire_dt;
+					if (expire === null) {
+						return
+					}
+					if (expire === "expired" || calculateDayDifference(expire) <= 0) {
+						return {
+							color: "red"
+						}
+					}
+					if (calculateDayDifference(expire) < 30) {
+						return {
+							color: "orange"
+						}
+					}
+					return {
+						color: "green"
+					}
+				}
 			}
 		}
 	};

@@ -253,10 +253,17 @@
 						</el-row>
 
 						<el-row>
-							<el-col :span="4">
+							<el-col :span="6">
 								<el-form-item label="Warranty Comments:" prop="war_cmt">
-									<el-input type="textarea" :autosize="{ minRows: 4, maxRows: 6 }"
+									<el-input type="textarea" :autosize="{ minRows: 6, maxRows: 10}"
 										v-model="queryData.war_cmt"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="6" style="margin-left: 20px;">
+								<el-form-item label="Warranty Comments Additon: (自动附带时间戳)">
+									<el-input v-enable="true" class="force-enabled" v-model="warrantyLogAdditon">
+										<el-button :disabled="false" type="primary" slot="append" @click="addWarrantyLog">Add</el-button>
+									</el-input>
 								</el-form-item>
 							</el-col>
 						</el-row>
@@ -390,7 +397,8 @@
 				upPicLoading: false,
 				loading: false,
 				autofillStr: "",
-				autoFillLoading: false
+				autoFillLoading: false,
+				warrantyLogAdditon:""
 			};
 		},
 		created() {
@@ -793,6 +801,14 @@
 						Object.assign(this.queryData, result);
 					}
 				})
+			},
+			addWarrantyLog(){
+				if(this.warrantyLogAdditon == ""){
+					return;
+				}
+				let cur_comments = this.queryData.war_cmt;
+				let dateStr = dateFormat(new Date());
+				this.queryData.war_cmt = (cur_comments?cur_comments + '\n':"") + dateStr + '\n' + this.warrantyLogAdditon;
 			}
 		}
 	};
@@ -870,5 +886,26 @@
 
 	.custom-prompt .el-input {
 		width: 200px !important;
+	}
+	
+	/* 在全局或组件样式中添加 */
+	.el-input-group__append .el-button--primary {
+	  background-color: #409EFF !important;
+	  border-color: #409EFF !important;
+	  color: #fff !important;
+	}
+	
+	.el-input-group__append .el-button--primary:hover {
+	  background-color: #66b1ff !important;
+	  border-color: #66b1ff !important;
+	}
+	
+	/* 覆盖输入框禁用样式 */
+	.force-enabled.is-disabled .el-input__inner {
+	  background-color: #fff !important;
+	  border-color: #dcdfe6 !important;
+	  color: #606266 !important;
+	  cursor: text !important;
+	  pointer-events: auto !important;
 	}
 </style>

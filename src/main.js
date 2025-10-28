@@ -42,6 +42,30 @@ Vue.component('MyNavi', MyNavi)
 Vue.prototype.$UPS_APPID = "vMMcWqjwiIWDuS8n3Mg6Mt2Wzj9t0U7celxYCTMmvVHfHXBr";
 Vue.prototype.$UPS_APPSECRET = "msWuqdWTkAEI8RVxmBfxzjVAlGNAySbsIVMokpochWm95JU9uVG43q1jCskuAfm5";
 
+// 在 Vue 实例中添加自定义指令
+Vue.directive('enable', {
+  inserted: function (el, binding) {
+    if (binding.value) {
+      const input = el.querySelector('.el-input__inner');
+      if (input) {
+        input.disabled = false;
+        input.style.pointerEvents = 'auto';
+        input.style.opacity = '1';
+      }
+    }
+  },
+  update: function (el, binding) {
+    if (binding.value) {
+      const input = el.querySelector('.el-input__inner');
+      if (input) {
+        input.disabled = false;
+        input.style.pointerEvents = 'auto';
+        input.style.opacity = '1';
+      }
+    }
+  }
+});
+
 store.dispatch('fetchUserInfo').then((e)=>{
 	new Vue({
 		router,
@@ -55,4 +79,5 @@ store.dispatch('fetchUserInfo').then((e)=>{
 		render: h => h(App)
 	}).$mount("#app");
 })
+
 
