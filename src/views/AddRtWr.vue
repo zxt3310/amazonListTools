@@ -260,7 +260,7 @@
 								</el-form-item>
 							</el-col>
 							<el-col :span="6" style="margin-left: 20px;">
-								<el-form-item label="Warranty Comments Additon: (自动附带时间戳)">
+								<el-form-item label="Warranty Comments Addition: (自动附带时间戳)">
 									<el-input v-enable="true" class="force-enabled" v-model="warrantyLogAdditon">
 										<el-button :disabled="false" type="primary" slot="append" @click="addWarrantyLog">Add</el-button>
 									</el-input>
