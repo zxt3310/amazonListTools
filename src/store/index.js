@@ -18,7 +18,7 @@ export default new Vuex.Store({
 	},
 	mutations: {
 		SET_USER_INFO(state, payload) {
-			state.userinfo = payload
+			state.userinfo = payload || null
 		},
 		//列表滚动保持
 		setScrollPosition(state,data){
@@ -27,12 +27,15 @@ export default new Vuex.Store({
 		
 		//退货列表数据保持
 		setTempPageAData(state, data) {
-			state.tempPageAData = JSON.parse(JSON.stringify(data));
+			state.tempPageAData = data ? JSON.parse(JSON.stringify(data)) : null;
 		},
 		//修改后离线展示
 		setModifiedData(state, data) {
+			if (!state.tempPageAData || !state.tempPageAData.tableData || !Array.isArray(state.tempPageAData.tableData)) {
+				return;
+			}
 			let list = state.tempPageAData.tableData;
-			let index = list.findIndex(item => item.id === data.id);
+			let index = list.findIndex(item => item && item.id === data.id);
 			if (index != -1) {
 				list[index] = data
 			}
@@ -45,7 +48,7 @@ export default new Vuex.Store({
 		},
 		//userinfo
 		login(state, data) {
-			state.userinfo = JSON.parse(JSON.stringify(data));
+			state.userinfo = data ? JSON.parse(JSON.stringify(data)) : null;
 			// localStorage.setItem("USER", JSON.stringify(data));
 			router.replace({
 				path: "/"
@@ -59,7 +62,8 @@ export default new Vuex.Store({
 			})
 		},
 		recvNotif(state,data){
-			state.notifications = [...data]
+			// 确保data是数组，防止null或undefined
+			state.notifications = Array.isArray(data) ? [...data] : []
 		}
 	},
 	actions: {

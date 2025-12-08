@@ -19,6 +19,7 @@ import UserManage from "../views/UserManage.vue";
 import AMZInvoiceCreator from "../views/AMZInvoiceCreator.vue";
 import InventoryModifyOut from "../views/InventoryModifyOut.vue";
 import CaTransHelper from "../views/CaTransHelper.vue";
+import UStoCACheckin from "../views/UStoCACheckin.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -117,6 +118,11 @@ const routes = [
 	  path:"/ca-trans-helper",
 	  name:"CaTransHelper",
 	  component:CaTransHelper
+  },
+  {
+	  path:"/us-to-ca-checkin",
+	  name:"UStoCACheckin",
+	  component:UStoCACheckin
   }
 ];
 
