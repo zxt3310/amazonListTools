@@ -4,6 +4,7 @@ import router from "./router";
 import store from "./store";
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import './assets/global-optimization.css';
 import MyNavi from "./components/Navi.vue";
 import EchoInstance from "./js/bootstrap.js";
 // import VueIziToast from 'vue-izitoast';

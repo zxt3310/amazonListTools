@@ -1,0 +1,967 @@
+/* 全局样式优化 */
+:root {
+  /* 主题色 */
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #f5222d;
+  --info-color: #13c2c2;
+  
+  /* 背景色 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f7fa;
+  --bg-tertiary: #e6f7ff;
+  
+  /* 文本色 */
+  --text-primary: #262626;
+  --text-secondary: #595959;
+  --text-tertiary: #8c8c8c;
+  --text-light: #bfbfbf;
+  
+  /* 边框色 */
+  --border-color: #e8e8e8;
+  --border-radius: 4px;
+  
+  /* 阴影 */
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.16);
+  
+  /* 过渡动画 */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* 全局重置 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 容器样式 - 适配不同布局结构 */
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-secondary);
+}
+
+/* 主内容区域 - 适配不同布局结构 */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  background-color: var(--bg-secondary);
+  overflow: auto;
+}
+
+/* 适配home和about页面 - 不强制全屏高度 */
+.home,
+.about {
+  padding: 24px;
+  background-color: var(--bg-secondary);
+}
+
+/* 修复About页面的三栏布局 */
+.about .el-container.is-vertical > .el-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+/* 修复About页面的侧边栏按钮布局 */
+.about .el-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: var(--bg-primary);
+  padding: 20px;
+  border-right: 1px solid var(--border-color);
+}
+
+/* 修复About页面右侧边栏的开始扫描按钮 */
+.about .el-aside:last-child {
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+  justify-content: flex-start;
+}
+
+/* 确保About页面表格正常显示 */
+.about .el-table {
+  margin: 0;
+  width: 100%;
+}
+
+/* Element UI容器布局 - 保持原有结构 */
+.el-container:not(.about .el-container) {
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-light);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.el-container:not(.about .el-container) .el-container {
+  box-shadow: none;
+  margin-bottom: 0;
+}
+
+/* Element UI布局组件 - 仅对非about页面应用 */
+.el-header:not(.about .el-header) {
+  padding: 10px 20px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.el-aside:not(.about .el-aside) {
+  background-color: var(--bg-primary);
+  padding: 20px;
+  border-right: 1px solid var(--border-color);
+}
+
+.el-main:not(.about .el-main) {
+  padding: 20px;
+  background-color: var(--bg-primary);
+  overflow: auto;
+}
+
+/* 修复三栏布局 */
+.el-container.is-vertical > .el-container {
+  display: flex;
+  flex-direction: row;
+  min-height: auto;
+}
+
+/* 表格区域优化 */
+.table-section {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all var(--transition-normal);
+}
+
+.table-section:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+/* 优化表格样式 */
+.el-table {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  transition: all var(--transition-normal);
+}
+
+.el-table:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+/* 表格样式优化 - 确保紧凑显示 */
+.el-table {
+  width: 100%;
+  table-layout: fixed;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  /* 移除不必要的外边距 */
+  margin: 0;
+}
+
+.el-table:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+/* 表格高度自适应 - 修复空白区域问题 */
+.el-table__body-wrapper {
+  /* 移除固定最小高度，让表格根据内容自适应 */
+  min-height: auto;
+  /* 根据页面结构动态调整最大高度 */
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  transition: max-height var(--transition-normal);
+  /* 移除表格内容区域与外框的空白 */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 修复特定页面的表格高度 */
+.about .el-table__body-wrapper,
+.tracking-check .el-table__body-wrapper {
+  /* 对于About页面，根据其布局调整最大高度 */
+  max-height: calc(100vh - 200px);
+}
+
+/* 确保表格占满可用空间 */
+.el-table {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-collapse: collapse !important;
+}
+
+/* 修复表格行高 */
+.el-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+  /* 确保单元格内容紧凑显示 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 统一表格头部样式 */
+.el-table th {
+  padding: 10px 8px;
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--primary-color);
+  transition: all var(--transition-fast);
+}
+
+/* 统一表格行样式 */
+.el-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+  /* 确保单元格内容紧凑显示 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 修复表格空白区域问题 - 移除不必要的内边距 */
+.el-table__inner-wrapper,
+.el-table__container,
+.el-table__header-wrapper,
+.el-table__footer-wrapper {
+  /* 确保表格内容与边框紧密贴合 */
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* 修复表格外框与内容之间的空白 */
+.el-table::before,
+.el-table::after {
+  /* 移除表格不必要的边框 */
+  display: none !important;
+}
+
+/* 修复表格容器的内边距 */
+.el-table {
+  border-spacing: 0 !important;
+  border-collapse: collapse !important;
+}
+
+/* 确保表格内容区域与外框紧密贴合 */
+.el-table-wrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.el-table tr:hover td {
+  background-color: var(--bg-tertiary);
+  transition: all var(--transition-fast);
+}
+
+/* 表格单元格内容溢出处理 */
+.el-table .cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: unset;
+}
+
+/* 优化表单元素 */
+.el-input, .el-select, .el-input-number, .el-textarea {
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast);
+}
+
+.el-input:focus-within, .el-select:focus-within, .el-input-number:focus-within, .el-textarea:focus-within {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 按钮样式优化 */
+.el-button {
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+
+.el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.el-button:active {
+  transform: translateY(0);
+}
+
+/* 卡片样式优化 */
+.el-card {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: all var(--transition-normal);
+  border: none;
+}
+
+.el-card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+/* 标题样式优化 */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 20px;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+/* 分割线样式优化 */
+.el-divider {
+  margin: 24px 0;
+  border-color: var(--border-color);
+}
+
+/* 上传组件样式优化 */
+.el-upload {
+  margin-bottom: 16px;
+}
+
+/* 扫描区域样式优化 */
+.scan-section {
+  margin-bottom: 24px;
+}
+
+.scan-section .el-input {
+  max-width: 400px;
+  margin-right: 8px;
+}
+
+/* 上传区域样式优化 */
+.upload-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+/* 高亮行动画优化 */
+@keyframes highlight {
+  0% { background-color: var(--bg-primary); }
+  50% { background-color: #e6f7ff; }
+  100% { background-color: var(--bg-primary); }
+}
+
+.highlight-row {
+  background-color: #e6f7ff !important;
+  animation: highlight 2s ease-in-out 2;
+  box-shadow: 0 0 10px rgba(24, 144, 255, 0.2);
+  transition: all var(--transition-fast);
+}
+
+/* 滚动条样式优化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-light);
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 12px;
+  }
+  
+  .table-section {
+    padding: 12px;
+  }
+  
+  .el-table__body-wrapper {
+    max-height: calc(100vh - 250px);
+  }
+  
+  .scan-section .el-input {
+    max-width: 100%;
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+}
+
+/* 加载状态优化 */
+.el-loading-mask {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.el-loading-spinner .el-loading-text {
+  color: var(--primary-color);
+}
+
+/* 消息提示优化 */
+.el-message {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+}
+
+/* 标签样式优化 */
+.el-tag {
+  border-radius: var(--border-radius);
+  font-weight: 500;
+}
+
+/* 单选框和复选框样式优化 */
+.el-radio__input.is-checked .el-radio__inner,
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* 优化导航菜单 */
+.el-menu {
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.el-menu-item {
+  transition: all var(--transition-fast);
+}
+
+.el-menu-item:hover {
+  background-color: rgba(24, 144, 255, 0.1);
+}
+
+.el-submenu__title:hover {
+  background-color: rgba(24, 144, 255, 0.1);
+}
+
+/* 优化下拉菜单 */
+.el-dropdown-menu {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  border: none;
+}
+
+/* 优化分页组件 */
+.el-pagination {
+  margin-top: 20px;
+  text-align: right;
+}
+
+/* 优化模态框 */
+.el-dialog {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-heavy);
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 优化标签页 */
+.el-tabs {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  box-shadow: var(--shadow-light);
+}
+
+.el-tabs__header {
+  margin-bottom: 16px;
+}
+
+.el-tabs__nav-wrap::after {
+  background-color: var(--border-color);
+}
+
+.el-tabs__active-bar {
+  background-color: var(--primary-color);
+}
+
+/* 优化时间选择器 */
+.el-date-editor {
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast);
+}
+
+.el-date-editor:focus-within {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 优化滑块组件 */
+.el-slider {
+  margin: 16px 0;
+}
+
+.el-slider__bar {
+  background-color: var(--primary-color);
+}
+
+.el-slider__button {
+  border-color: var(--primary-color);
+  background-color: var(--bg-primary);
+  transition: all var(--transition-fast);
+}
+
+.el-slider__button:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px rgba(24, 144, 255, 0.2);
+}
+
+/* 优化评分组件 */
+.el-rate__icon {
+  font-size: 16px;
+}
+
+/* 优化进度条组件 */
+.el-progress {
+  margin: 16px 0;
+}
+
+.el-progress-bar__inner {
+  background-color: var(--primary-color);
+  transition: width var(--transition-normal);
+}
+
+/* 优化Collapse组件 */
+.el-collapse {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+}
+
+.el-collapse-item__header {
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px;
+  transition: all var(--transition-fast);
+}
+
+.el-collapse-item__header:hover {
+  background-color: var(--bg-secondary);
+}
+
+.el-collapse-item__content {
+  padding: 16px;
+  background-color: var(--bg-primary);
+}
+
+/* 优化Timeline组件 */
+.el-timeline {
+  padding: 16px;
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+
+.el-timeline-item__tail {
+  background-color: var(--border-color);
+}
+
+.el-timeline-item__node {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* 优化Tree组件 */
+.el-tree {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 8px;
+}
+
+.el-tree-node:focus > .el-tree-node__content {
+  background-color: var(--bg-tertiary);
+}
+
+/* 优化Transfer组件 */
+.el-transfer {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 16px;
+}
+
+/* 优化Cascader组件 */
+.el-cascader {
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast);
+}
+
+.el-cascader:focus-within {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 优化ColorPicker组件 */
+.el-color-picker {
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast);
+}
+
+.el-color-picker:focus-within {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 优化Avatar组件 */
+.el-avatar {
+  transition: all var(--transition-fast);
+}
+
+.el-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-medium);
+}
+
+/* 优化Badge组件 */
+.el-badge {
+  transition: all var(--transition-fast);
+}
+
+/* 优化Steps组件 */
+.el-steps {
+  margin-bottom: 24px;
+}
+
+.el-step__head.is-finish {
+  color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.el-step__head.is-process {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.el-step__title.is-finish {
+  color: var(--text-primary);
+}
+
+.el-step__title.is-process {
+  color: var(--primary-color);
+}
+
+/* 优化Carousel组件 */
+.el-carousel {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+}
+
+.el-carousel__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+/* 优化Drawer组件 */
+.el-drawer {
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+  box-shadow: var(--shadow-heavy);
+}
+
+.el-drawer__header {
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px;
+}
+
+/* 优化Popover组件 */
+.el-popover {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  border: none;
+}
+
+/* 优化Tooltip组件 */
+.el-tooltip__popper {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  border: none;
+}
+
+/* 优化InfiniteScroll组件 */
+.el-infinite-scroll {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 16px;
+}
+
+/* 优化Divider组件 */
+.el-divider {
+  margin: 24px 0;
+}
+
+/* 优化Result组件 */
+.el-result {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 48px 32px;
+  text-align: center;
+}
+
+/* 优化Skeleton组件 */
+.el-skeleton {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 16px;
+}
+
+.el-skeleton__item {
+  background: linear-gradient(90deg, rgba(24, 144, 255, 0.1) 25%, rgba(24, 144, 255, 0.05) 50%, rgba(24, 144, 255, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 优化Backtop组件 */
+.el-backtop {
+  background-color: var(--primary-color);
+  box-shadow: var(--shadow-medium);
+  transition: all var(--transition-fast);
+}
+
+.el-backtop:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-heavy);
+}
+
+/* 优化Calendar组件 */
+.el-calendar {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+}
+
+.el-calendar__header {
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px;
+}
+
+/* 优化Statistic组件 */
+.el-statistic {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 24px;
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.el-statistic:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+/* 优化Descriptions组件 */
+.el-descriptions {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  padding: 16px;
+}
+
+.el-descriptions__header {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.el-descriptions__title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.el-descriptions-item__label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* 优化Empty组件 */
+.el-empty {
+  padding: 48px 32px;
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  text-align: center;
+}
+
+/* 优化Image组件 */
+.el-image {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  transition: all var(--transition-normal);
+}
+
+.el-image:hover {
+  box-shadow: var(--shadow-medium);
+  transform: scale(1.02);
+}
+
+/* 优化Video组件 */
+.el-video {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+/* 优化Audio组件 */
+.el-audio {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  background-color: var(--bg-primary);
+  padding: 8px;
+}
+
+/* 优化ProgressCircle组件 */
+.el-progress-circle {
+  margin: 16px 0;
+}
+
+.el-progress-circle__path {
+  stroke: var(--primary-color);
+  stroke-linecap: round;
+}
+
+/* 优化CollapseTransition组件 */
+.el-collapse-transition {
+  transition: all var(--transition-normal);
+}
+
+/* 优化FadeTransition组件 */
+.el-fade-in-linear {
+  transition: all var(--transition-normal);
+}
+
+/* 优化ZoomTransition组件 */
+.el-zoom-in-center {
+  transition: all var(--transition-normal);
+}
+
+/* 优化SlideUpTransition组件 */
+.el-slide-up-enter-active,
+.el-slide-up-leave-active {
+  transition: all var(--transition-normal);
+}
+
+/* 优化SlideDownTransition组件 */
+.el-slide-down-enter-active,
+.el-slide-down-leave-active {
+  transition: all var(--transition-normal);
+}
+
+/* 优化BounceTransition组件 */
+.el-bounce-in {
+  animation: bounce-in var(--transition-normal);
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* 优化PulseTransition组件 */
+.el-pulse {
+  animation: pulse var(--transition-normal);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* 优化ShakeTransition组件 */
+.el-shake {
+  animation: shake var(--transition-normal);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* 优化FlipTransition组件 */
+.el-flip-in-x {
+  animation: flip-in-x var(--transition-normal);
+}
+
+@keyframes flip-in-x {
+  0% { transform: perspective(400px) rotateX(90deg); opacity: 0; }
+  40% { transform: perspective(400px) rotateX(-10deg); }
+  70% { transform: perspective(400px) rotateX(10deg); }
+  100% { transform: perspective(400px) rotateX(0deg); opacity: 1; }
+}
+
+/* 优化LightSpeedTransition组件 */
+.el-light-speed-in {
+  animation: light-speed-in var(--transition-normal);
+}
+
+@keyframes light-speed-in {
+  0% { transform: translateX(100%) skewX(-30deg); opacity: 0; }
+  60% { transform: translateX(-20%) skewX(30deg); opacity: 1; }
+  80% { transform: translateX(0%) skewX(-15deg); opacity: 1; }
+  100% { transform: translateX(0%) skewX(0deg); opacity: 1; }
+}
+
+/* 优化RotateTransition组件 */
+.el-rotate-in {
+  animation: rotate-in var(--transition-normal);
+}
+
+@keyframes rotate-in {
+  0% { transform: rotate(-200deg); opacity: 0; }
+  100% { transform: rotate(0); opacity: 1; }
+}

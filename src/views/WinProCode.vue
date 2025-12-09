@@ -27,27 +27,27 @@
 					<el-button type="primary" style="position: absolute; right: 50px; width: 120px;"
 						@click="AddDialogVisible = true">Add</el-button>
 				</el-header>
-				<el-main style="padding-top: 0 !important;">
-					<el-table ref="dataTable" :height="table_max_height" v-loading="loading" :data="tableData" fit
-						@row-contextmenu="handleContextMenu" row-class-name="table_text">
-						<el-table-column label="ID" prop="id" width="80"></el-table-column>
-						<el-table-column label="Code" prop="code" width="400"></el-table-column>
-						<el-table-column label="SN" :formatter="SnsFmt"></el-table-column>
+				<el-main style="padding-top: 0 !important; overflow-x: auto;">
+				<el-table ref="dataTable" :height="table_max_height" v-loading="loading" :data="tableData" fit
+					@row-contextmenu="handleContextMenu" row-class-name="table_text" style="width: auto;">
+					<el-table-column label="ID" prop="id" width="80"></el-table-column>
+					<el-table-column label="Code" prop="code" min-width="300" show-overflow-tooltip align="left"></el-table-column>
+					<el-table-column label="SN" :formatter="SnsFmt" min-width="400" show-overflow-tooltip align="left"></el-table-column>
 
-						<el-table-column label="操作" width="150">
-							<template slot-scope="scope">
-								<el-button type="primary" @click="handleEditByTable(scope.$index, scope.row)">
-									绑定SN</el-button>
-								<!-- <el-button size="mini" type="danger"
-									@click="handleDeleteByTable(scope.$index, scope.row)">
-									Del</el-button> -->
-							</template>
-						</el-table-column>
-						<template #empty>
-							<div class="custom-empty">
-								<p class="empty-text">暂无数据</p>
-							</div>
-						</template>
+					<el-table-column label="操作" width="120">
+					<template slot-scope="scope">
+						<el-button size="small" type="primary" @click="handleEditByTable(scope.$index, scope.row)">
+							绑定SN</el-button>
+						<!-- <el-button size="mini" type="danger"
+							@click="handleDeleteByTable(scope.$index, scope.row)">
+							Del</el-button> -->
+					</template>
+				</el-table-column>
+				<template #empty>
+					<div class="custom-empty">
+						<p class="empty-text">暂无数据</p>
+					</div>
+				</template>
 					</el-table>
 					<el-pagination style="margin-top: 5px;" v-if="searchParam == ''" background
 						@current-change="handleCurrentChange" @size-change="handleCurrentChange"
@@ -185,12 +185,12 @@
 		},
 		methods: {
 			SnsFmt(row, column, cellValue, index) {
-				let sns = row.sns
-				let sns_str = ""
+				let sns = row.sns || [];
+				let sns_str = "";
 				for (let sn of sns) {
-					sns_str += `<${sn.sn}>   `
+					sns_str += `[${sn.sn}] `;
 				}
-				return sns_str
+				return sns_str;
 			},
 			getInitData() {
 				this.loading = true;

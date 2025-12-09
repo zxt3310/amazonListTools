@@ -272,10 +272,17 @@ export default {
         return;
       }
       
-      // 按格式拼接数据：每一行开头添加两个空列（制表符），然后upc、qty、cost用制表符间隔，每行之间用换行符间隔
+      // 获取当前日期，格式为YYYYMMDD
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const dateStr = `${year}${month}${day}US2CA`;
+      
+      // 按格式拼接数据：每一行开头添加两个固定列，然后upc、qty、cost用制表符间隔，每行之间用换行符间隔
       let lines = [];
       this.scanData.forEach(row => {
-        lines.push(`\t\t${row.upc}\t${row.qty}\t${row.cost}`);
+        lines.push(`wtod\t${dateStr}\t${row.upc}\t${row.qty}\t${row.cost}`);
       });
       
       // 使用join方法连接所有行，确保每一行都有相同的格式
