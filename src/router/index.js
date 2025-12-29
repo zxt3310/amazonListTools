@@ -20,6 +20,7 @@ import AMZInvoiceCreator from "../views/AMZInvoiceCreator.vue";
 import InventoryModifyOut from "../views/InventoryModifyOut.vue";
 import CaTransHelper from "../views/CaTransHelper.vue";
 import UStoCACheckin from "../views/UStoCACheckin.vue";
+import ImgGenerateAI from "../views/ImgGenerateAI.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -123,6 +124,11 @@ const routes = [
 	  path:"/us-to-ca-checkin",
 	  name:"UStoCACheckin",
 	  component:UStoCACheckin
+  },
+  {
+	  path:"/img-generate-ai",
+	  name:"ImgGenerateAI",
+	  component:ImgGenerateAI
   }
 ];
 

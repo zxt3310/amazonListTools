@@ -61,6 +61,10 @@
 					<i class="el-icon-guide"></i>
 					<span>US to CA Check-in</span>
 				</el-menu-item>
+				<el-menu-item index="16">
+					<i class="el-icon-picture-outline"></i>
+					<span>AI图片生成</span>
+				</el-menu-item>
 			</el-submenu>
 
 			<div style="position: absolute; right: 80px; top: 50%; transform: translateY(-50%);">
@@ -225,7 +229,8 @@
 					"/invoice",
 					"/inventory-modify-output",
 					"/ca-trans-helper",
-					"/us-to-ca-checkin"
+					"/us-to-ca-checkin",
+					"/img-generate-ai"
 				];
 				
 				// 确保索引有效
