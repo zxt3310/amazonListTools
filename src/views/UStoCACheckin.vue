@@ -3,7 +3,7 @@
     <MyNavi activeIndex="15"></MyNavi>
     <div class="main-content">
       <h2>US to CA Check-in</h2>
-      
+
       <!-- 上传库存文件区域 -->
       <div class="upload-section">
         <el-upload
@@ -20,7 +20,7 @@
           </el-label>
         </el-upload>
       </div>
-      
+
       <!-- 扫描区域 -->
       <div class="scan-section">
         <el-input
@@ -30,14 +30,20 @@
           @keyup.enter.native="handleScan"
           ref="scanInput"
         >
-          <el-button slot="append" icon="el-icon-check" @click="handleScan"></el-button>
+          <el-button
+            slot="append"
+            icon="el-icon-check"
+            @click="handleScan"
+          ></el-button>
         </el-input>
       </div>
-      
+
       <!-- 数据展示表格 -->
       <div class="table-section">
         <div style="margin-bottom: 10px;">
-          <el-button type="primary" @click="copyToClipboard">复制所有数据到剪贴板</el-button>
+          <el-button type="primary" @click="copyToClipboard"
+            >复制所有数据到剪贴板</el-button
+          >
         </div>
         <el-table
           :data="scanData"
@@ -55,9 +61,20 @@
               ></el-input-number>
             </template>
           </el-table-column>
-          <el-table-column prop="cost" label="Avg $Price" width="150"></el-table-column>
-          <el-table-column prop="productName" label="Product Name"></el-table-column>
-          <el-table-column prop="model" label="Model" width="200"></el-table-column>
+          <el-table-column
+            prop="cost"
+            label="Avg $Price"
+            width="150"
+          ></el-table-column>
+          <el-table-column
+            prop="productName"
+            label="Product Name"
+          ></el-table-column>
+          <el-table-column
+            prop="model"
+            label="Model"
+            width="200"
+          ></el-table-column>
           <el-table-column label="操作" width="100">
             <template slot-scope="scope">
               <el-button
@@ -76,19 +93,19 @@
 </template>
 
 <script>
-import MyNavi from '../components/Navi.vue';
+import MyNavi from "../components/Navi.vue";
 import * as XLSX from "xlsx";
 import { dateFormat } from "../js/Dateformat";
 
 export default {
-  name: 'UStoCACheckin',
+  name: "UStoCACheckin",
   components: {
     MyNavi
   },
   data() {
     return {
       // 扫描输入
-      scanInput: '',
+      scanInput: "",
       // 库存数据
       inventoryData: localStorage.getItem("LOULAN_INVENTORY")
         ? JSON.parse(localStorage.getItem("LOULAN_INVENTORY")).data
@@ -112,7 +129,10 @@ export default {
   methods: {
     // 文件检查
     fileCheck(file) {
-      const extension = file.name.split(".").pop().toLowerCase();
+      const extension = file.name
+        .split(".")
+        .pop()
+        .toLowerCase();
       const validTypes = ["xls", "xlsx", "csv", "xlsm"];
       if (!validTypes.includes(extension)) {
         this.$message.error("只能上传Excel文件");
@@ -120,7 +140,7 @@ export default {
       }
       return true;
     },
-    
+
     // 加载库存文件
     loadInventoryFile(file) {
       const reader = new FileReader();
@@ -133,21 +153,21 @@ export default {
       };
       reader.readAsArrayBuffer(file.raw);
     },
-    
+
     // 处理Excel数据
     processExcelData(data, filename) {
       try {
         // 读取Excel工作簿
         let workbook = XLSX.read(data, { type: "array" });
-        
+
         // 获取第一个工作表
         let sheets = workbook.SheetNames;
         let selectedSheet = sheets[0];
         const worksheet = workbook.Sheets[selectedSheet];
-        
+
         // 转换为JSON
         let json_data = XLSX.utils.sheet_to_json(worksheet);
-        
+
         // 处理库存数据
         let inventoryObj = {};
         for (let item of json_data) {
@@ -160,7 +180,7 @@ export default {
             };
           }
         }
-        
+
         // 保存到localStorage
         let savedData = {
           data: inventoryObj,
@@ -170,24 +190,26 @@ export default {
         this.inventoryData = inventoryObj;
         localStorage.setItem("LOULAN_INVENTORY", JSON.stringify(savedData));
         this.$message.success("库存数据更新成功");
-        
       } catch (error) {
         console.error("Excel处理错误:", error);
         this.$message.error("Excel文件处理失败，请确保文件格式正确");
       }
     },
-    
+
     // 处理扫描
     handleScan() {
       const upc = this.scanInput.trim();
       if (!upc) return;
-      
+
       // 查找UPC是否已存在
       const existingIndex = this.scanData.findIndex(item => item.upc === upc);
-      
+
       if (existingIndex >= 0) {
         // 已存在，增加数量并更新最新的产品信息
-        const inventoryInfo = this.inventoryData && this.inventoryData[upc] ? this.inventoryData[upc] : {};
+        const inventoryInfo =
+          this.inventoryData && this.inventoryData[upc]
+            ? this.inventoryData[upc]
+            : {};
         // 使用Vue.set或扩展运算符确保响应式更新
         this.scanData.splice(existingIndex, 1, {
           ...this.scanData[existingIndex],
@@ -199,7 +221,10 @@ export default {
         this.highlightedRow = this.scanData[existingIndex].id;
       } else {
         // 不存在，新增行
-        const inventoryInfo = this.inventoryData && this.inventoryData[upc] ? this.inventoryData[upc] : {};
+        const inventoryInfo =
+          this.inventoryData && this.inventoryData[upc]
+            ? this.inventoryData[upc]
+            : {};
         const newRow = {
           id: Date.now(),
           upc: upc,
@@ -211,18 +236,18 @@ export default {
         this.scanData.push(newRow);
         this.highlightedRow = newRow.id;
       }
-      
+
       // 高亮行效果
       this.triggerHighlight();
-      
+
       // 清空输入框
-      this.scanInput = '';
+      this.scanInput = "";
       // 重新聚焦
       this.$nextTick(() => {
         this.$refs.scanInput.focus();
       });
     },
-    
+
     // 数量变化处理
     handleQtyChange(row) {
       // 查找当前行的索引
@@ -237,66 +262,66 @@ export default {
         this.triggerHighlight();
       }
     },
-    
+
     // 移除行
     removeRow(index, row) {
       this.scanData.splice(index, 1);
       this.$message.success("行已删除");
     },
-    
+
     // 高亮行逻辑
     triggerHighlight() {
       // 清除之前的计时器
       if (this.highlightTimer) {
         clearTimeout(this.highlightTimer);
       }
-      
+
       // 3秒后移除高亮
       this.highlightTimer = setTimeout(() => {
         this.highlightedRow = null;
       }, 3000);
     },
-    
+
     // 行高亮样式
     highlightRow({ row, rowIndex }) {
       if (row.id === this.highlightedRow) {
-        return 'highlight-row';
+        return "highlight-row";
       }
-      return '';
+      return "";
     },
-    
+
     // 复制数据到剪贴板
     copyToClipboard() {
       if (this.scanData.length === 0) {
-        this.$message.warning('没有数据可复制');
+        this.$message.warning("没有数据可复制");
         return;
       }
-      
+
       // 获取当前日期，格式为YYYYMMDD
       const today = new Date();
       const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
       const dateStr = `${year}${month}${day}US2CA`;
-      
+
       // 按格式拼接数据：每一行开头添加两个固定列，然后upc、qty、cost用制表符间隔，每行之间用换行符间隔
       let lines = [];
       this.scanData.forEach(row => {
         lines.push(`wtod\t${dateStr}\t${row.upc}\t${row.qty}\t${row.cost}`);
       });
-      
+
       // 使用join方法连接所有行，确保每一行都有相同的格式
-      const clipboardContent = lines.join('\n');
-      
-      
+      const clipboardContent = lines.join("\n");
+
       // 复制到剪贴板
-      navigator.clipboard.writeText(clipboardContent)
+      navigator.clipboard
+        .writeText(clipboardContent)
         .then(() => {
-          this.$message.success('数据已成功复制到剪贴板');
+          this.$message.success("数据已成功复制到剪贴板");
         })
         .catch(err => {
-          console.error('复制失败:', err);
-          this.$message.error('复制失败，请手动复制');
+          console.error("复制失败:", err);
+          this.$message.error("复制失败，请手动复制");
         });
     }
   }

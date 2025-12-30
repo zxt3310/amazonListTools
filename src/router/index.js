@@ -7,7 +7,7 @@ import UPC from "../views/UPC.vue";
 import CaculateUPC from "../views/CaculateUPC.vue";
 import TrackingCheck from "../views/TrackingCheck.vue";
 import UpgradeMission from "../views/UpgradeMission.vue";
-import Login from "../views/login.vue"
+import Login from "../views/login.vue";
 import Return from "../views/Return.vue";
 import UnRefund from "../views/UnRefund.vue";
 import Warranty from "../views/Warranty.vue";
@@ -29,106 +29,106 @@ const routes = [
     name: "About",
     component: About
   },
- //  {
- //    path: "/about",
- //    name: "About",
- //    // route level code-splitting
- //    // this generates a separate chunk (about.[hash].js) for this route
- //    // which is lazy-loaded when the route is visited.
- //    // component: () =>
- //    //   import(/* webpackChunkName: "about" */ "../views/About.vue")
-	// component: About
- //  },
- //  {
-	//   path:"/CAConvert",
-	//   name:"CAConvert",
-	//   component: CAConvert
+  //  {
+  //    path: "/about",
+  //    name: "About",
+  //    // route level code-splitting
+  //    // this generates a separate chunk (about.[hash].js) for this route
+  //    // which is lazy-loaded when the route is visited.
+  //    // component: () =>
+  //    //   import(/* webpackChunkName: "about" */ "../views/About.vue")
+  // component: About
+  //  },
+  //  {
+  //   path:"/CAConvert",
+  //   name:"CAConvert",
+  //   component: CAConvert
   // },
   {
-	  path:"/UPC",
-	  name:"UPC",
-	  component: UPC
+    path: "/UPC",
+    name: "UPC",
+    component: UPC
   },
   {
-	  path:"/CaculateUPC",
-	  name:"UPC计算器",
-	  component: CaculateUPC
+    path: "/CaculateUPC",
+    name: "UPC计算器",
+    component: CaculateUPC
   },
   {
-	  path:"/trackingcheck",
-	  name:"CA Tracking Check",
-	  component: TrackingCheck
+    path: "/trackingcheck",
+    name: "CA Tracking Check",
+    component: TrackingCheck
   },
   {
-	  path:"/UpgradeMission",
-	  name:"UpgradeMission",
-	  component: UpgradeMission
+    path: "/UpgradeMission",
+    name: "UpgradeMission",
+    component: UpgradeMission
   },
   {
-	  path:"/login",
-	  name:"Login",
-	  component: Login
+    path: "/login",
+    name: "Login",
+    component: Login
   },
   {
-	  path:"/return",
-	  name:"Return",
-	  component:Return,
-	  meta: { keepAlive: true }
+    path: "/return",
+    name: "Return",
+    component: Return,
+    meta: { keepAlive: true }
   },
   {
-  	  path:"/warranty",
-  	  name:"Warranty",
-  	  component:Warranty
+    path: "/warranty",
+    name: "Warranty",
+    component: Warranty
   },
   {
-  	  path:"/unrefund",
-  	  name:"UnRefund",
-  	  component:UnRefund
+    path: "/unrefund",
+    name: "UnRefund",
+    component: UnRefund
   },
   {
-	  path:"/addreturn",
-	  name:"addreturn",
-	  component:AddRtWrVue
+    path: "/addreturn",
+    name: "addreturn",
+    component: AddRtWrVue
   },
   {
-	  path:"/inventory-adjustment",
-	  name:"inventory",
-	  component:InventoryAjustment
+    path: "/inventory-adjustment",
+    name: "inventory",
+    component: InventoryAjustment
   },
   {
-	  path:"/procode",
-	  name:"ProCode",
-	  component:WinProCode
+    path: "/procode",
+    name: "ProCode",
+    component: WinProCode
   },
   {
-	  path:"/user",
-	  name:"User Manage",
-	  component:UserManage
+    path: "/user",
+    name: "User Manage",
+    component: UserManage
   },
   {
-  	  path:"/invoice",
-  	  name:"AMZ Invoice Creator",
-  	  component:AMZInvoiceCreator
+    path: "/invoice",
+    name: "AMZ Invoice Creator",
+    component: AMZInvoiceCreator
   },
   {
-  	  path:"/inventory-modify-output",
-  	  name:"InventoryOut",
-  	  component:InventoryModifyOut
+    path: "/inventory-modify-output",
+    name: "InventoryOut",
+    component: InventoryModifyOut
   },
   {
-	  path:"/ca-trans-helper",
-	  name:"CaTransHelper",
-	  component:CaTransHelper
+    path: "/ca-trans-helper",
+    name: "CaTransHelper",
+    component: CaTransHelper
   },
   {
-	  path:"/us-to-ca-checkin",
-	  name:"UStoCACheckin",
-	  component:UStoCACheckin
+    path: "/us-to-ca-checkin",
+    name: "UStoCACheckin",
+    component: UStoCACheckin
   },
   {
-	  path:"/img-generate-ai",
-	  name:"ImgGenerateAI",
-	  component:ImgGenerateAI
+    path: "/img-generate-ai",
+    name: "ImgGenerateAI",
+    component: ImgGenerateAI
   }
 ];
 
@@ -140,7 +140,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   // 记录上一个路由到Vuex
-  store.commit('setPreviousRoute', from);
+  store.commit("setPreviousRoute", from);
   next();
 });
 

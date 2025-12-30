@@ -110,7 +110,7 @@ export default {
         title: "获取 UPC"
       },
       showHeight: window.innerHeight - 220,
-	  interval:null
+      interval: null
     };
   },
   created() {
@@ -118,7 +118,7 @@ export default {
     this.interval = setInterval(this.loadUPCStores, 30000);
   },
   beforeDestroy() {
-  	clearInterval(this.interval)
+    clearInterval(this.interval);
   },
   methods: {
     loadUPCStores() {
