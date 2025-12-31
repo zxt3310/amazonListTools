@@ -495,13 +495,14 @@ export default {
       this.progressStatus = "";
       this.progressMessage = "正在发送请求...";
       this.generatedImages = [];
-
-      // 发送生成请求
-      await this.sendGenerateRequest();
+      
+      //先获取KEY
+      let res = await axios.get("/getGrasaiApiKey")
+      await this.sendGenerateRequest(res.data)
     },
 
     // 发送生成请求
-    async sendGenerateRequest() {
+    async sendGenerateRequest(key) {
       try {
         console.log("开始发送生成请求...");
 
@@ -512,7 +513,7 @@ export default {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer sk-90159500be454a8a854e2c4355f7d7b2`
+              Authorization: `Bearer ${key}`
             },
             body: JSON.stringify({
               model: "nano-banana-pro",
