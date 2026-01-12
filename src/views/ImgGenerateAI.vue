@@ -20,30 +20,54 @@
               ></el-input>
             </el-form-item>
             <el-form-item label="参考图片URL">
-              <el-input
-                v-model="generateForm.imageUrl"
-                placeholder="请输入参考图片URL（可选）"
-              ></el-input>
-              <!-- 图片预览 -->
-              <div v-if="generateForm.imageUrl" class="image-preview">
-                <el-image
-                  :src="generateForm.imageUrl"
-                  fit="contain"
-                  style="width: 300px; height: 200px;"
-                  :preview-src-list="[generateForm.imageUrl]"
-                >
-                  <div slot="error" class="image-error">
-                    <i class="el-icon-picture-outline"></i>
+              <div class="image-urls-section">
+                <!-- 添加图片URL的输入框 -->
+                <div class="add-image-url">
+                  <el-input
+                    v-model="newImageUrl"
+                    placeholder="请输入参考图片URL，按回车键添加"
+                    @keyup.enter.native="addImageUrl"
+                    style="width: 1000px; margin-right: 10px;"
+                  ></el-input>
+                  <el-button
+                    type="primary"
+                    size="small"
+                    @click="addImageUrl"
+                    :disabled="!newImageUrl.trim()"
+                  >
+                    添加图片
+                  </el-button>
+                </div>
+                
+                <!-- 图片URL列表 -->
+                <div v-if="generateForm.imageUrls.length > 0" class="image-url-list">
+                  <div
+                    v-for="(url, index) in generateForm.imageUrls"
+                    :key="index"
+                    class="image-url-item"
+                  >
+                    <div class="image-preview">
+                      <el-image
+                        :src="url"
+                        fit="contain"
+                        style="width: 200px; height: 150px;"
+                        :preview-src-list="[url]"
+                      >
+                        <div slot="error" class="image-error">
+                          <i class="el-icon-picture-outline"></i>
+                        </div>
+                      </el-image>
+                      <el-button
+                        type="danger"
+                        size="mini"
+                        @click="removeImageUrl(index)"
+                        class="clear-button"
+                      >
+                        移除
+                      </el-button>
+                    </div>
                   </div>
-                </el-image>
-                <el-button
-                  type="danger"
-                  size="mini"
-                  @click="clearImageUrl"
-                  class="clear-button"
-                >
-                  清除
-                </el-button>
+                </div>
               </div>
             </el-form-item>
             <el-form-item label="图片尺寸" label-position="left">
@@ -379,11 +403,12 @@ export default {
     return {
       generateForm: {
         prompt: "",
-        imageUrl: "",
+        imageUrls: [],
         imageSize: "1K",
         upc: "",
         desktopStyle: "科技"
       },
+      newImageUrl: "",
       generating: false,
       generatedImages: [],
       progressPercentage: 0,
@@ -518,9 +543,7 @@ export default {
             body: JSON.stringify({
               model: "nano-banana-pro",
               prompt: this.generateForm.prompt,
-              urls: this.generateForm.imageUrl
-                ? [this.generateForm.imageUrl]
-                : [],
+              urls: this.generateForm.imageUrls,
               imageSize: this.generateForm.imageSize,
               aspectRatio: "auto"
             })
@@ -616,10 +639,41 @@ export default {
       this.$message.info("已停止图片生成");
     },
 
-    // 清除图片URL
+    // 添加图片URL
+    addImageUrl() {
+      if (!this.newImageUrl.trim()) {
+        return;
+      }
+      
+      // 处理URL中的dl=0，自动改为dl=1
+      let processedUrl = this.newImageUrl.trim();
+      if (processedUrl.includes('dl=0')) {
+        processedUrl = processedUrl.replace(/dl=0/g, 'dl=1');
+        // 提示用户URL已被处理
+        this.$message.info("URL已自动处理: dl=0 → dl=1");
+      }
+      
+      // 检查是否已经存在相同的URL
+      if (this.generateForm.imageUrls.includes(processedUrl)) {
+        this.$message.warning("该图片URL已存在");
+        return;
+      }
+      
+      this.generateForm.imageUrls.push(processedUrl);
+      this.newImageUrl = "";
+      this.$message.success("图片URL已添加");
+    },
+    
+    // 移除图片URL
+    removeImageUrl(index) {
+      this.generateForm.imageUrls.splice(index, 1);
+      this.$message.success("图片URL已移除");
+    },
+    
+    // 清除所有图片URL
     clearImageUrl() {
-      this.generateForm.imageUrl = "";
-      this.$message.success("图片URL已清除");
+      this.generateForm.imageUrls = [];
+      this.$message.success("所有图片URL已清除");
     },
 
     resetForm() {
@@ -629,11 +683,12 @@ export default {
 
       this.generateForm = {
         prompt: "",
-        imageUrl: "",
+        imageUrls: [],
         imageSize: "1K",
         upc: "",
         desktopStyle: "科技"
       };
+      this.newImageUrl = "";
       this.generatedImages = [];
       this.progressPercentage = 0;
       this.progressStatus = "";
@@ -703,7 +758,16 @@ export default {
 
           // 自动设置参考图片URL
           if (response.data.root_image) {
-            this.generateForm.imageUrl = response.data.root_image;
+            // 处理URL中的dl=0，自动改为dl=1
+            let processedUrl = response.data.root_image;
+            if (processedUrl.includes('dl=0')) {
+              processedUrl = processedUrl.replace(/dl=0/g, 'dl=1');
+            }
+            
+            // 先清空现有图片URL
+            this.generateForm.imageUrls = [];
+            // 添加新的图片URL
+            this.generateForm.imageUrls.push(processedUrl);
           }
 
           // 初始化参数位置（清空所有位置）
@@ -973,19 +1037,42 @@ h2 {
   text-overflow: ellipsis;
 }
 
-/* 图片预览样式 */
-.image-preview {
+/* 图片URL相关样式 */
+.image-urls-section {
   margin-top: 10px;
+}
+
+.add-image-url {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.image-url-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.image-url-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.image-preview {
   position: relative;
   display: inline-block;
+  margin-right: 10px;
 }
 
 .image-error {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 300px;
-  height: 200px;
+  width: 200px;
+  height: 150px;
   background-color: #f5f7fa;
   color: #909399;
   font-size: 30px;
@@ -993,6 +1080,6 @@ h2 {
 
 .clear-button {
   margin-top: 5px;
-  margin-left: 10px;
+  margin-left: 0;
 }
 </style>
