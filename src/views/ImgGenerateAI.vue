@@ -758,16 +758,25 @@ export default {
 
           // 自动设置参考图片URL
           if (response.data.root_image) {
-            // 处理URL中的dl=0，自动改为dl=1
-            let processedUrl = response.data.root_image;
-            if (processedUrl.includes('dl=0')) {
-              processedUrl = processedUrl.replace(/dl=0/g, 'dl=1');
-            }
-            
             // 先清空现有图片URL
             this.generateForm.imageUrls = [];
-            // 添加新的图片URL
-            this.generateForm.imageUrls.push(processedUrl);
+            
+            // 处理root_image字段，支持数组和字符串两种格式
+            const rootImages = Array.isArray(response.data.root_image) 
+              ? response.data.root_image 
+              : [response.data.root_image];
+            
+            // 遍历所有图片URL，处理dl=0并添加到列表
+            rootImages.forEach(url => {
+              if (url) {
+                // 处理URL中的dl=0，自动改为dl=1
+                let processedUrl = url;
+                if (processedUrl.includes('dl=0')) {
+                  processedUrl = processedUrl.replace(/dl=0/g, 'dl=1');
+                }
+                this.generateForm.imageUrls.push(processedUrl);
+              }
+            });
           }
 
           // 初始化参数位置（清空所有位置）
