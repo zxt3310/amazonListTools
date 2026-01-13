@@ -72,6 +72,10 @@
           <i class="el-icon-picture-outline"></i>
           <span>AI图片生成</span>
         </el-menu-item>
+        <el-menu-item index="17">
+          <i class="el-icon-data-analysis"></i>
+          <span>跟卖利润计算器</span>
+        </el-menu-item>
       </el-submenu>
 
       <div
@@ -277,7 +281,8 @@ export default {
         "/inventory-modify-output",
         "/ca-trans-helper",
         "/us-to-ca-checkin",
-        "/img-generate-ai"
+        "/img-generate-ai",
+        "/follow-selling-profit"
       ];
 
       // 确保索引有效

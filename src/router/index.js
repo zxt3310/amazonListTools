@@ -21,6 +21,7 @@ import InventoryModifyOut from "../views/InventoryModifyOut.vue";
 import CaTransHelper from "../views/CaTransHelper.vue";
 import UStoCACheckin from "../views/UStoCACheckin.vue";
 import ImgGenerateAI from "../views/ImgGenerateAI.vue";
+import FollowSellingProfit from "../views/FollowSellingProfit.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -129,6 +130,11 @@ const routes = [
     path: "/img-generate-ai",
     name: "ImgGenerateAI",
     component: ImgGenerateAI
+  },
+  {
+    path: "/follow-selling-profit",
+    name: "FollowSellingProfit",
+    component: FollowSellingProfit
   }
 ];
 
