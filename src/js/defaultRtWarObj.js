@@ -15,6 +15,7 @@ export const InitQuery = {
   rt_cmt_cs: "",
   rt_qty: "1",
   rt_reason: "",
+  rt_residual: "",
   rt_track: "",
   seller: "",
   sn: "",

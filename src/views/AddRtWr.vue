@@ -465,6 +465,18 @@
             <el-col :span="12">
               <el-row>
                 <el-col :span="5">
+                  <el-form-item label="Residual:" prop="rt_residual">
+                    <el-input
+                      style="width: 280px;"
+                      v-model="queryData.rt_residual"
+                      placeholder="Enter residual"
+                    ></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-row>
+                <el-col :span="5">
                   <el-form-item label="Decision:" prop="decision">
                     <el-select placeholder="" v-model="queryData.decision">
                       <el-option

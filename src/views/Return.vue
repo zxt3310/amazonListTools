@@ -109,6 +109,14 @@
             <div style="margin-left: 20px;">
               <el-button type="primary" @click="clearfilter">Clear</el-button>
             </div>
+            <div style="margin-left: auto; margin-right: 20px; display: flex; align-items: center;">
+              <el-tag type="info" style="margin-right: 10px;">
+                Residual Units: {{ residualStats.count }}
+              </el-tag>
+              <el-tag type="success">
+                Total Residual: ${{ residualStats.total_value ? residualStats.total_value.toFixed(2) : '0.00' }}
+              </el-tag>
+            </div>
           </div>
 
           <el-table
@@ -150,6 +158,12 @@
               label="Refund"
               width="80"
               :formatter="rateformat"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="rt_residual"
+              label="Residual"
+              width="120"
             >
             </el-table-column>
             <el-table-column
@@ -480,7 +494,12 @@ export default {
         "#90ee90",
         "#00ced1",
         "#1e90ff"
-      ]
+      ],
+      // 残值统计
+      residualStats: {
+        count: 0,
+        total_value: 0
+      }
     };
   },
   computed: {
@@ -497,6 +516,8 @@ export default {
 
     //回退后筛选保持数据
     this.filter();
+    // 获取残值统计数据
+    this.getResidualStats();
   },
   beforeDestroy() {
     document.removeEventListener("click", this.closeMenu);
@@ -564,6 +585,8 @@ export default {
         "seller",
         filterOption.seller === "" ? [] : [filterOption.seller]
       );
+      // 筛选后重新获取残值统计数据
+      this.getResidualStats();
     },
     clearfilter(key) {
       let filters = {
@@ -800,6 +823,19 @@ export default {
     //Region格式化
     regionFmt(row, column, cellValue, index) {
       return cellValue == 1 ? "US" : "CA";
+    },
+    // 获取残值统计数据
+    getResidualStats() {
+      axios
+        .get("get-return-residual-stats")
+        .then(e => {
+          if (e.ret == 0) {
+            this.residualStats = e.data;
+          }
+        })
+        .catch(e => {
+          console.log(e);
+        });
     },
     // 过滤逻辑
     filterMethod(value, row, column) {
