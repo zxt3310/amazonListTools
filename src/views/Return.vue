@@ -114,7 +114,7 @@
                 Residual Units: {{ residualStats.count }}
               </el-tag>
               <el-tag type="success">
-                Total Residual: ${{ residualStats.total_value ? residualStats.total_value.toFixed(2) : '0.00' }}
+                Total Residual: ${{ residualStats.total_value ? residualStats.total_value : '0.00' }}
               </el-tag>
             </div>
           </div>
