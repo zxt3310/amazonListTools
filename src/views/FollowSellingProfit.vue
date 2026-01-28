@@ -14,9 +14,9 @@
               <div class="upc-input-wrapper">
                 <el-input
                   v-model="upcForm.upc"
-                  placeholder="请输入12位UPC码"
+                  placeholder="请输入12位UPC码，或14位格式(如：123456789012-3)"
                   style="width: 300px; margin-right: 10px;"
-                  maxlength="12"
+                  maxlength="14"
                   show-word-limit
                 ></el-input>
                 <el-button
@@ -900,9 +900,9 @@ export default {
     },
     
     async queryUpc() {
-      const upcRegex = /^\d{12}$/;
+      const upcRegex = /^\d{12}$|^\d{12}-\d$/;
       if (!upcRegex.test(this.upcForm.upc.trim())) {
-        this.$message.error("请输入有效的12位UPC码");
+        this.$message.error("请输入有效的12位UPC码，或14位格式(如：123456789012-3)");
         return;
       }
       
