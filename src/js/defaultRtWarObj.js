@@ -69,6 +69,7 @@ export const SellerOption = [
   "MST",
   "WWC",
   "CCG",
+  "RMD",
   "CHILL_AU",
   "PCStop",
   "无店铺"
