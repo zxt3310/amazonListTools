@@ -102,6 +102,13 @@
                 :fetch-suggestions="brandQuerySearch"
               ></el-autocomplete>
             </div>
+            <div style="margin-left: 20px;">
+              <span>Region:</span>
+              <el-select style="width: 120px;" v-model="filters.region">
+                <el-option label="US" value="1"></el-option>
+                <el-option label="CA" value="2"></el-option>
+              </el-select>
+            </div>
 
             <div style="margin-left: 20px;">
               <el-button type="primary" @click="filter">Filter</el-button>
@@ -336,6 +343,11 @@
               label="Region"
               width="100"
               :formatter="regionFmt"
+              :filters="[
+                { text: 'US', value: 1 },
+                { text: 'CA', value: 2 }
+              ]"
+              :filter-method="filterMethod"
             >
             </el-table-column>
             <el-table-column
@@ -471,7 +483,8 @@ export default {
         check: ["is_check_out"],
         decision: "",
         brand: "",
-        seller: ""
+        seller: "",
+        region: ""
       },
       loading: false,
       page: {
@@ -558,6 +571,7 @@ export default {
     },
     filter() {
       let filterOption = this.filters;
+      console.log(filterOption)
       let targets = [
         "is_check_out",
         "is_need_war",
@@ -585,6 +599,10 @@ export default {
         "seller",
         filterOption.seller === "" ? [] : [filterOption.seller]
       );
+      this.activeFilterChange(
+        "rt_region",
+        filterOption.region === "" ? [] : [parseInt(filterOption.region)]
+      );
       // 筛选后重新获取残值统计数据
       this.getResidualStats();
     },
@@ -593,7 +611,8 @@ export default {
         check: ["is_check_out"],
         decision: "",
         brand: "",
-        seller: ""
+        seller: "",
+        region: ""
       };
       this.filters = filters;
       this.filter();
