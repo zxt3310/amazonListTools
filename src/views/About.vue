@@ -83,7 +83,18 @@
               </el-table-column>
               <el-table-column prop="express_num" label="运单号" width="220">
               </el-table-column>
-              <el-table-column prop="SN" label="Serial Number" width="220">
+              <el-table-column prop="SN" label="Serial Number" min-width="220">
+                <template slot-scope="scope">
+                  <el-tooltip :content="scope.row.SN" placement="top" effect="dark">
+                    <div 
+                      class="sn-cell" 
+                      @click="copySN(scope.row.SN)"
+                      style="cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                    >
+                      {{ scope.row.SN }}
+                    </div>
+                  </el-tooltip>
+                </template>
               </el-table-column>
               <el-table-column label="操作">
                 <template slot-scope="scope">
@@ -405,6 +416,20 @@ export default {
             message: "已取消删除"
           });
         });
+    },
+    copySN(sn) {
+      navigator.clipboard.writeText(sn).then(() => {
+        this.$message({
+          type: "success",
+          message: "SN 已复制到剪贴板"
+        });
+      }).catch(err => {
+        console.error("复制失败:", err);
+        this.$message({
+          type: "error",
+          message: "复制失败，请手动复制"
+        });
+      });
     }
   }
 };
