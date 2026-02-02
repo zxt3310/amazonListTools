@@ -66,61 +66,68 @@
         </el-header>
         <el-main style="padding-top: 0 !important;">
           <div
-            style="padding: 10px 0;text-align: left; display: flex; align-items: center;"
+            style="padding: 10px; text-align: left; display: flex; align-items: center; flex-wrap: nowrap; justify-content: space-between;"
           >
-            <el-checkbox-group v-model="filters.check">
-              <el-checkbox border label="is_check_out">In Stock</el-checkbox>
-              <el-checkbox border label="is_need_war">Repair</el-checkbox>
-              <el-checkbox border label="is_fraud">Fraud</el-checkbox>
-              <el-checkbox border label="is_junk">Junk</el-checkbox>
-              <el-checkbox border label="rt_lpn">FBA</el-checkbox>
-            </el-checkbox-group>
-            <div style="margin-left: 20px;">
-              <span>Decision:</span>
-              <el-select style=" width: 160px;" v-model="filters.decision">
-                <el-option
-                  v-for="(item, index) in decisionOption"
-                  :key="index"
-                  :label="item"
-                  :value="index + 1"
-                ></el-option>
-              </el-select>
+            <div style="display: flex; align-items: center; flex: 1; min-width: 0;">
+              <el-checkbox-group v-model="filters.check" style="display: flex; align-items: center; flex-shrink: 0; margin-right: 1%;">
+                <el-checkbox border label="is_check_out">In Stock</el-checkbox>
+                <el-checkbox border label="is_need_war">Repair</el-checkbox>
+                <el-checkbox border label="is_fraud">Fraud</el-checkbox>
+                <el-checkbox border label="is_junk">Junk</el-checkbox>
+                <el-checkbox border label="rt_lpn">FBA</el-checkbox>
+              </el-checkbox-group>
+              
+              <div style="display: flex; align-items: center; flex: 1; justify-content: space-between; gap: 1%;">
+                <div style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                  <span style="margin-right: 5px; white-space: nowrap;">Decision:</span>
+                  <el-select style="flex: 1; min-width: 100px;" v-model="filters.decision">
+                    <el-option
+                      v-for="(item, index) in decisionOption"
+                      :key="index"
+                      :label="item"
+                      :value="index + 1"
+                    ></el-option>
+                  </el-select>
+                </div>
+                
+                <div style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                  <span style="margin-right: 5px; white-space: nowrap;">Store:</span>
+                  <el-autocomplete
+                    style="flex: 1; min-width: 80px;"
+                    v-model="filters.seller"
+                    :fetch-suggestions="sellerQuerySearch"
+                  ></el-autocomplete>
+                </div>
+                
+                <div style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                  <span style="margin-right: 5px; white-space: nowrap;">Brand:</span>
+                  <el-autocomplete
+                    style="flex: 1; min-width: 80px;"
+                    v-model="filters.brand"
+                    :fetch-suggestions="brandQuerySearch"
+                  ></el-autocomplete>
+                </div>
+                
+                <div style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                  <span style="margin-right: 5px; white-space: nowrap;">Region:</span>
+                  <el-select style="flex: 1; min-width: 60px;" v-model="filters.region">
+                    <el-option label="US" value="1"></el-option>
+                    <el-option label="CA" value="2"></el-option>
+                  </el-select>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                  <el-button type="primary" @click="filter" size="small">Filter</el-button>
+                  <el-button type="primary" @click="clearfilter" size="small">Clear</el-button>
+                </div>
+              </div>
             </div>
-            <div style="margin-left: 20px;">
-              <span>Store:</span>
-              <el-autocomplete
-                style="width: 120px;"
-                v-model="filters.seller"
-                :fetch-suggestions="sellerQuerySearch"
-              ></el-autocomplete>
-            </div>
-            <div style="margin-left: 20px;">
-              <span>Brand:</span>
-              <el-autocomplete
-                style="width: 120px;"
-                v-model="filters.brand"
-                :fetch-suggestions="brandQuerySearch"
-              ></el-autocomplete>
-            </div>
-            <div style="margin-left: 20px;">
-              <span>Region:</span>
-              <el-select style="width: 120px;" v-model="filters.region">
-                <el-option label="US" value="1"></el-option>
-                <el-option label="CA" value="2"></el-option>
-              </el-select>
-            </div>
-
-            <div style="margin-left: 20px;">
-              <el-button type="primary" @click="filter">Filter</el-button>
-            </div>
-            <div style="margin-left: 20px;">
-              <el-button type="primary" @click="clearfilter">Clear</el-button>
-            </div>
-            <div style="margin-left: auto; margin-right: 20px; display: flex; align-items: center;">
-              <el-tag type="info" style="margin-right: 10px;">
+            
+            <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 1%;">
+              <el-tag type="info" size="small">
                 Residual Units: {{ residualStats.count }}
               </el-tag>
-              <el-tag type="success">
+              <el-tag type="success" size="small">
                 Total Residual: ${{ residualStats.total_value ? residualStats.total_value : '0.00' }}
               </el-tag>
             </div>
