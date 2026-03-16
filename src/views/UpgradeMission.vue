@@ -34,6 +34,9 @@
                       <el-dropdown-item command="order"
                         >订单号</el-dropdown-item
                       >
+                      <el-dropdown-item command="upc"
+                        >UPC</el-dropdown-item
+                      >
                       <el-dropdown-item command="date">日期</el-dropdown-item>
                     </el-dropdown-menu>
                   </el-dropdown>
@@ -644,6 +647,9 @@ export default {
           break;
         case "tracker":
           text = "运单号";
+          break;
+        case "upc":
+          text = "UPC";
           break;
         case "date":
           text = "日期";
