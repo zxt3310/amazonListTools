@@ -452,7 +452,7 @@
                       type="danger"
                       icon="el-icon-close"
                       circle
-                      @click="removePic(pic, index)"
+                      @click="removePic(pic, idx)"
                     ></el-button>
                   </div>
                 </div>
@@ -596,6 +596,8 @@ export default {
       };
       this.warrantyAccess = true;
       this.getPics(this.queryData.pic_ids);
+      console.log(this.queryData);
+      
     } else {
       this.queryData = {
         ...InitQuery
